@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LanguageData>
-  <Translator_MainMenuButton>Translator</Translator_MainMenuButton>
-  <Translator_WindowTitle>Translator Workbench</Translator_WindowTitle>
+  <Translator_MainMenuButton>Auto Translator</Translator_MainMenuButton>
+  <Translator_WindowTitle>Auto Translator</Translator_WindowTitle>
   <Translator_ModSearchLabel>Search</Translator_ModSearchLabel>
   <Translator_ModCount>Showing mods {0}/{1}</Translator_ModCount>
   <Translator_NoModSelected>Select a mod from the left list to continue.</Translator_NoModSelected>
@@ -25,7 +25,7 @@
   <Translator_AiTranslatePartialFailedWithDetails>Translation export completed with some errors. Output: {0}. Failure summary: {1}</Translator_AiTranslatePartialFailedWithDetails>
   <Translator_AiTranslateConfigInvalid>AI configuration is invalid: {0}</Translator_AiTranslateConfigInvalid>
   <Translator_AiTranslateFailed>AI translation failed: {0}</Translator_AiTranslateFailed>
-  <Translator_ModSettingsCategory>Translator</Translator_ModSettingsCategory>
+  <Translator_ModSettingsCategory>Auto Translator</Translator_ModSettingsCategory>
   <Translator_ModSettingsDescription>Configure the API endpoint, key, and model used for AI translation.</Translator_ModSettingsDescription>
   <Translator_ModSettingApiUrl>API URL (OpenAI-compatible)</Translator_ModSettingApiUrl>
   <Translator_ModSettingApiKey>API Key</Translator_ModSettingApiKey>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LanguageData>
-  <Translator_MainMenuButton>翻译器</Translator_MainMenuButton>
-  <Translator_WindowTitle>Translator 工作台</Translator_WindowTitle>
+  <Translator_MainMenuButton>Auto Translator</Translator_MainMenuButton>
+  <Translator_WindowTitle>Auto Translator</Translator_WindowTitle>
   <Translator_ModSearchLabel>搜索</Translator_ModSearchLabel>
   <Translator_ModCount>显示模组 {0}/{1}</Translator_ModCount>
   <Translator_NoModSelected>请先在左侧列表中选择一个模组。</Translator_NoModSelected>
@@ -25,7 +25,7 @@
   <Translator_AiTranslatePartialFailedWithDetails>翻译导出完成但存在部分错误。输出目录：{0}。失败摘要：{1}</Translator_AiTranslatePartialFailedWithDetails>
   <Translator_AiTranslateConfigInvalid>AI 配置无效：{0}</Translator_AiTranslateConfigInvalid>
   <Translator_AiTranslateFailed>AI 翻译失败：{0}</Translator_AiTranslateFailed>
-  <Translator_ModSettingsCategory>Translator</Translator_ModSettingsCategory>
+  <Translator_ModSettingsCategory>Auto Translator</Translator_ModSettingsCategory>
   <Translator_ModSettingsDescription>配置 AI 翻译所需的 API 地址、密钥与模型名称。</Translator_ModSettingsDescription>
   <Translator_ModSettingApiUrl>API 地址（OpenAI 兼容格式）</Translator_ModSettingApiUrl>
   <Translator_ModSettingApiKey>API Key</Translator_ModSettingApiKey>
