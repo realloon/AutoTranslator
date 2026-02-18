@@ -19,10 +19,11 @@
   <Translator_ExportLanguageConfirm>翻译并导出</Translator_ExportLanguageConfirm>
   <Translator_ExportNoLanguageSelected>请至少选择一种导出语言。</Translator_ExportNoLanguageSelected>
   <Translator_ExportIrButton>翻译并导出</Translator_ExportIrButton>
-  <Translator_AiTranslateInProgress>AI 翻译进行中...</Translator_AiTranslateInProgress>
-  <Translator_AiTranslateSuccess>翻译导出完成。输出目录：{0}</Translator_AiTranslateSuccess>
-  <Translator_AiTranslatePartialFailed>翻译导出完成但存在部分错误。输出目录：{0}</Translator_AiTranslatePartialFailed>
-  <Translator_AiTranslatePartialFailedWithDetails>翻译导出完成但存在部分错误。输出目录：{0}。失败摘要：{1}</Translator_AiTranslatePartialFailedWithDetails>
+  <Translator_AiTranslateInProgress>翻译中，这可能需要较长时间</Translator_AiTranslateInProgress>
+  <Translator_AiTranslateSuccess>翻译模组已导出</Translator_AiTranslateSuccess>
+  <Translator_AiTranslatePartialFailed>翻译模组已导出，但存在部分错误。</Translator_AiTranslatePartialFailed>
+  <Translator_AiTranslatePartialFailedWithDetails>翻译模组已导出，但存在部分错误。失败摘要：{0}</Translator_AiTranslatePartialFailedWithDetails>
+  <Translator_OutputDirectory>输出目录：{0}</Translator_OutputDirectory>
   <Translator_AiTranslateConfigInvalid>AI 配置无效：{0}</Translator_AiTranslateConfigInvalid>
   <Translator_AiTranslateFailed>AI 翻译失败：{0}</Translator_AiTranslateFailed>
   <Translator_ModSettingsCategory>Auto Translator</Translator_ModSettingsCategory>
@@ -36,7 +37,7 @@
   <Translator_ModSettingConcurrencyDescription>同时进行的模型调用数量。并发越高完成越早，但过高可能触发平台限流。</Translator_ModSettingConcurrencyDescription>
   <Translator_ModSettingRetryCount>重试数</Translator_ModSettingRetryCount>
   <Translator_ModSettingRetryCountDescription>单次模型调用失败后重试的次数。</Translator_ModSettingRetryCountDescription>
-  <Translator_ModSettingsValidateConfig>验证配置</Translator_ModSettingsValidateConfig>
+  <Translator_ModSettingsValidateConfig>验证</Translator_ModSettingsValidateConfig>
   <Translator_ModSettingsValidating>正在验证配置，请稍候...</Translator_ModSettingsValidating>
   <Translator_ModSettingsValidationSuccess>配置验证成功。</Translator_ModSettingsValidationSuccess>
   <Translator_ModSettingsValidationFailed>配置验证失败：{0}</Translator_ModSettingsValidationFailed>
