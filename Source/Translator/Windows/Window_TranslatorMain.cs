@@ -151,9 +151,26 @@ public class Window_TranslatorMain : Window {
 
         y += 36f;
         if (!_lastExportStatus.NullOrEmpty()) {
-            GUI.color = _lastExportFailed ? ErrorColor : SuccessColor;
-            Widgets.Label(new Rect(rect.x, y, rect.width, 40f), _lastExportStatus);
-            GUI.color = Color.white;
+            var statusText = _lastExportStatus!;
+            var separatorIndex = statusText.IndexOf('\n');
+            if (separatorIndex < 0) {
+                GUI.color = _lastExportFailed ? ErrorColor : SuccessColor;
+                var statusHeight = Mathf.Max(40f, Text.CalcHeight(statusText, rect.width));
+                Widgets.Label(new Rect(rect.x, y, rect.width, statusHeight), statusText);
+                GUI.color = Color.white;
+            } else {
+                var title = statusText[..separatorIndex];
+                var outputLine = statusText[(separatorIndex + 1)..];
+
+                GUI.color = _lastExportFailed ? ErrorColor : SuccessColor;
+                var titleHeight = Mathf.Max(20f, Text.CalcHeight(title, rect.width));
+                Widgets.Label(new Rect(rect.x, y, rect.width, titleHeight), title);
+
+                GUI.color = ColoredText.SubtleGrayColor;
+                var outputHeight = Mathf.Max(20f, Text.CalcHeight(outputLine, rect.width));
+                Widgets.Label(new Rect(rect.x, y + titleHeight + 2f, rect.width, outputHeight), outputLine);
+                GUI.color = Color.white;
+            }
         }
     }
 
@@ -273,7 +290,8 @@ public class Window_TranslatorMain : Window {
 
             if (runResult.Failures.Count == 0) {
                 _lastExportFailed = false;
-                _lastExportStatus = "Translator_AiTranslateSuccess".Translate(
+                _lastExportStatus = BuildExportStatusWithOutput(
+                    "Translator_AiTranslateSuccess".Translate(),
                     runResult.OutputModPath);
                 Messages.Message(_lastExportStatus, MessageTypeDefOf.TaskCompletion);
                 return;
@@ -281,11 +299,15 @@ public class Window_TranslatorMain : Window {
 
             var failureSummary = BuildFailureSummary(runResult.Failures);
             _lastExportFailed = true;
-            _lastExportStatus = "Translator_AiTranslatePartialFailedWithDetails".Translate(
-                runResult.OutputModPath,
-                failureSummary);
+            _lastExportStatus = BuildExportStatusWithOutput(
+                "Translator_AiTranslatePartialFailedWithDetails".Translate(failureSummary),
+                runResult.OutputModPath);
             Messages.Message(_lastExportStatus, MessageTypeDefOf.RejectInput);
         });
+    }
+
+    private static string BuildExportStatusWithOutput(string title, string outputPath) {
+        return $"{title}\n{"Translator_OutputDirectory".Translate(outputPath)}";
     }
 
     private static string BuildFailureSummary(IReadOnlyList<string> failures) {
