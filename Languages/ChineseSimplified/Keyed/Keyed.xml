@@ -30,6 +30,12 @@
   <Translator_ModSettingApiUrl>API 地址（OpenAI 兼容格式）</Translator_ModSettingApiUrl>
   <Translator_ModSettingApiKey>API Key</Translator_ModSettingApiKey>
   <Translator_ModSettingModel>模型</Translator_ModSettingModel>
+  <Translator_ModSettingBatchSize>请求分片</Translator_ModSettingBatchSize>
+  <Translator_ModSettingBatchSizeDescription>单次模型调用包含的条目数。条目越多一致性越好，但应控制在合理的上下文长度内。</Translator_ModSettingBatchSizeDescription>
+  <Translator_ModSettingConcurrency>并发数</Translator_ModSettingConcurrency>
+  <Translator_ModSettingConcurrencyDescription>同时进行的模型调用数量。并发越高完成越早，但过高可能触发平台限流。</Translator_ModSettingConcurrencyDescription>
+  <Translator_ModSettingRetryCount>重试数</Translator_ModSettingRetryCount>
+  <Translator_ModSettingRetryCountDescription>单次模型调用失败后重试的次数。</Translator_ModSettingRetryCountDescription>
   <Translator_ModSettingsValidateConfig>验证配置</Translator_ModSettingsValidateConfig>
   <Translator_ModSettingsValidating>正在验证配置，请稍候...</Translator_ModSettingsValidating>
   <Translator_ModSettingsValidationSuccess>配置验证成功。</Translator_ModSettingsValidationSuccess>
