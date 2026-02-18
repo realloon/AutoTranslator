@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ModMetaData>
-  <packageId>Vortex.Translator</packageId>
-  <name>Translator</name>
-  <description>Translator.</description>
+  <packageId>Vortex.AutoTranslator</packageId>
+  <name>Auto Translator</name>
+  <description>Auto Translator.</description>
   <author>Vortex</author>
-  <modVersion>0.1.0</modVersion>
+  <modVersion>0.3.0</modVersion>
   <supportedVersions>
     <li>1.6</li>
   </supportedVersions>
-  <loadAfter>
-    <li>Ludeon.RimWorld</li>
-    <li>Ludeon.Rimworld.Anomaly</li>
-  </loadAfter>
   <modDependencies>
     <li>
       <packageId>brrainz.harmony</packageId>
