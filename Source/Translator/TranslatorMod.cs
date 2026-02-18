@@ -11,6 +11,9 @@ public sealed class TranslatorMod : Mod {
     private string _lastValidationStatus = string.Empty;
     private bool _lastValidationFailed;
     private Task<LlmConfigValidationResult>? _validateConfigTask;
+    private string _batchSizeBuffer = string.Empty;
+    private string _concurrencyBuffer = string.Empty;
+    private string _retryCountBuffer = string.Empty;
 
     public TranslatorMod(ModContentPack content) : base(content) {
         Settings = GetSettings<TranslatorSettings>();
@@ -39,6 +42,59 @@ public sealed class TranslatorMod : Mod {
 
         listing.Label("Translator_ModSettingModel".Translate());
         Settings.Model = listing.TextEntry(Settings.Model);
+        listing.Gap(6f);
+
+        listing.Label("Translator_ModSettingBatchSize".Translate());
+        if (_batchSizeBuffer.NullOrEmpty()) {
+            _batchSizeBuffer = Settings.BatchSize.ToString();
+        }
+
+        var newBatchSizeBuffer = listing.TextEntry(_batchSizeBuffer);
+        if (newBatchSizeBuffer != _batchSizeBuffer) {
+            _batchSizeBuffer = newBatchSizeBuffer;
+            if (int.TryParse(_batchSizeBuffer.Trim(), out var parsedBatchSize)) {
+                Settings.BatchSize = parsedBatchSize;
+            }
+        }
+        GUI.color = ColoredText.SubtleGrayColor;
+        listing.Label("Translator_ModSettingBatchSizeDescription".Translate());
+        GUI.color = Color.white;
+        listing.Gap(6f);
+
+        listing.Label("Translator_ModSettingConcurrency".Translate());
+        if (_concurrencyBuffer.NullOrEmpty()) {
+            _concurrencyBuffer = Settings.Concurrency.ToString();
+        }
+
+        var newConcurrencyBuffer = listing.TextEntry(_concurrencyBuffer);
+        if (newConcurrencyBuffer != _concurrencyBuffer) {
+            _concurrencyBuffer = newConcurrencyBuffer;
+            if (int.TryParse(_concurrencyBuffer.Trim(), out var parsedConcurrency)) {
+                Settings.Concurrency = parsedConcurrency;
+            }
+        }
+
+        GUI.color = ColoredText.SubtleGrayColor;
+        listing.Label("Translator_ModSettingConcurrencyDescription".Translate());
+        GUI.color = Color.white;
+        listing.Gap(6f);
+
+        listing.Label("Translator_ModSettingRetryCount".Translate());
+        if (_retryCountBuffer.NullOrEmpty()) {
+            _retryCountBuffer = Settings.RetryCount.ToString();
+        }
+
+        var newRetryCountBuffer = listing.TextEntry(_retryCountBuffer);
+        if (newRetryCountBuffer != _retryCountBuffer) {
+            _retryCountBuffer = newRetryCountBuffer;
+            if (int.TryParse(_retryCountBuffer.Trim(), out var parsedRetryCount)) {
+                Settings.RetryCount = parsedRetryCount;
+            }
+        }
+
+        GUI.color = ColoredText.SubtleGrayColor;
+        listing.Label("Translator_ModSettingRetryCountDescription".Translate());
+        GUI.color = Color.white;
         listing.Gap();
 
         if (_validateConfigTask is not null) {
@@ -68,6 +124,7 @@ public sealed class TranslatorMod : Mod {
         Settings.ApiUrl = Settings.ApiUrl.Trim();
         Settings.ApiKey = Settings.ApiKey.Trim();
         Settings.Model = Settings.Model.Trim();
+        NormalizeNumericSettings();
     }
 
     private void BeginValidateConfig() {
@@ -78,6 +135,7 @@ public sealed class TranslatorMod : Mod {
         Settings.ApiUrl = Settings.ApiUrl.Trim();
         Settings.ApiKey = Settings.ApiKey.Trim();
         Settings.Model = Settings.Model.Trim();
+        NormalizeNumericSettings();
         WriteSettings();
 
         _lastValidationStatus = "Translator_ModSettingsValidating".Translate();
@@ -111,5 +169,17 @@ public sealed class TranslatorMod : Mod {
 
         _lastValidationFailed = true;
         _lastValidationStatus = "Translator_ModSettingsValidationFailed".Translate(result.Message);
+    }
+
+    private void NormalizeNumericSettings() {
+        Settings.BatchSize = Mathf.Clamp(Settings.BatchSize, TranslatorSettings.MinBatchSize,
+            TranslatorSettings.MaxBatchSize);
+        Settings.Concurrency = Mathf.Clamp(Settings.Concurrency, TranslatorSettings.MinConcurrency,
+            TranslatorSettings.MaxConcurrency);
+        Settings.RetryCount = Mathf.Clamp(Settings.RetryCount, TranslatorSettings.MinRetryCount,
+            TranslatorSettings.MaxRetryCount);
+        _batchSizeBuffer = Settings.BatchSize.ToString();
+        _concurrencyBuffer = Settings.Concurrency.ToString();
+        _retryCountBuffer = Settings.RetryCount.ToString();
     }
 }
