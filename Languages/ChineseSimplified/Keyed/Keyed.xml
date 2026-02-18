@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <Translator_MainMenuButton>翻译器</Translator_MainMenuButton>
+  <Translator_WindowTitle>Translator 工作台</Translator_WindowTitle>
+  <Translator_ModSearchLabel>搜索</Translator_ModSearchLabel>
+  <Translator_ModCount>显示模组 {0}/{1}</Translator_ModCount>
+  <Translator_NoModSelected>请先在左侧列表中选择一个模组。</Translator_NoModSelected>
+  <Translator_SelectedModLabel>当前选择：{0}</Translator_SelectedModLabel>
+  <Translator_DefStatsTitle>来源于 Def</Translator_DefStatsTitle>
+  <Translator_DefStatsFields>可翻译注入项：{0}</Translator_DefStatsFields>
+  <Translator_DefStatsMissingDefInjection>当前语言缺失 Def-injection：{0}</Translator_DefStatsMissingDefInjection>
+  <Translator_StaticScanTitle>来源于 key</Translator_StaticScanTitle>
+  <Translator_StaticScanUniqueKeys>可翻译 Key：{0}</Translator_StaticScanUniqueKeys>
+  <Translator_StaticScanMissingKeys>当前语言缺失 keyed：{0}</Translator_StaticScanMissingKeys>
+  <Translator_ExportLanguageDialogTitle>选择翻译语言</Translator_ExportLanguageDialogTitle>
+  <Translator_SelectAllLanguages>全选</Translator_SelectAllLanguages>
+  <Translator_ClearLanguageSelection>清空</Translator_ClearLanguageSelection>
+  <Translator_ExportLanguageSelectedCount>已选择 {0}/{1}</Translator_ExportLanguageSelectedCount>
+  <Translator_ExportLanguageConfirm>翻译并导出</Translator_ExportLanguageConfirm>
+  <Translator_ExportNoLanguageSelected>请至少选择一种导出语言。</Translator_ExportNoLanguageSelected>
+  <Translator_ExportIrButton>翻译并导出</Translator_ExportIrButton>
+  <Translator_AiTranslateInProgress>AI 翻译进行中...</Translator_AiTranslateInProgress>
+  <Translator_AiTranslateSuccess>翻译导出完成。输出目录：{0}</Translator_AiTranslateSuccess>
+  <Translator_AiTranslatePartialFailed>翻译导出完成但存在部分错误。输出目录：{0}</Translator_AiTranslatePartialFailed>
+  <Translator_AiTranslatePartialFailedWithDetails>翻译导出完成但存在部分错误。输出目录：{0}。失败摘要：{1}</Translator_AiTranslatePartialFailedWithDetails>
+  <Translator_AiTranslateConfigInvalid>AI 配置无效：{0}</Translator_AiTranslateConfigInvalid>
+  <Translator_AiTranslateFailed>AI 翻译失败：{0}</Translator_AiTranslateFailed>
+  <Translator_ModSettingsCategory>Translator</Translator_ModSettingsCategory>
+  <Translator_ModSettingsDescription>配置 AI 翻译所需的 API 地址、密钥与模型名称。</Translator_ModSettingsDescription>
+  <Translator_ModSettingApiUrl>API 地址（OpenAI 兼容格式）</Translator_ModSettingApiUrl>
+  <Translator_ModSettingApiKey>API Key</Translator_ModSettingApiKey>
+  <Translator_ModSettingModel>模型</Translator_ModSettingModel>
+  <Translator_ModSettingsValidateConfig>验证配置</Translator_ModSettingsValidateConfig>
+  <Translator_ModSettingsValidating>正在验证配置，请稍候...</Translator_ModSettingsValidating>
+  <Translator_ModSettingsValidationSuccess>配置验证成功。</Translator_ModSettingsValidationSuccess>
+  <Translator_ModSettingsValidationFailed>配置验证失败：{0}</Translator_ModSettingsValidationFailed>
+  <Translator_ModSettingsResetDefaults>恢复默认值</Translator_ModSettingsResetDefaults>
+</LanguageData>

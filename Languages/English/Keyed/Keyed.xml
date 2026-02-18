@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <Translator_MainMenuButton>Translator</Translator_MainMenuButton>
+  <Translator_WindowTitle>Translator Workbench</Translator_WindowTitle>
+  <Translator_ModSearchLabel>Search</Translator_ModSearchLabel>
+  <Translator_ModCount>Showing mods {0}/{1}</Translator_ModCount>
+  <Translator_NoModSelected>Select a mod from the left list to continue.</Translator_NoModSelected>
+  <Translator_SelectedModLabel>Selected: {0}</Translator_SelectedModLabel>
+  <Translator_DefStatsTitle>From Def</Translator_DefStatsTitle>
+  <Translator_DefStatsFields>Translatable injection entries: {0}</Translator_DefStatsFields>
+  <Translator_DefStatsMissingDefInjection>Missing def-injections in current language: {0}</Translator_DefStatsMissingDefInjection>
+  <Translator_StaticScanTitle>From key</Translator_StaticScanTitle>
+  <Translator_StaticScanUniqueKeys>Translatable keys: {0}</Translator_StaticScanUniqueKeys>
+  <Translator_StaticScanMissingKeys>Missing keyed in current language: {0}</Translator_StaticScanMissingKeys>
+  <Translator_ExportLanguageDialogTitle>Select Translation Languages</Translator_ExportLanguageDialogTitle>
+  <Translator_SelectAllLanguages>Select All</Translator_SelectAllLanguages>
+  <Translator_ClearLanguageSelection>Clear</Translator_ClearLanguageSelection>
+  <Translator_ExportLanguageSelectedCount>Selected: {0}/{1}</Translator_ExportLanguageSelectedCount>
+  <Translator_ExportLanguageConfirm>Translate &amp; Export</Translator_ExportLanguageConfirm>
+  <Translator_ExportNoLanguageSelected>Select at least one language to export.</Translator_ExportNoLanguageSelected>
+  <Translator_ExportIrButton>Translate &amp; Export</Translator_ExportIrButton>
+  <Translator_AiTranslateInProgress>AI translation in progress...</Translator_AiTranslateInProgress>
+  <Translator_AiTranslateSuccess>Translation export completed. Output: {0}</Translator_AiTranslateSuccess>
+  <Translator_AiTranslatePartialFailed>Translation export completed with some errors. Output: {0}</Translator_AiTranslatePartialFailed>
+  <Translator_AiTranslatePartialFailedWithDetails>Translation export completed with some errors. Output: {0}. Failure summary: {1}</Translator_AiTranslatePartialFailedWithDetails>
+  <Translator_AiTranslateConfigInvalid>AI configuration is invalid: {0}</Translator_AiTranslateConfigInvalid>
+  <Translator_AiTranslateFailed>AI translation failed: {0}</Translator_AiTranslateFailed>
+  <Translator_ModSettingsCategory>Translator</Translator_ModSettingsCategory>
+  <Translator_ModSettingsDescription>Configure the API endpoint, key, and model used for AI translation.</Translator_ModSettingsDescription>
+  <Translator_ModSettingApiUrl>API URL (OpenAI-compatible)</Translator_ModSettingApiUrl>
+  <Translator_ModSettingApiKey>API Key</Translator_ModSettingApiKey>
+  <Translator_ModSettingModel>Model</Translator_ModSettingModel>
+  <Translator_ModSettingsValidateConfig>Validate Configuration</Translator_ModSettingsValidateConfig>
+  <Translator_ModSettingsValidating>Validating configuration...</Translator_ModSettingsValidating>
+  <Translator_ModSettingsValidationSuccess>Configuration validated successfully.</Translator_ModSettingsValidationSuccess>
+  <Translator_ModSettingsValidationFailed>Configuration validation failed: {0}</Translator_ModSettingsValidationFailed>
+  <Translator_ModSettingsResetDefaults>Reset to defaults</Translator_ModSettingsResetDefaults>
+</LanguageData>
