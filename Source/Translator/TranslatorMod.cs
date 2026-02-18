@@ -44,6 +44,24 @@ public sealed class TranslatorMod : Mod {
         Settings.Model = listing.TextEntry(Settings.Model);
         listing.Gap(6f);
 
+        if (_validateConfigTask is not null) {
+            GUI.color = Color.yellow;
+            listing.Label("Translator_ModSettingsValidating".Translate());
+            GUI.color = Color.white;
+            listing.Gap(8f);
+        } else if (!_lastValidationStatus.NullOrEmpty()) {
+            GUI.color = _lastValidationFailed ? new Color(0.95f, 0.35f, 0.35f) : new Color(0.35f, 0.95f, 0.35f);
+            listing.Label(_lastValidationStatus);
+            GUI.color = Color.white;
+            listing.Gap(8f);
+        }
+
+        if (listing.ButtonText("Translator_ModSettingsValidateConfig".Translate())) {
+            BeginValidateConfig();
+        }
+
+        listing.Gap(10f);
+
         listing.Label("Translator_ModSettingBatchSize".Translate());
         if (_batchSizeBuffer.NullOrEmpty()) {
             _batchSizeBuffer = Settings.BatchSize.ToString();
@@ -96,24 +114,6 @@ public sealed class TranslatorMod : Mod {
         listing.Label("Translator_ModSettingRetryCountDescription".Translate());
         GUI.color = Color.white;
         listing.Gap();
-
-        if (_validateConfigTask is not null) {
-            GUI.color = Color.yellow;
-            listing.Label("Translator_ModSettingsValidating".Translate());
-            GUI.color = Color.white;
-            listing.Gap(8f);
-        } else if (!_lastValidationStatus.NullOrEmpty()) {
-            GUI.color = _lastValidationFailed ? new Color(0.95f, 0.35f, 0.35f) : new Color(0.35f, 0.95f, 0.35f);
-            listing.Label(_lastValidationStatus);
-            GUI.color = Color.white;
-            listing.Gap(8f);
-        }
-
-        if (listing.ButtonText("Translator_ModSettingsValidateConfig".Translate())) {
-            BeginValidateConfig();
-        }
-
-        listing.Gap(6f);
 
         if (listing.ButtonText("Translator_ModSettingsResetDefaults".Translate())) {
             Settings.ResetToDefaults();
