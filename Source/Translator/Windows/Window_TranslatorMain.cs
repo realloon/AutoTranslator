@@ -253,10 +253,10 @@ public class Window_TranslatorMain : Window {
                     var xmlWriteResult = LanguageXmlWriteService.WriteFromWorkset(
                         runResult.OutputModPath,
                         target.Workset);
-                    if (!xmlWriteResult.Success) {
-                        runResult.Failures.Add($"{target.FolderName}/XML: {xmlWriteResult.Message}");
-                        continue;
-                    }
+
+                    if (xmlWriteResult.Success) continue;
+
+                    runResult.Failures.Add($"{target.FolderName}/XML: {xmlWriteResult.Message}");
                 }
             } catch (Exception ex) {
                 runResult.ErrorMessage = ex.Message;

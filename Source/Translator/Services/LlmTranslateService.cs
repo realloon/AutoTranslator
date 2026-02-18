@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using JetBrains.Annotations;
 
 namespace Translator.Services;
 
@@ -151,13 +152,9 @@ internal static class LlmTranslateService {
         out string model,
         out string errorMessage) {
         var settings = TranslatorMod.Settings;
-        apiUrl = settings?.ApiUrl ?? TranslatorSettings.DefaultApiUrl;
-        apiKey = settings?.ApiKey ?? string.Empty;
-        model = settings?.Model ?? TranslatorSettings.DefaultModel;
-
-        apiUrl = apiUrl.Trim();
-        apiKey = apiKey.Trim();
-        model = model.Trim();
+        apiUrl = settings.ApiUrl.Trim();
+        apiKey = settings.ApiKey.Trim();
+        model = settings.Model.Trim();
 
         if (string.IsNullOrWhiteSpace(apiUrl)) {
             errorMessage = "Translator API URL is empty. Configure it in Mod Settings.";
@@ -345,11 +342,13 @@ internal static class LlmTranslateService {
     }
 
     private sealed class ChatChoice {
+        [UsedImplicitly]
         [JsonPropertyName("message")]
         public ChatMessage Message { get; set; } = new();
     }
 
     private sealed class ChatMessage {
+        [UsedImplicitly]
         [JsonPropertyName("content")]
         public string Content { get; set; } = string.Empty;
     }
@@ -360,9 +359,11 @@ internal static class LlmTranslateService {
     }
 
     private sealed class TranslatedEntry {
+        [UsedImplicitly]
         [JsonPropertyName("id")]
         public string Id { get; set; } = string.Empty;
 
+        [UsedImplicitly]
         [JsonPropertyName("translation")]
         public string? Translation { get; set; }
     }

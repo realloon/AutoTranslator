@@ -22,13 +22,6 @@ internal static class LanguageXmlWriteService {
                 };
             }
 
-            if (workset is null) {
-                return new LanguageXmlWriteResult {
-                    Success = false,
-                    Message = "Workset is null."
-                };
-            }
-
             var languageFolderName = workset.LanguageFolderName;
             if (languageFolderName.NullOrEmpty()) {
                 return new LanguageXmlWriteResult {
@@ -139,10 +132,8 @@ internal static class LanguageXmlWriteService {
             return 0;
         }
 
-        var directory = Path.GetDirectoryName(outputFilePath);
-        if (!directory.NullOrEmpty()) {
-            Directory.CreateDirectory(directory);
-        }
+        var directory = Path.GetDirectoryName(outputFilePath)!;
+        Directory.CreateDirectory(directory);
 
         var doc = new XDocument(
             new XDeclaration("1.0", "utf-8", null),
@@ -160,7 +151,7 @@ internal static class LanguageXmlWriteService {
 
         try {
             XmlConvert.VerifyName(normalizedTag);
-            element = new XElement(normalizedTag, translation ?? string.Empty);
+            element = new XElement(normalizedTag, translation);
             return true;
         } catch {
             return false;

@@ -1,9 +1,7 @@
 using JetBrains.Annotations;
-using RimWorld;
-using System.Threading.Tasks;
-using Translator.Services;
 using UnityEngine;
 using Verse;
+using Translator.Services;
 
 namespace Translator;
 
@@ -41,7 +39,7 @@ public sealed class TranslatorMod : Mod {
 
         listing.Label("Translator_ModSettingModel".Translate());
         Settings.Model = listing.TextEntry(Settings.Model);
-        listing.Gap(12f);
+        listing.Gap();
 
         if (_validateConfigTask is not null) {
             GUI.color = Color.yellow;

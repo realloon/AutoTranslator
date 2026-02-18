@@ -3,8 +3,8 @@ using Verse;
 namespace Translator;
 
 public sealed class TranslatorSettings : ModSettings {
-    public const string DefaultApiUrl = "https://api.openai.com/v1/chat/completions";
-    public const string DefaultModel = "gpt-5.2";
+    private const string DefaultApiUrl = "https://api.openai.com/v1/chat/completions";
+    private const string DefaultModel = "gpt-5.2";
 
     public string ApiUrl = DefaultApiUrl;
     public string ApiKey = string.Empty;
