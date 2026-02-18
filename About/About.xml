@@ -2,7 +2,7 @@
 <ModMetaData>
   <packageId>Vortex.AutoTranslator</packageId>
   <name>Auto Translator</name>
-  <description>Auto Translator.</description>
+  <description>This mod automatically translates other mods and generates standard localization mods. It uses a large language model internally for translation, and you can also manually adjust the translated results.</description>
   <author>Vortex</author>
   <modVersion>0.3.0</modVersion>
   <supportedVersions>
