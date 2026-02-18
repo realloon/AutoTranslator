@@ -20,8 +20,6 @@ internal sealed class LlmConfigValidationResult {
 }
 
 internal static class LlmTranslateService {
-    private const int BatchSize = 40;
-
     private static readonly JsonSerializerOptions JsonOptions = new() {
         WriteIndented = true,
         PropertyNameCaseInsensitive = true,
@@ -32,7 +30,8 @@ internal static class LlmTranslateService {
 
     public static LlmConfigValidationResult ValidateCurrentConfig(bool testConnection) {
         try {
-            if (!TryGetActiveConfig(out var apiUrl, out var apiKey, out var model, out var configError)) {
+            if (!TryGetActiveConfig(out var apiUrl, out var apiKey, out var model, out _, out _, out _,
+                    out var configError)) {
                 return new LlmConfigValidationResult {
                     Success = false,
                     Message = configError
@@ -57,7 +56,9 @@ internal static class LlmTranslateService {
 
     public static LlmTranslateResult TranslateWorkset(LanguageWorksetFile workset, string targetLanguage) {
         try {
-            if (!TryGetActiveConfig(out var apiUrl, out var apiKey, out var model, out var configError)) {
+            if (!TryGetActiveConfig(out var apiUrl, out var apiKey, out var model, out var batchSize,
+                    out var concurrency, out var retryCount,
+                    out var configError)) {
                 return new LlmTranslateResult {
                     Success = false,
                     Message = configError,
@@ -75,12 +76,41 @@ internal static class LlmTranslateService {
             }
 
             var translatedById = new Dictionary<string, string>(StringComparer.Ordinal);
-            for (var i = 0; i < pending.Count; i += BatchSize) {
-                var batch = pending.Skip(i).Take(BatchSize).ToList();
-                var batchResult = RequestBatchTranslations(apiUrl, apiKey, model, targetLanguage, batch);
-                foreach (var (id, translation) in batchResult) {
-                    translatedById[id] = translation;
+            var batches = new List<BatchRequest>();
+            for (var i = 0; i < pending.Count; i += batchSize) {
+                batches.Add(new BatchRequest {
+                    BatchNo = batches.Count + 1,
+                    Items = pending.Skip(i).Take(batchSize).ToList()
+                });
+            }
+
+            var failedBatches = new List<string>();
+            for (var i = 0; i < batches.Count; i += concurrency) {
+                var wave = batches.Skip(i).Take(concurrency).ToList();
+                var waveTasks = wave
+                    .Select(batch => Task.Run(() =>
+                        RequestBatchTranslationsWithRetry(apiUrl, apiKey, model, targetLanguage, batch, retryCount)))
+                    .ToArray();
+                Task.WaitAll(waveTasks);
+                foreach (var task in waveTasks) {
+                    var batchResult = task.Result;
+                    if (!batchResult.Success) {
+                        failedBatches.Add($"batch#{batchResult.BatchNo}: {batchResult.ErrorMessage}");
+                        continue;
+                    }
+
+                    foreach (var (id, translation) in batchResult.Translations) {
+                        translatedById[id] = translation;
+                    }
                 }
+            }
+
+            if (failedBatches.Count > 0) {
+                return new LlmTranslateResult {
+                    Success = false,
+                    Message = BuildBatchFailureMessage(failedBatches),
+                    UpdatedCount = 0
+                };
             }
 
             var updatedCount = 0;
@@ -150,11 +180,17 @@ internal static class LlmTranslateService {
     private static bool TryGetActiveConfig(out string apiUrl,
         out string apiKey,
         out string model,
+        out int batchSize,
+        out int concurrency,
+        out int retryCount,
         out string errorMessage) {
         var settings = TranslatorMod.Settings;
         apiUrl = settings.ApiUrl.Trim();
         apiKey = settings.ApiKey.Trim();
         model = settings.Model.Trim();
+        batchSize = settings.BatchSize;
+        concurrency = settings.Concurrency;
+        retryCount = settings.RetryCount;
 
         if (string.IsNullOrWhiteSpace(apiUrl)) {
             errorMessage = "Translator API URL is empty. Configure it in Mod Settings.";
@@ -181,8 +217,68 @@ internal static class LlmTranslateService {
             return false;
         }
 
+        if (batchSize < TranslatorSettings.MinBatchSize || batchSize > TranslatorSettings.MaxBatchSize) {
+            errorMessage =
+                $"Translator batch size is invalid. Configure a value between {TranslatorSettings.MinBatchSize} and {TranslatorSettings.MaxBatchSize} in Mod Settings.";
+            return false;
+        }
+
+        if (concurrency < TranslatorSettings.MinConcurrency || concurrency > TranslatorSettings.MaxConcurrency) {
+            errorMessage =
+                $"Translator concurrency is invalid. Configure a value between {TranslatorSettings.MinConcurrency} and {TranslatorSettings.MaxConcurrency} in Mod Settings.";
+            return false;
+        }
+
+        if (retryCount < TranslatorSettings.MinRetryCount || retryCount > TranslatorSettings.MaxRetryCount) {
+            errorMessage =
+                $"Translator retry count is invalid. Configure a value between {TranslatorSettings.MinRetryCount} and {TranslatorSettings.MaxRetryCount} in Mod Settings.";
+            return false;
+        }
+
         errorMessage = string.Empty;
         return true;
+    }
+
+    private static BatchExecutionResult RequestBatchTranslationsWithRetry(string apiUrl,
+        string apiKey,
+        string model,
+        string targetLanguage,
+        BatchRequest batch,
+        int retryCount) {
+        Exception? lastException = null;
+        for (var attempt = 0; attempt <= retryCount; attempt++) {
+            try {
+                var translations = RequestBatchTranslations(apiUrl, apiKey, model, targetLanguage, batch.Items);
+                return new BatchExecutionResult {
+                    BatchNo = batch.BatchNo,
+                    Success = true,
+                    ErrorMessage = string.Empty,
+                    Translations = translations
+                };
+            } catch (Exception ex) {
+                lastException = ex;
+            }
+        }
+
+        return new BatchExecutionResult {
+            BatchNo = batch.BatchNo,
+            Success = false,
+            ErrorMessage = lastException?.Message ?? "Unknown batch translation error.",
+            Translations = new Dictionary<string, string>(StringComparer.Ordinal)
+        };
+    }
+
+    private static string BuildBatchFailureMessage(IReadOnlyList<string> failedBatches) {
+        const int maxErrors = 3;
+        var shown = failedBatches
+            .Take(maxErrors)
+            .Select(error => error.Length > 180 ? $"{error[..180]}..." : error);
+        var message = string.Join(" | ", shown);
+        if (failedBatches.Count > maxErrors) {
+            message += $" (+{failedBatches.Count - maxErrors} more)";
+        }
+
+        return $"Some translation batches failed after retries: {message}";
     }
 
     private static bool TryNormalizeApiUrl(Uri uri, out string normalizedApiUrl, out string errorMessage) {
@@ -334,6 +430,18 @@ internal static class LlmTranslateService {
         public string? DefType;
         public bool? IsCollectionItem;
         public Action<string> ApplyTranslation = _ => { };
+    }
+
+    private sealed class BatchRequest {
+        public int BatchNo;
+        public List<PendingTranslationItem> Items { get; set; } = [];
+    }
+
+    private sealed class BatchExecutionResult {
+        public int BatchNo;
+        public bool Success;
+        public string ErrorMessage = string.Empty;
+        public Dictionary<string, string> Translations { get; set; } = new(StringComparer.Ordinal);
     }
 
     private sealed class ChatCompletionResponse {
