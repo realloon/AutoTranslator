@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <Translator_MainMenuButton>Auto Translator</Translator_MainMenuButton>
+  <Translator_WindowTitle>Auto Translator</Translator_WindowTitle>
+  <Translator_ModSearchLabel>搜尋</Translator_ModSearchLabel>
+  <Translator_ModCount>顯示模組 {0}/{1}</Translator_ModCount>
+  <Translator_NoModSelected>請先在左側列表中選擇一個模組。</Translator_NoModSelected>
+  <Translator_SelectedModLabel>目前選擇：{0}</Translator_SelectedModLabel>
+  <Translator_DefStatsTitle>來源於 Def</Translator_DefStatsTitle>
+  <Translator_DefStatsFields>可翻譯注入項：{0}</Translator_DefStatsFields>
+  <Translator_DefStatsMissingDefInjection>目前語言缺失 Def-injection：{0}</Translator_DefStatsMissingDefInjection>
+  <Translator_StaticScanTitle>來源於 key</Translator_StaticScanTitle>
+  <Translator_StaticScanUniqueKeys>可翻譯 Key：{0}</Translator_StaticScanUniqueKeys>
+  <Translator_StaticScanMissingKeys>目前語言缺失 keyed：{0}</Translator_StaticScanMissingKeys>
+  <Translator_ExportLanguageDialogTitle>選擇翻譯語言</Translator_ExportLanguageDialogTitle>
+  <Translator_SelectAllLanguages>全選</Translator_SelectAllLanguages>
+  <Translator_ClearLanguageSelection>清空</Translator_ClearLanguageSelection>
+  <Translator_ExportLanguageSelectedCount>已選擇 {0}/{1}</Translator_ExportLanguageSelectedCount>
+  <Translator_ExportLanguageConfirm>翻譯並匯出</Translator_ExportLanguageConfirm>
+  <Translator_ExportNoLanguageSelected>請至少選擇一種匯出語言。</Translator_ExportNoLanguageSelected>
+  <Translator_ExportIrButton>翻譯並匯出</Translator_ExportIrButton>
+  <Translator_AiTranslateInProgress>翻譯中，這可能需要較長時間</Translator_AiTranslateInProgress>
+  <Translator_AiTranslateSuccess>翻譯模組已匯出</Translator_AiTranslateSuccess>
+  <Translator_AiTranslatePartialFailed>翻譯模組已匯出，但存在部分錯誤。</Translator_AiTranslatePartialFailed>
+  <Translator_AiTranslatePartialFailedWithDetails>翻譯模組已匯出，但存在部分錯誤。失敗摘要：{0}</Translator_AiTranslatePartialFailedWithDetails>
+  <Translator_OutputDirectory>輸出目錄：{0}</Translator_OutputDirectory>
+  <Translator_AiTranslateConfigInvalid>AI 設定無效：{0}</Translator_AiTranslateConfigInvalid>
+  <Translator_AiTranslateFailed>AI 翻譯失敗：{0}</Translator_AiTranslateFailed>
+  <Translator_ModSettingsCategory>Auto Translator</Translator_ModSettingsCategory>
+  <Translator_ModSettingsDescription>設定 AI 翻譯所需的 API 位址、金鑰與模型名稱。</Translator_ModSettingsDescription>
+  <Translator_ModSettingApiUrl>API 位址（OpenAI 相容格式）</Translator_ModSettingApiUrl>
+  <Translator_ModSettingApiKey>API Key</Translator_ModSettingApiKey>
+  <Translator_ModSettingModel>模型</Translator_ModSettingModel>
+  <Translator_ModSettingBatchSize>請求分片</Translator_ModSettingBatchSize>
+  <Translator_ModSettingBatchSizeDescription>單次模型呼叫包含的條目數。條目越多一致性越好，但應控制在合理的上下文長度內。</Translator_ModSettingBatchSizeDescription>
+  <Translator_ModSettingConcurrency>併發數</Translator_ModSettingConcurrency>
+  <Translator_ModSettingConcurrencyDescription>同時進行的模型呼叫數量。併發越高完成越早，但過高可能觸發平台限流。</Translator_ModSettingConcurrencyDescription>
+  <Translator_ModSettingRetryCount>重試次數</Translator_ModSettingRetryCount>
+  <Translator_ModSettingRetryCountDescription>單次模型呼叫失敗後重試的次數。</Translator_ModSettingRetryCountDescription>
+  <Translator_ModSettingsValidateConfig>驗證</Translator_ModSettingsValidateConfig>
+  <Translator_ModSettingsValidating>正在驗證設定，請稍候...</Translator_ModSettingsValidating>
+  <Translator_ModSettingsValidationSuccess>設定驗證成功。</Translator_ModSettingsValidationSuccess>
+  <Translator_ModSettingsValidationFailed>設定驗證失敗：{0}</Translator_ModSettingsValidationFailed>
+  <Translator_ModSettingsResetDefaults>恢復預設值</Translator_ModSettingsResetDefaults>
+</LanguageData>
