@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <Translator_MainMenuButton>Auto Translator</Translator_MainMenuButton>
+  <Translator_WindowTitle>Auto Translator</Translator_WindowTitle>
+  <Translator_ModSearchLabel>検索</Translator_ModSearchLabel>
+  <Translator_ModCount>表示中のMod {0}/{1}</Translator_ModCount>
+  <Translator_NoModSelected>続行するには左側のリストからModを選択してください。</Translator_NoModSelected>
+  <Translator_SelectedModLabel>選択中: {0}</Translator_SelectedModLabel>
+  <Translator_DefStatsTitle>From Def</Translator_DefStatsTitle>
+  <Translator_DefStatsFields>翻訳可能なdef-injections: {0}</Translator_DefStatsFields>
+  <Translator_DefStatsMissingDefInjection>現在の言語で不足しているdef-injections: {0}</Translator_DefStatsMissingDefInjection>
+  <Translator_StaticScanTitle>From Key</Translator_StaticScanTitle>
+  <Translator_StaticScanUniqueKeys>翻訳可能なKey: {0}</Translator_StaticScanUniqueKeys>
+  <Translator_StaticScanMissingKeys>現在の言語で不足しているkeyed: {0}</Translator_StaticScanMissingKeys>
+  <Translator_ExportLanguageDialogTitle>翻訳言語を選択</Translator_ExportLanguageDialogTitle>
+  <Translator_SelectAllLanguages>すべて選択</Translator_SelectAllLanguages>
+  <Translator_ClearLanguageSelection>クリア</Translator_ClearLanguageSelection>
+  <Translator_ExportLanguageSelectedCount>選択済み: {0}/{1}</Translator_ExportLanguageSelectedCount>
+  <Translator_ExportLanguageConfirm>翻訳してエクスポート</Translator_ExportLanguageConfirm>
+  <Translator_ExportNoLanguageSelected>エクスポートする言語を少なくとも1つ選択してください。</Translator_ExportNoLanguageSelected>
+  <Translator_ExportIrButton>翻訳してエクスポート</Translator_ExportIrButton>
+  <Translator_AiTranslateInProgress>翻訳中です。しばらく時間がかかる場合があります。</Translator_AiTranslateInProgress>
+  <Translator_AiTranslateSuccess>翻訳済みModをエクスポートしました。</Translator_AiTranslateSuccess>
+  <Translator_AiTranslatePartialFailed>一部エラーがありましたが、翻訳済みModをエクスポートしました。</Translator_AiTranslatePartialFailed>
+  <Translator_AiTranslatePartialFailedWithDetails>一部エラーがありましたが、翻訳済みModをエクスポートしました。失敗の概要: {0}</Translator_AiTranslatePartialFailedWithDetails>
+  <Translator_OutputDirectory>出力ディレクトリ: {0}</Translator_OutputDirectory>
+  <Translator_AiTranslateConfigInvalid>AI設定が無効です: {0}</Translator_AiTranslateConfigInvalid>
+  <Translator_AiTranslateFailed>AI翻訳に失敗しました: {0}</Translator_AiTranslateFailed>
+  <Translator_ModSettingsCategory>Auto Translator</Translator_ModSettingsCategory>
+  <Translator_ModSettingsDescription>AI翻訳に使用するAPI endpoint、キー、モデルを設定します。</Translator_ModSettingsDescription>
+  <Translator_ModSettingApiUrl>API URL (OpenAI-compatible)</Translator_ModSettingApiUrl>
+  <Translator_ModSettingApiKey>API Key</Translator_ModSettingApiKey>
+  <Translator_ModSettingModel>モデル</Translator_ModSettingModel>
+  <Translator_ModSettingBatchSize>リクエスト分割</Translator_ModSettingBatchSize>
+  <Translator_ModSettingBatchSizeDescription>1回のモデル呼び出しに含める項目数です。項目が多いほど一貫性は向上しやすいですが、コンテキスト長は適切な範囲に保ってください。</Translator_ModSettingBatchSizeDescription>
+  <Translator_ModSettingConcurrency>並列数</Translator_ModSettingConcurrency>
+  <Translator_ModSettingConcurrencyDescription>並列で送信するモデル呼び出し数です。並列数を上げると完了は早くなりますが、高すぎるとプロバイダーのrate limitに達する可能性があります。</Translator_ModSettingConcurrencyDescription>
+  <Translator_ModSettingRetryCount>再試行回数</Translator_ModSettingRetryCount>
+  <Translator_ModSettingRetryCountDescription>1回のモデル呼び出しが失敗した後の再試行回数です。</Translator_ModSettingRetryCountDescription>
+  <Translator_ModSettingsValidateConfig>検証</Translator_ModSettingsValidateConfig>
+  <Translator_ModSettingsValidating>設定を検証中...</Translator_ModSettingsValidating>
+  <Translator_ModSettingsValidationSuccess>設定の検証に成功しました。</Translator_ModSettingsValidationSuccess>
+  <Translator_ModSettingsValidationFailed>設定の検証に失敗しました: {0}</Translator_ModSettingsValidationFailed>
+  <Translator_ModSettingsResetDefaults>デフォルトに戻す</Translator_ModSettingsResetDefaults>
+</LanguageData>

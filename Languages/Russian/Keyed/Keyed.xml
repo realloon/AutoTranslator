@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <Translator_MainMenuButton>Auto Translator</Translator_MainMenuButton>
+  <Translator_WindowTitle>Auto Translator</Translator_WindowTitle>
+  <Translator_ModSearchLabel>Поиск</Translator_ModSearchLabel>
+  <Translator_ModCount>Показано модов {0}/{1}</Translator_ModCount>
+  <Translator_NoModSelected>Выберите мод в списке слева, чтобы продолжить.</Translator_NoModSelected>
+  <Translator_SelectedModLabel>Выбрано: {0}</Translator_SelectedModLabel>
+  <Translator_DefStatsTitle>Из Def</Translator_DefStatsTitle>
+  <Translator_DefStatsFields>Переводимых def-injections: {0}</Translator_DefStatsFields>
+  <Translator_DefStatsMissingDefInjection>Отсутствует def-injections для текущего языка: {0}</Translator_DefStatsMissingDefInjection>
+  <Translator_StaticScanTitle>Из Key</Translator_StaticScanTitle>
+  <Translator_StaticScanUniqueKeys>Переводимых Key: {0}</Translator_StaticScanUniqueKeys>
+  <Translator_StaticScanMissingKeys>Отсутствует keyed для текущего языка: {0}</Translator_StaticScanMissingKeys>
+  <Translator_ExportLanguageDialogTitle>Выберите языки перевода</Translator_ExportLanguageDialogTitle>
+  <Translator_SelectAllLanguages>Выбрать все</Translator_SelectAllLanguages>
+  <Translator_ClearLanguageSelection>Очистить</Translator_ClearLanguageSelection>
+  <Translator_ExportLanguageSelectedCount>Выбрано: {0}/{1}</Translator_ExportLanguageSelectedCount>
+  <Translator_ExportLanguageConfirm>Перевести &amp; экспортировать</Translator_ExportLanguageConfirm>
+  <Translator_ExportNoLanguageSelected>Выберите как минимум один язык для экспорта.</Translator_ExportNoLanguageSelected>
+  <Translator_ExportIrButton>Перевести &amp; экспортировать</Translator_ExportIrButton>
+  <Translator_AiTranslateInProgress>Идёт перевод. Это может занять некоторое время.</Translator_AiTranslateInProgress>
+  <Translator_AiTranslateSuccess>Переведённый мод экспортирован.</Translator_AiTranslateSuccess>
+  <Translator_AiTranslatePartialFailed>Переведённый мод экспортирован с некоторыми ошибками.</Translator_AiTranslatePartialFailed>
+  <Translator_AiTranslatePartialFailedWithDetails>Переведённый мод экспортирован с некоторыми ошибками. Сводка ошибок: {0}</Translator_AiTranslatePartialFailedWithDetails>
+  <Translator_OutputDirectory>Папка вывода: {0}</Translator_OutputDirectory>
+  <Translator_AiTranslateConfigInvalid>Некорректная конфигурация AI: {0}</Translator_AiTranslateConfigInvalid>
+  <Translator_AiTranslateFailed>Ошибка AI-перевода: {0}</Translator_AiTranslateFailed>
+  <Translator_ModSettingsCategory>Auto Translator</Translator_ModSettingsCategory>
+  <Translator_ModSettingsDescription>Настройте API endpoint, ключ и модель для AI-перевода.</Translator_ModSettingsDescription>
+  <Translator_ModSettingApiUrl>API URL (совместимый с OpenAI)</Translator_ModSettingApiUrl>
+  <Translator_ModSettingApiKey>API Key</Translator_ModSettingApiKey>
+  <Translator_ModSettingModel>Модель</Translator_ModSettingModel>
+  <Translator_ModSettingBatchSize>Размер пакета запроса</Translator_ModSettingBatchSize>
+  <Translator_ModSettingBatchSizeDescription>Количество записей в одном вызове модели. Большее число обычно повышает согласованность, но держите его в разумных пределах контекстного окна.</Translator_ModSettingBatchSizeDescription>
+  <Translator_ModSettingConcurrency>Параллельность</Translator_ModSettingConcurrency>
+  <Translator_ModSettingConcurrencyDescription>Количество вызовов модели, отправляемых параллельно. Более высокая параллельность ускоряет выполнение, но слишком высокое значение может вызвать ограничение по частоте.</Translator_ModSettingConcurrencyDescription>
+  <Translator_ModSettingRetryCount>Количество повторных попыток</Translator_ModSettingRetryCount>
+  <Translator_ModSettingRetryCountDescription>Число повторов после сбоя одного вызова модели.</Translator_ModSettingRetryCountDescription>
+  <Translator_ModSettingsValidateConfig>Проверить</Translator_ModSettingsValidateConfig>
+  <Translator_ModSettingsValidating>Проверка конфигурации...</Translator_ModSettingsValidating>
+  <Translator_ModSettingsValidationSuccess>Конфигурация успешно проверена.</Translator_ModSettingsValidationSuccess>
+  <Translator_ModSettingsValidationFailed>Ошибка проверки конфигурации: {0}</Translator_ModSettingsValidationFailed>
+  <Translator_ModSettingsResetDefaults>Сбросить по умолчанию</Translator_ModSettingsResetDefaults>
+</LanguageData>

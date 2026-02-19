@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <Translator_MainMenuButton>Auto Translator</Translator_MainMenuButton>
+  <Translator_WindowTitle>Auto Translator</Translator_WindowTitle>
+  <Translator_ModSearchLabel>검색</Translator_ModSearchLabel>
+  <Translator_ModCount>모드 표시 {0}/{1}</Translator_ModCount>
+  <Translator_NoModSelected>계속하려면 왼쪽 목록에서 모드를 선택하세요.</Translator_NoModSelected>
+  <Translator_SelectedModLabel>선택됨: {0}</Translator_SelectedModLabel>
+  <Translator_DefStatsTitle>From Def</Translator_DefStatsTitle>
+  <Translator_DefStatsFields>번역 가능한 def-injections: {0}</Translator_DefStatsFields>
+  <Translator_DefStatsMissingDefInjection>현재 언어에서 누락된 def-injections: {0}</Translator_DefStatsMissingDefInjection>
+  <Translator_StaticScanTitle>From Key</Translator_StaticScanTitle>
+  <Translator_StaticScanUniqueKeys>번역 가능한 Key: {0}</Translator_StaticScanUniqueKeys>
+  <Translator_StaticScanMissingKeys>현재 언어에서 누락된 keyed: {0}</Translator_StaticScanMissingKeys>
+  <Translator_ExportLanguageDialogTitle>번역 언어 선택</Translator_ExportLanguageDialogTitle>
+  <Translator_SelectAllLanguages>전체 선택</Translator_SelectAllLanguages>
+  <Translator_ClearLanguageSelection>지우기</Translator_ClearLanguageSelection>
+  <Translator_ExportLanguageSelectedCount>선택됨: {0}/{1}</Translator_ExportLanguageSelectedCount>
+  <Translator_ExportLanguageConfirm>번역 및 내보내기</Translator_ExportLanguageConfirm>
+  <Translator_ExportNoLanguageSelected>내보낼 언어를 최소 하나 선택하세요.</Translator_ExportNoLanguageSelected>
+  <Translator_ExportIrButton>번역 및 내보내기</Translator_ExportIrButton>
+  <Translator_AiTranslateInProgress>번역 중입니다. 시간이 다소 걸릴 수 있습니다.</Translator_AiTranslateInProgress>
+  <Translator_AiTranslateSuccess>번역된 모드를 내보냈습니다.</Translator_AiTranslateSuccess>
+  <Translator_AiTranslatePartialFailed>일부 오류와 함께 번역된 모드를 내보냈습니다.</Translator_AiTranslatePartialFailed>
+  <Translator_AiTranslatePartialFailedWithDetails>일부 오류와 함께 번역된 모드를 내보냈습니다. 실패 요약: {0}</Translator_AiTranslatePartialFailedWithDetails>
+  <Translator_OutputDirectory>출력 디렉터리: {0}</Translator_OutputDirectory>
+  <Translator_AiTranslateConfigInvalid>AI 구성 정보가 올바르지 않습니다: {0}</Translator_AiTranslateConfigInvalid>
+  <Translator_AiTranslateFailed>AI 번역 실패: {0}</Translator_AiTranslateFailed>
+  <Translator_ModSettingsCategory>Auto Translator</Translator_ModSettingsCategory>
+  <Translator_ModSettingsDescription>AI 번역에 사용할 API endpoint, 키, 모델을 설정합니다.</Translator_ModSettingsDescription>
+  <Translator_ModSettingApiUrl>API URL (OpenAI-compatible)</Translator_ModSettingApiUrl>
+  <Translator_ModSettingApiKey>API Key</Translator_ModSettingApiKey>
+  <Translator_ModSettingModel>모델</Translator_ModSettingModel>
+  <Translator_ModSettingBatchSize>요청 청크 단위</Translator_ModSettingBatchSize>
+  <Translator_ModSettingBatchSizeDescription>한 번의 모델 호출에 포함되는 항목 수입니다. 항목이 많을수록 일관성이 좋아지는 경향이 있지만, 컨텍스트 길이는 합리적인 범위로 유지하세요.</Translator_ModSettingBatchSizeDescription>
+  <Translator_ModSettingConcurrency>동시성</Translator_ModSettingConcurrency>
+  <Translator_ModSettingConcurrencyDescription>병렬로 전송되는 모델 호출 수입니다. 동시성이 높을수록 더 빨리 끝나지만, 너무 높으면 제공자 rate limit에 걸릴 수 있습니다.</Translator_ModSettingConcurrencyDescription>
+  <Translator_ModSettingRetryCount>재시도 횟수</Translator_ModSettingRetryCount>
+  <Translator_ModSettingRetryCountDescription>단일 모델 호출 실패 후 재시도하는 횟수입니다.</Translator_ModSettingRetryCountDescription>
+  <Translator_ModSettingsValidateConfig>검증</Translator_ModSettingsValidateConfig>
+  <Translator_ModSettingsValidating>구성을 검증하는 중...</Translator_ModSettingsValidating>
+  <Translator_ModSettingsValidationSuccess>구성 검증에 성공했습니다.</Translator_ModSettingsValidationSuccess>
+  <Translator_ModSettingsValidationFailed>구성 검증 실패: {0}</Translator_ModSettingsValidationFailed>
+  <Translator_ModSettingsResetDefaults>기본값으로 재설정</Translator_ModSettingsResetDefaults>
+</LanguageData>
