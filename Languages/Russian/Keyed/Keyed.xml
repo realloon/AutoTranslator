@@ -18,6 +18,12 @@
   <Translator_ExportLanguageSelectedCount>Выбрано: {0}/{1}</Translator_ExportLanguageSelectedCount>
   <Translator_ExportLanguageConfirm>Перевести &amp; экспортировать</Translator_ExportLanguageConfirm>
   <Translator_ExportNoLanguageSelected>Выберите как минимум один язык для экспорта.</Translator_ExportNoLanguageSelected>
+  <Translator_TermbaseButton>Терминология</Translator_TermbaseButton>
+  <Translator_TermbaseComingSoon>Интерфейс терминологии находится в разработке.</Translator_TermbaseComingSoon>
+  <Translator_TermbaseDialogTitle>Терминология</Translator_TermbaseDialogTitle>
+  <Translator_TermbaseDescription>Управляйте фиксированными терминами перед переводом.</Translator_TermbaseDescription>
+  <Translator_TermbaseColumns>Исходный термин -> Целевой термин</Translator_TermbaseColumns>
+  <Translator_TermbaseEmpty>Терминов пока нет. Управление терминами будет реализовано на следующем этапе.</Translator_TermbaseEmpty>
   <Translator_ExportIrButton>Перевести &amp; экспортировать</Translator_ExportIrButton>
   <Translator_AiTranslateInProgress>Идёт перевод. Это может занять некоторое время.</Translator_AiTranslateInProgress>
   <Translator_AiTranslateSuccess>Переведённый мод экспортирован.</Translator_AiTranslateSuccess>

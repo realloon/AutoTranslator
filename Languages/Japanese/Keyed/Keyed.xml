@@ -18,6 +18,12 @@
   <Translator_ExportLanguageSelectedCount>選択済み: {0}/{1}</Translator_ExportLanguageSelectedCount>
   <Translator_ExportLanguageConfirm>翻訳してエクスポート</Translator_ExportLanguageConfirm>
   <Translator_ExportNoLanguageSelected>エクスポートする言語を少なくとも1つ選択してください。</Translator_ExportNoLanguageSelected>
+  <Translator_TermbaseButton>用語集</Translator_TermbaseButton>
+  <Translator_TermbaseComingSoon>用語集UIは現在開発中です。</Translator_TermbaseComingSoon>
+  <Translator_TermbaseDialogTitle>用語集</Translator_TermbaseDialogTitle>
+  <Translator_TermbaseDescription>翻訳前に固定用語を管理します。</Translator_TermbaseDescription>
+  <Translator_TermbaseColumns>原文用語 -> 訳文用語</Translator_TermbaseColumns>
+  <Translator_TermbaseEmpty>まだ用語がありません。次のステップで用語管理を実装します。</Translator_TermbaseEmpty>
   <Translator_ExportIrButton>翻訳してエクスポート</Translator_ExportIrButton>
   <Translator_AiTranslateInProgress>翻訳中です。しばらく時間がかかる場合があります。</Translator_AiTranslateInProgress>
   <Translator_AiTranslateSuccess>翻訳済みModをエクスポートしました。</Translator_AiTranslateSuccess>

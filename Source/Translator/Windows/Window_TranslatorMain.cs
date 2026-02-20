@@ -142,9 +142,23 @@ public class Window_TranslatorMain : Window {
             "Translator_StaticScanMissingKeys".Translate(translateStats.MissingKeyCount));
         y += 30f;
 
+        var termbaseButtonLabel = "Translator_TermbaseButton".Translate();
         var exportButtonLabel = "Translator_ExportIrButton".Translate();
-        var exportButtonWidth = Mathf.Min(rect.width, Mathf.Max(210f, Text.CalcSize(exportButtonLabel).x + 28f));
-        var exportButtonRect = new Rect(rect.x, y, exportButtonWidth, 30f);
+        const float buttonGap = 8f;
+        var termbaseButtonWidth = Mathf.Max(130f, Text.CalcSize(termbaseButtonLabel).x + 28f);
+        var exportButtonWidth = Mathf.Max(210f, Text.CalcSize(exportButtonLabel).x + 28f);
+        if (termbaseButtonWidth + buttonGap + exportButtonWidth > rect.width) {
+            var halfWidth = (rect.width - buttonGap) / 2f;
+            termbaseButtonWidth = halfWidth;
+            exportButtonWidth = halfWidth;
+        }
+
+        var termbaseButtonRect = new Rect(rect.x, y, termbaseButtonWidth, 30f);
+        var exportButtonRect = new Rect(termbaseButtonRect.xMax + buttonGap, y, exportButtonWidth, 30f);
+        if (Widgets.ButtonText(termbaseButtonRect, termbaseButtonLabel)) {
+            OpenTermbaseWindow();
+        }
+
         if (Widgets.ButtonText(exportButtonRect, exportButtonLabel)) {
             OpenExportLanguagePicker(selectedMod);
         }
@@ -187,6 +201,10 @@ public class Window_TranslatorMain : Window {
 
     private void OpenExportLanguagePicker(ModMetaData selectedMod) {
         OpenLanguagePicker(selectedMod, TryExportAndAiTranslate);
+    }
+
+    private static void OpenTermbaseWindow() {
+        Find.WindowStack.Add(new Window_Termbase());
     }
 
     private void OpenLanguagePicker(ModMetaData selectedMod,

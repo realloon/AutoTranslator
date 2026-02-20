@@ -18,6 +18,12 @@
   <Translator_ExportLanguageSelectedCount>Selected: {0}/{1}</Translator_ExportLanguageSelectedCount>
   <Translator_ExportLanguageConfirm>Translate &amp; Export</Translator_ExportLanguageConfirm>
   <Translator_ExportNoLanguageSelected>Select at least one language to export.</Translator_ExportNoLanguageSelected>
+  <Translator_TermbaseButton>Termbase</Translator_TermbaseButton>
+  <Translator_TermbaseComingSoon>Termbase UI is under construction.</Translator_TermbaseComingSoon>
+  <Translator_TermbaseDialogTitle>Termbase</Translator_TermbaseDialogTitle>
+  <Translator_TermbaseDescription>Manage fixed terminology before translation.</Translator_TermbaseDescription>
+  <Translator_TermbaseColumns>Source Term -> Target Term</Translator_TermbaseColumns>
+  <Translator_TermbaseEmpty>No terms yet. Add term management in the next step.</Translator_TermbaseEmpty>
   <Translator_ExportIrButton>Translate &amp; Export</Translator_ExportIrButton>
   <Translator_AiTranslateInProgress>Translating. This may take a while.</Translator_AiTranslateInProgress>
   <Translator_AiTranslateSuccess>Translated mod exported.</Translator_AiTranslateSuccess>

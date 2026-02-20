@@ -18,6 +18,12 @@
   <Translator_ExportLanguageSelectedCount>已选择 {0}/{1}</Translator_ExportLanguageSelectedCount>
   <Translator_ExportLanguageConfirm>翻译并导出</Translator_ExportLanguageConfirm>
   <Translator_ExportNoLanguageSelected>请至少选择一种导出语言。</Translator_ExportNoLanguageSelected>
+  <Translator_TermbaseButton>术语库</Translator_TermbaseButton>
+  <Translator_TermbaseComingSoon>术语库界面正在开发中。</Translator_TermbaseComingSoon>
+  <Translator_TermbaseDialogTitle>术语库</Translator_TermbaseDialogTitle>
+  <Translator_TermbaseDescription>在翻译前管理固定术语。</Translator_TermbaseDescription>
+  <Translator_TermbaseColumns>源术语 -> 目标术语</Translator_TermbaseColumns>
+  <Translator_TermbaseEmpty>暂无术语。下一步将继续实现术语管理。</Translator_TermbaseEmpty>
   <Translator_ExportIrButton>翻译并导出</Translator_ExportIrButton>
   <Translator_AiTranslateInProgress>翻译中，这可能需要较长时间</Translator_AiTranslateInProgress>
   <Translator_AiTranslateSuccess>翻译模组已导出</Translator_AiTranslateSuccess>

@@ -18,6 +18,12 @@
   <Translator_ExportLanguageSelectedCount>已選擇 {0}/{1}</Translator_ExportLanguageSelectedCount>
   <Translator_ExportLanguageConfirm>翻譯並匯出</Translator_ExportLanguageConfirm>
   <Translator_ExportNoLanguageSelected>請至少選擇一種匯出語言。</Translator_ExportNoLanguageSelected>
+  <Translator_TermbaseButton>術語庫</Translator_TermbaseButton>
+  <Translator_TermbaseComingSoon>術語庫介面正在開發中。</Translator_TermbaseComingSoon>
+  <Translator_TermbaseDialogTitle>術語庫</Translator_TermbaseDialogTitle>
+  <Translator_TermbaseDescription>在翻譯前管理固定術語。</Translator_TermbaseDescription>
+  <Translator_TermbaseColumns>來源術語 -> 目標術語</Translator_TermbaseColumns>
+  <Translator_TermbaseEmpty>目前沒有術語。下一步將繼續實作術語管理。</Translator_TermbaseEmpty>
   <Translator_ExportIrButton>翻譯並匯出</Translator_ExportIrButton>
   <Translator_AiTranslateInProgress>翻譯中，這可能需要較長時間</Translator_AiTranslateInProgress>
   <Translator_AiTranslateSuccess>翻譯模組已匯出</Translator_AiTranslateSuccess>
