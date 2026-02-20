@@ -24,6 +24,13 @@
   <Translator_TermbaseDescription>翻訳前に固定用語を管理します。</Translator_TermbaseDescription>
   <Translator_TermbaseColumns>原文用語 -> 訳文用語</Translator_TermbaseColumns>
   <Translator_TermbaseEmpty>まだ用語がありません。次のステップで用語管理を実装します。</Translator_TermbaseEmpty>
+  <Translator_TermbaseAddRow>行を追加</Translator_TermbaseAddRow>
+  <Translator_TermbaseClearAll>クリア</Translator_TermbaseClearAll>
+  <Translator_TermbaseTargetLanguage>対象言語</Translator_TermbaseTargetLanguage>
+  <Translator_TermbaseNoLanguage>利用可能な言語がありません。</Translator_TermbaseNoLanguage>
+  <Translator_TermbaseEntryCount>項目数: {0}</Translator_TermbaseEntryCount>
+  <Translator_TermbaseSave>保存</Translator_TermbaseSave>
+  <Translator_TermbaseSaveFailed>用語集の保存に失敗しました: {0}</Translator_TermbaseSaveFailed>
   <Translator_ExportIrButton>翻訳してエクスポート</Translator_ExportIrButton>
   <Translator_AiTranslateInProgress>翻訳中です。しばらく時間がかかる場合があります。</Translator_AiTranslateInProgress>
   <Translator_AiTranslateSuccess>翻訳済みModをエクスポートしました。</Translator_AiTranslateSuccess>

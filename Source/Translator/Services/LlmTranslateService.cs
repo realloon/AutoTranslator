@@ -54,7 +54,9 @@ internal static class LlmTranslateService {
         }
     }
 
-    public static LlmTranslateResult TranslateWorkset(LanguageWorksetFile workset, string targetLanguage) {
+    public static LlmTranslateResult TranslateWorkset(LanguageWorksetFile workset,
+        string targetLanguageFolder,
+        string targetLanguageDisplayName) {
         try {
             if (!TryGetActiveConfig(out var apiUrl, out var apiKey, out var model, out var batchSize,
                     out var concurrency, out var retryCount,
@@ -76,6 +78,7 @@ internal static class LlmTranslateService {
             }
 
             var translatedById = new Dictionary<string, string>(StringComparer.Ordinal);
+            var termbaseGlossary = TermbaseService.GetGlossaryForLanguage(targetLanguageFolder);
             var batches = new List<BatchRequest>();
             for (var i = 0; i < pending.Count; i += batchSize) {
                 batches.Add(new BatchRequest {
@@ -89,9 +92,15 @@ internal static class LlmTranslateService {
                 var wave = batches.Skip(i).Take(concurrency).ToList();
                 var waveTasks = wave
                     .Select(batch => Task.Run(() =>
-                        RequestBatchTranslationsWithRetry(apiUrl, apiKey, model, targetLanguage, batch, retryCount)))
+                        RequestBatchTranslationsWithRetry(apiUrl,
+                            apiKey,
+                            model,
+                            targetLanguageDisplayName,
+                            batch,
+                            retryCount,
+                            termbaseGlossary)))
                     .ToArray();
-                Task.WaitAll(waveTasks);
+                Task.WhenAll(waveTasks).GetAwaiter().GetResult();
                 foreach (var task in waveTasks) {
                     var batchResult = task.Result;
                     if (!batchResult.Success) {
@@ -244,11 +253,13 @@ internal static class LlmTranslateService {
         string model,
         string targetLanguage,
         BatchRequest batch,
-        int retryCount) {
+        int retryCount,
+        IReadOnlyDictionary<string, string> termbaseGlossary) {
         Exception? lastException = null;
         for (var attempt = 0; attempt <= retryCount; attempt++) {
             try {
-                var translations = RequestBatchTranslations(apiUrl, apiKey, model, targetLanguage, batch.Items);
+                var translations =
+                    RequestBatchTranslations(apiUrl, apiKey, model, targetLanguage, batch.Items, termbaseGlossary);
                 return new BatchExecutionResult {
                     BatchNo = batch.BatchNo,
                     Success = true,
@@ -337,7 +348,8 @@ internal static class LlmTranslateService {
         string apiKey,
         string model,
         string targetLanguage,
-        IReadOnlyList<PendingTranslationItem> batch) {
+        IReadOnlyList<PendingTranslationItem> batch,
+        IReadOnlyDictionary<string, string> termbaseGlossary) {
         var payloadItems = batch.Select(item => new {
             id = item.Id,
             tag = item.Tag,
@@ -346,14 +358,30 @@ internal static class LlmTranslateService {
             isCollectionItem = item.IsCollectionItem
         }).ToList();
 
+        const int maxGlossaryItems = 200;
+        var glossaryItems = termbaseGlossary
+            .Take(maxGlossaryItems)
+            .Select(pair => new {
+                source = pair.Key,
+                target = pair.Value
+            })
+            .ToList();
+        var hasGlossary = glossaryItems.Count > 0;
+
         var systemPrompt =
             "You are a professional RimWorld localization translator. " +
             "Translate each entry's original text into the target language. " +
             "Preserve placeholders like {0}, {1}, {name}, escaped newline markers (\\n), and punctuation. " +
+            (hasGlossary
+                ? "When termbase rules are provided, follow them exactly for the matching source terms. "
+                : string.Empty) +
             "Output JSON only with shape: {\"translations\":[{\"id\":\"...\",\"translation\":\"...\"}]} and include every id exactly once.";
 
         var userPrompt =
             $"Target language: {targetLanguage}\n" +
+            (hasGlossary
+                ? $"Termbase rules (source -> target, mandatory):\n{JsonSerializer.Serialize(glossaryItems, JsonOptions)}\n"
+                : string.Empty) +
             "Entries:\n" +
             JsonSerializer.Serialize(payloadItems, JsonOptions);
 

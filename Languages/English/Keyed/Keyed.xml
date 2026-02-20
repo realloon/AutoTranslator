@@ -24,6 +24,13 @@
   <Translator_TermbaseDescription>Manage fixed terminology before translation.</Translator_TermbaseDescription>
   <Translator_TermbaseColumns>Source Term -> Target Term</Translator_TermbaseColumns>
   <Translator_TermbaseEmpty>No terms yet. Add term management in the next step.</Translator_TermbaseEmpty>
+  <Translator_TermbaseAddRow>Add</Translator_TermbaseAddRow>
+  <Translator_TermbaseClearAll>Clear</Translator_TermbaseClearAll>
+  <Translator_TermbaseTargetLanguage>Language</Translator_TermbaseTargetLanguage>
+  <Translator_TermbaseNoLanguage>No available language.</Translator_TermbaseNoLanguage>
+  <Translator_TermbaseEntryCount>Entries: {0}</Translator_TermbaseEntryCount>
+  <Translator_TermbaseSave>Save</Translator_TermbaseSave>
+  <Translator_TermbaseSaveFailed>Failed to save termbase: {0}</Translator_TermbaseSaveFailed>
   <Translator_ExportIrButton>Translate &amp; Export</Translator_ExportIrButton>
   <Translator_AiTranslateInProgress>Translating. This may take a while.</Translator_AiTranslateInProgress>
   <Translator_AiTranslateSuccess>Translated mod exported.</Translator_AiTranslateSuccess>

@@ -24,6 +24,13 @@
   <Translator_TermbaseDescription>在翻譯前管理固定術語。</Translator_TermbaseDescription>
   <Translator_TermbaseColumns>來源術語 -> 目標術語</Translator_TermbaseColumns>
   <Translator_TermbaseEmpty>目前沒有術語。下一步將繼續實作術語管理。</Translator_TermbaseEmpty>
+  <Translator_TermbaseAddRow>新增行</Translator_TermbaseAddRow>
+  <Translator_TermbaseClearAll>清空</Translator_TermbaseClearAll>
+  <Translator_TermbaseTargetLanguage>目標語言</Translator_TermbaseTargetLanguage>
+  <Translator_TermbaseNoLanguage>沒有可用語言</Translator_TermbaseNoLanguage>
+  <Translator_TermbaseEntryCount>條目數：{0}</Translator_TermbaseEntryCount>
+  <Translator_TermbaseSave>儲存</Translator_TermbaseSave>
+  <Translator_TermbaseSaveFailed>術語庫儲存失敗：{0}</Translator_TermbaseSaveFailed>
   <Translator_ExportIrButton>翻譯並匯出</Translator_ExportIrButton>
   <Translator_AiTranslateInProgress>翻譯中，這可能需要較長時間</Translator_AiTranslateInProgress>
   <Translator_AiTranslateSuccess>翻譯模組已匯出</Translator_AiTranslateSuccess>

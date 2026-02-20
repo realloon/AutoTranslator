@@ -1,7 +1,7 @@
-using RimWorld;
-using Translator.Services;
 using UnityEngine;
+using RimWorld;
 using Verse;
+using Translator.Services;
 
 namespace Translator.Windows;
 
@@ -164,6 +164,7 @@ public class Window_TranslatorMain : Window {
         }
 
         y += 36f;
+
         if (!_lastExportStatus.NullOrEmpty()) {
             var statusText = _lastExportStatus!;
             var separatorIndex = statusText.IndexOf('\n');
@@ -171,7 +172,6 @@ public class Window_TranslatorMain : Window {
                 GUI.color = _lastExportFailed ? ErrorColor : SuccessColor;
                 var statusHeight = Mathf.Max(40f, Text.CalcHeight(statusText, rect.width));
                 Widgets.Label(new Rect(rect.x, y, rect.width, statusHeight), statusText);
-                GUI.color = Color.white;
             } else {
                 var title = statusText[..separatorIndex];
                 var outputLine = statusText[(separatorIndex + 1)..];
@@ -183,8 +183,9 @@ public class Window_TranslatorMain : Window {
                 GUI.color = ColoredText.SubtleGrayColor;
                 var outputHeight = Mathf.Max(20f, Text.CalcHeight(outputLine, rect.width));
                 Widgets.Label(new Rect(rect.x, y + titleHeight + 2f, rect.width, outputHeight), outputLine);
-                GUI.color = Color.white;
             }
+
+            GUI.color = Color.white;
         }
     }
 
@@ -279,7 +280,10 @@ public class Window_TranslatorMain : Window {
         LongEventHandler.QueueLongEvent(() => {
             try {
                 foreach (var target in targets) {
-                    var translateResult = LlmTranslateService.TranslateWorkset(target.Workset, target.TargetLanguage);
+                    var translateResult = LlmTranslateService.TranslateWorkset(
+                        target.Workset,
+                        target.FolderName,
+                        target.TargetLanguage);
                     if (!translateResult.Success) {
                         runResult.Failures.Add($"{target.FolderName}: {translateResult.Message}");
                         continue;

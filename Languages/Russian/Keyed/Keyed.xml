@@ -24,6 +24,13 @@
   <Translator_TermbaseDescription>Управляйте фиксированными терминами перед переводом.</Translator_TermbaseDescription>
   <Translator_TermbaseColumns>Исходный термин -> Целевой термин</Translator_TermbaseColumns>
   <Translator_TermbaseEmpty>Терминов пока нет. Управление терминами будет реализовано на следующем этапе.</Translator_TermbaseEmpty>
+  <Translator_TermbaseAddRow>Добавить строку</Translator_TermbaseAddRow>
+  <Translator_TermbaseClearAll>Очистить</Translator_TermbaseClearAll>
+  <Translator_TermbaseTargetLanguage>Целевой язык</Translator_TermbaseTargetLanguage>
+  <Translator_TermbaseNoLanguage>Нет доступных языков.</Translator_TermbaseNoLanguage>
+  <Translator_TermbaseEntryCount>Записей: {0}</Translator_TermbaseEntryCount>
+  <Translator_TermbaseSave>Сохранить</Translator_TermbaseSave>
+  <Translator_TermbaseSaveFailed>Не удалось сохранить терминологию: {0}</Translator_TermbaseSaveFailed>
   <Translator_ExportIrButton>Перевести &amp; экспортировать</Translator_ExportIrButton>
   <Translator_AiTranslateInProgress>Идёт перевод. Это может занять некоторое время.</Translator_AiTranslateInProgress>
   <Translator_AiTranslateSuccess>Переведённый мод экспортирован.</Translator_AiTranslateSuccess>
