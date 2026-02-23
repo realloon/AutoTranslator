@@ -1,6 +1,7 @@
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Translator.Services;
 
 namespace Translator.Windows;
 
@@ -8,10 +9,12 @@ namespace Translator.Windows;
 public class Window_ExportLanguagePicker : Window {
     private static readonly Color ListBackgroundColor = new ColorInt(42, 43, 44).ToColor;
     private static readonly Color ListBorderColor = new(0.78f, 0.78f, 0.78f, 0.2f);
+    private static readonly Texture2D GeneralIcon = ContentFinder<Texture2D>.Get("UI/Icons/Options/OptionsGeneral");
 
     private readonly List<LoadedLanguage> _languages;
     private readonly HashSet<string> _selectedLanguageFolders;
-    private readonly Action<IReadOnlyCollection<string>> _onConfirm;
+    private readonly Action<IReadOnlyCollection<string>, OutputLocationMode> _onConfirm;
+    private OutputLocationMode _outputLocationMode;
 
     private Vector2 _scrollPos = Vector2.zero;
 
@@ -19,7 +22,8 @@ public class Window_ExportLanguagePicker : Window {
 
     public Window_ExportLanguagePicker(IEnumerable<LoadedLanguage> languages,
         IEnumerable<string> selectedLanguageFolders,
-        Action<IReadOnlyCollection<string>> onConfirm) {
+        OutputLocationMode defaultOutputLocationMode,
+        Action<IReadOnlyCollection<string>, OutputLocationMode> onConfirm) {
         _languages = languages
             .Where(language => language is not null && !language.folderName.NullOrEmpty())
             .OrderBy(language => language.folderName, StringComparer.OrdinalIgnoreCase)
@@ -30,6 +34,7 @@ public class Window_ExportLanguagePicker : Window {
         }
 
         _onConfirm = onConfirm;
+        _outputLocationMode = defaultOutputLocationMode;
 
         doCloseX = true;
         closeOnClickedOutside = false;
@@ -121,6 +126,14 @@ public class Window_ExportLanguagePicker : Window {
     }
 
     private void DrawFooter(Rect rect) {
+        var modeButtonRect = new Rect(rect.x, rect.y, rect.height, rect.height);
+        if (Widgets.ButtonImage(modeButtonRect, GeneralIcon)) {
+            OpenOutputModeMenu();
+        }
+
+        TooltipHandler.TipRegion(modeButtonRect,
+            "Translator_OutputModeButtonTip".Translate(GetOutputModeLabel(_outputLocationMode)));
+
         var confirmLabel = "Translator_ExportLanguageConfirm".Translate();
         var cancelLabel = "Cancel".Translate();
         var confirmWidth = Mathf.Max(120f, Text.CalcSize(confirmLabel).x + 24f);
@@ -142,7 +155,23 @@ public class Window_ExportLanguagePicker : Window {
             return;
         }
 
-        _onConfirm(_selectedLanguageFolders.ToList());
+        _onConfirm(_selectedLanguageFolders.ToList(), _outputLocationMode);
         Close();
+    }
+
+    private void OpenOutputModeMenu() {
+        var options = new List<FloatMenuOption> {
+            new("Translator_OutputModeGeneratedMod".Translate(),
+                () => { _outputLocationMode = OutputLocationMode.GeneratedMod; }),
+            new("Translator_OutputModeOriginalMod".Translate(),
+                () => { _outputLocationMode = OutputLocationMode.OriginalMod; })
+        };
+        Find.WindowStack.Add(new FloatMenu(options));
+    }
+
+    private static string GetOutputModeLabel(OutputLocationMode mode) {
+        return mode == OutputLocationMode.OriginalMod
+            ? "Translator_OutputModeOriginalMod".Translate()
+            : "Translator_OutputModeGeneratedMod".Translate();
     }
 }
