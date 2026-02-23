@@ -23,7 +23,7 @@
   <Translator_TermbaseDialogTitle>용어집</Translator_TermbaseDialogTitle>
   <Translator_TermbaseDescription>번역 전에 고정 용어를 관리합니다.</Translator_TermbaseDescription>
   <Translator_TermbaseColumns>원문 용어 -> 번역 용어</Translator_TermbaseColumns>
-  <Translator_TermbaseEmpty>아직 용어가 없습니다. 다음 단계에서 용어 관리 기능을 구현합니다.</Translator_TermbaseEmpty>
+  <Translator_TermbaseEmpty>아직 용어가 없습니다.</Translator_TermbaseEmpty>
   <Translator_TermbaseAddRow>행 추가</Translator_TermbaseAddRow>
   <Translator_TermbaseClearAll>지우기</Translator_TermbaseClearAll>
   <Translator_TermbaseTargetLanguage>대상 언어</Translator_TermbaseTargetLanguage>
@@ -37,6 +37,9 @@
   <Translator_AiTranslatePartialFailed>일부 오류와 함께 번역된 모드를 내보냈습니다.</Translator_AiTranslatePartialFailed>
   <Translator_AiTranslatePartialFailedWithDetails>일부 오류와 함께 번역된 모드를 내보냈습니다. 실패 요약: {0}</Translator_AiTranslatePartialFailedWithDetails>
   <Translator_OutputDirectory>출력 디렉터리: {0}</Translator_OutputDirectory>
+  <Translator_OpenOutputFolder>출력 폴더 열기</Translator_OpenOutputFolder>
+  <Translator_OutputFolderNotFound>출력 폴더가 존재하지 않습니다.</Translator_OutputFolderNotFound>
+  <Translator_OpenOutputFolderFailed>출력 폴더를 열지 못했습니다: {0}</Translator_OpenOutputFolderFailed>
   <Translator_AiTranslateConfigInvalid>AI 구성 정보가 올바르지 않습니다: {0}</Translator_AiTranslateConfigInvalid>
   <Translator_AiTranslateFailed>AI 번역 실패: {0}</Translator_AiTranslateFailed>
   <Translator_ModSettingsCategory>Auto Translator</Translator_ModSettingsCategory>
@@ -50,6 +53,11 @@
   <Translator_ModSettingConcurrencyDescription>병렬로 전송되는 모델 호출 수입니다. 동시성이 높을수록 더 빨리 끝나지만, 너무 높으면 제공자 rate limit에 걸릴 수 있습니다.</Translator_ModSettingConcurrencyDescription>
   <Translator_ModSettingRetryCount>재시도 횟수</Translator_ModSettingRetryCount>
   <Translator_ModSettingRetryCountDescription>단일 모델 호출 실패 후 재시도하는 횟수입니다.</Translator_ModSettingRetryCountDescription>
+  <Translator_ModSettingDefaultOutputLocation>기본 출력 위치</Translator_ModSettingDefaultOutputLocation>
+  <Translator_ModSettingDefaultOutputLocationDescription>번역 파일이 기본적으로 저장될 위치를 선택합니다.</Translator_ModSettingDefaultOutputLocationDescription>
+  <Translator_OutputModeGeneratedMod>생성된 모드</Translator_OutputModeGeneratedMod>
+  <Translator_OutputModeOriginalMod>원본 모드</Translator_OutputModeOriginalMod>
+  <Translator_OutputModeButtonTip>출력 위치: {0}</Translator_OutputModeButtonTip>
   <Translator_ModSettingsValidateConfig>검증</Translator_ModSettingsValidateConfig>
   <Translator_ModSettingsValidating>구성을 검증하는 중...</Translator_ModSettingsValidating>
   <Translator_ModSettingsValidationSuccess>구성 검증에 성공했습니다.</Translator_ModSettingsValidationSuccess>
