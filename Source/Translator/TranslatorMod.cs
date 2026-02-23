@@ -12,8 +12,6 @@ public sealed class TranslatorMod : Mod {
     private bool _lastValidationFailed;
     private Task<LlmConfigValidationResult>? _validateConfigTask;
     private string _batchSizeBuffer = string.Empty;
-    private string _concurrencyBuffer = string.Empty;
-    private string _retryCountBuffer = string.Empty;
 
     public TranslatorMod(ModContentPack content) : base(content) {
         Settings = GetSettings<TranslatorSettings>();
@@ -79,39 +77,39 @@ public sealed class TranslatorMod : Mod {
         GUI.color = Color.white;
         listing.Gap(6f);
 
-        listing.Label("Translator_ModSettingConcurrency".Translate());
-        if (_concurrencyBuffer.NullOrEmpty()) {
-            _concurrencyBuffer = Settings.Concurrency.ToString();
-        }
-
-        var newConcurrencyBuffer = listing.TextEntry(_concurrencyBuffer);
-        if (newConcurrencyBuffer != _concurrencyBuffer) {
-            _concurrencyBuffer = newConcurrencyBuffer;
-            if (int.TryParse(_concurrencyBuffer.Trim(), out var parsedConcurrency)) {
-                Settings.Concurrency = parsedConcurrency;
-            }
-        }
+        listing.Label($"{ "Translator_ModSettingConcurrency".Translate() }: {Settings.Concurrency}");
+        Settings.Concurrency = Mathf.RoundToInt(listing.Slider(
+            Settings.Concurrency,
+            TranslatorSettings.MinConcurrency,
+            TranslatorSettings.MaxConcurrency));
 
         GUI.color = ColoredText.SubtleGrayColor;
         listing.Label("Translator_ModSettingConcurrencyDescription".Translate());
         GUI.color = Color.white;
         listing.Gap(6f);
 
-        listing.Label("Translator_ModSettingRetryCount".Translate());
-        if (_retryCountBuffer.NullOrEmpty()) {
-            _retryCountBuffer = Settings.RetryCount.ToString();
-        }
-
-        var newRetryCountBuffer = listing.TextEntry(_retryCountBuffer);
-        if (newRetryCountBuffer != _retryCountBuffer) {
-            _retryCountBuffer = newRetryCountBuffer;
-            if (int.TryParse(_retryCountBuffer.Trim(), out var parsedRetryCount)) {
-                Settings.RetryCount = parsedRetryCount;
-            }
-        }
+        listing.Label($"{ "Translator_ModSettingRetryCount".Translate() }: {Settings.RetryCount}");
+        Settings.RetryCount = Mathf.RoundToInt(listing.Slider(
+            Settings.RetryCount,
+            TranslatorSettings.MinRetryCount,
+            TranslatorSettings.MaxRetryCount));
 
         GUI.color = ColoredText.SubtleGrayColor;
         listing.Label("Translator_ModSettingRetryCountDescription".Translate());
+        GUI.color = Color.white;
+        listing.Gap(6f);
+
+        listing.Label("Translator_ModSettingDefaultOutputLocation".Translate());
+        var outputLocationLabel = GetOutputLocationLabel(Settings.DefaultOutputLocationMode);
+        if (listing.ButtonText(outputLocationLabel)) {
+            Settings.DefaultOutputLocationMode =
+                Settings.DefaultOutputLocationMode == OutputLocationMode.GeneratedMod
+                    ? OutputLocationMode.OriginalMod
+                    : OutputLocationMode.GeneratedMod;
+        }
+
+        GUI.color = ColoredText.SubtleGrayColor;
+        listing.Label("Translator_ModSettingDefaultOutputLocationDescription".Translate());
         GUI.color = Color.white;
         listing.Gap();
 
@@ -178,8 +176,17 @@ public sealed class TranslatorMod : Mod {
             TranslatorSettings.MaxConcurrency);
         Settings.RetryCount = Mathf.Clamp(Settings.RetryCount, TranslatorSettings.MinRetryCount,
             TranslatorSettings.MaxRetryCount);
+        Settings.DefaultOutputLocationMode = Settings.DefaultOutputLocationMode is
+            OutputLocationMode.GeneratedMod or OutputLocationMode.OriginalMod
+            ? Settings.DefaultOutputLocationMode
+            : OutputLocationMode.GeneratedMod;
         _batchSizeBuffer = Settings.BatchSize.ToString();
-        _concurrencyBuffer = Settings.Concurrency.ToString();
-        _retryCountBuffer = Settings.RetryCount.ToString();
+    }
+
+    private static string GetOutputLocationLabel(OutputLocationMode mode) {
+        var modeText = mode == OutputLocationMode.OriginalMod
+            ? "Translator_OutputModeOriginalMod".Translate()
+            : "Translator_OutputModeGeneratedMod".Translate();
+        return $"{ "Translator_ModSettingDefaultOutputLocation".Translate() }: {modeText}";
     }
 }
