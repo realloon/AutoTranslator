@@ -23,7 +23,7 @@
   <Translator_TermbaseDialogTitle>用語集</Translator_TermbaseDialogTitle>
   <Translator_TermbaseDescription>翻訳前に固定用語を管理します。</Translator_TermbaseDescription>
   <Translator_TermbaseColumns>原文用語 -> 訳文用語</Translator_TermbaseColumns>
-  <Translator_TermbaseEmpty>まだ用語がありません。次のステップで用語管理を実装します。</Translator_TermbaseEmpty>
+  <Translator_TermbaseEmpty>用語はまだありません。</Translator_TermbaseEmpty>
   <Translator_TermbaseAddRow>行を追加</Translator_TermbaseAddRow>
   <Translator_TermbaseClearAll>クリア</Translator_TermbaseClearAll>
   <Translator_TermbaseTargetLanguage>対象言語</Translator_TermbaseTargetLanguage>
@@ -37,6 +37,9 @@
   <Translator_AiTranslatePartialFailed>一部エラーがありましたが、翻訳済みModをエクスポートしました。</Translator_AiTranslatePartialFailed>
   <Translator_AiTranslatePartialFailedWithDetails>一部エラーがありましたが、翻訳済みModをエクスポートしました。失敗の概要: {0}</Translator_AiTranslatePartialFailedWithDetails>
   <Translator_OutputDirectory>出力ディレクトリ: {0}</Translator_OutputDirectory>
+  <Translator_OpenOutputFolder>出力フォルダを開く</Translator_OpenOutputFolder>
+  <Translator_OutputFolderNotFound>出力フォルダが見つかりません。</Translator_OutputFolderNotFound>
+  <Translator_OpenOutputFolderFailed>出力フォルダを開けませんでした: {0}</Translator_OpenOutputFolderFailed>
   <Translator_AiTranslateConfigInvalid>AI設定が無効です: {0}</Translator_AiTranslateConfigInvalid>
   <Translator_AiTranslateFailed>AI翻訳に失敗しました: {0}</Translator_AiTranslateFailed>
   <Translator_ModSettingsCategory>Auto Translator</Translator_ModSettingsCategory>
@@ -50,6 +53,11 @@
   <Translator_ModSettingConcurrencyDescription>並列で送信するモデル呼び出し数です。並列数を上げると完了は早くなりますが、高すぎるとプロバイダーのrate limitに達する可能性があります。</Translator_ModSettingConcurrencyDescription>
   <Translator_ModSettingRetryCount>再試行回数</Translator_ModSettingRetryCount>
   <Translator_ModSettingRetryCountDescription>1回のモデル呼び出しが失敗した後の再試行回数です。</Translator_ModSettingRetryCountDescription>
+  <Translator_ModSettingDefaultOutputLocation>デフォルト出力先</Translator_ModSettingDefaultOutputLocation>
+  <Translator_ModSettingDefaultOutputLocationDescription>翻訳ファイルの既定の出力先を選択します。</Translator_ModSettingDefaultOutputLocationDescription>
+  <Translator_OutputModeGeneratedMod>生成Mod</Translator_OutputModeGeneratedMod>
+  <Translator_OutputModeOriginalMod>元のMod</Translator_OutputModeOriginalMod>
+  <Translator_OutputModeButtonTip>出力先: {0}</Translator_OutputModeButtonTip>
   <Translator_ModSettingsValidateConfig>検証</Translator_ModSettingsValidateConfig>
   <Translator_ModSettingsValidating>設定を検証中...</Translator_ModSettingsValidating>
   <Translator_ModSettingsValidationSuccess>設定の検証に成功しました。</Translator_ModSettingsValidationSuccess>
