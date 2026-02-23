@@ -11,6 +11,7 @@ public sealed class TranslatorMod : Mod {
     private string _lastValidationStatus = string.Empty;
     private bool _lastValidationFailed;
     private Task<LlmConfigValidationResult>? _validateConfigTask;
+    private Vector2 _settingsScrollPosition = Vector2.zero;
     private string _batchSizeBuffer = string.Empty;
 
     public TranslatorMod(ModContentPack content) : base(content) {
@@ -24,8 +25,14 @@ public sealed class TranslatorMod : Mod {
     public override void DoSettingsWindowContents(Rect inRect) {
         ConsumeValidationTaskResultIfReady();
 
+        const float scrollbarWidth = 16f;
+        const float minContentHeight = 780f;
+        var viewHeight = Mathf.Max(minContentHeight, inRect.height - 1f);
+        var viewRect = new Rect(0f, 0f, inRect.width - scrollbarWidth, viewHeight);
+        Widgets.BeginScrollView(inRect, ref _settingsScrollPosition, viewRect);
+
         var listing = new Listing_Standard();
-        listing.Begin(inRect);
+        listing.Begin(viewRect);
 
         listing.Label("Translator_ModSettingsDescription".Translate());
         listing.GapLine();
@@ -118,6 +125,7 @@ public sealed class TranslatorMod : Mod {
         }
 
         listing.End();
+        Widgets.EndScrollView();
 
         Settings.ApiUrl = Settings.ApiUrl.Trim();
         Settings.ApiKey = Settings.ApiKey.Trim();
