@@ -23,7 +23,7 @@
   <Translator_TermbaseDialogTitle>Termbase</Translator_TermbaseDialogTitle>
   <Translator_TermbaseDescription>Manage fixed terminology before translation.</Translator_TermbaseDescription>
   <Translator_TermbaseColumns>Source Term -> Target Term</Translator_TermbaseColumns>
-  <Translator_TermbaseEmpty>No terms yet. Add term management in the next step.</Translator_TermbaseEmpty>
+  <Translator_TermbaseEmpty>No terms yet.</Translator_TermbaseEmpty>
   <Translator_TermbaseAddRow>Add</Translator_TermbaseAddRow>
   <Translator_TermbaseClearAll>Clear</Translator_TermbaseClearAll>
   <Translator_TermbaseTargetLanguage>Language</Translator_TermbaseTargetLanguage>
@@ -37,6 +37,9 @@
   <Translator_AiTranslatePartialFailed>Translated mod exported with some errors.</Translator_AiTranslatePartialFailed>
   <Translator_AiTranslatePartialFailedWithDetails>Translated mod exported with some errors. Failure summary: {0}</Translator_AiTranslatePartialFailedWithDetails>
   <Translator_OutputDirectory>Output directory: {0}</Translator_OutputDirectory>
+  <Translator_OpenOutputFolder>Open Output Folder</Translator_OpenOutputFolder>
+  <Translator_OutputFolderNotFound>Output folder does not exist.</Translator_OutputFolderNotFound>
+  <Translator_OpenOutputFolderFailed>Failed to open output folder: {0}</Translator_OpenOutputFolderFailed>
   <Translator_AiTranslateConfigInvalid>AI configuration is invalid: {0}</Translator_AiTranslateConfigInvalid>
   <Translator_AiTranslateFailed>AI translation failed: {0}</Translator_AiTranslateFailed>
   <Translator_ModSettingsCategory>Auto Translator</Translator_ModSettingsCategory>
@@ -50,6 +53,11 @@
   <Translator_ModSettingConcurrencyDescription>Number of model calls sent in parallel. Higher concurrency finishes sooner, but setting it too high may trigger provider rate limits.</Translator_ModSettingConcurrencyDescription>
   <Translator_ModSettingRetryCount>Retry Attempts</Translator_ModSettingRetryCount>
   <Translator_ModSettingRetryCountDescription>Number of retries after a single model call fails.</Translator_ModSettingRetryCountDescription>
+  <Translator_ModSettingDefaultOutputLocation>Default output location</Translator_ModSettingDefaultOutputLocation>
+  <Translator_ModSettingDefaultOutputLocationDescription>Choose where translated files are written by default.</Translator_ModSettingDefaultOutputLocationDescription>
+  <Translator_OutputModeGeneratedMod>Generated mod</Translator_OutputModeGeneratedMod>
+  <Translator_OutputModeOriginalMod>Original mod</Translator_OutputModeOriginalMod>
+  <Translator_OutputModeButtonTip>Output location: {0}</Translator_OutputModeButtonTip>
   <Translator_ModSettingsValidateConfig>Validate</Translator_ModSettingsValidateConfig>
   <Translator_ModSettingsValidating>Validating configuration...</Translator_ModSettingsValidating>
   <Translator_ModSettingsValidationSuccess>Configuration validated successfully.</Translator_ModSettingsValidationSuccess>
