@@ -23,7 +23,7 @@
   <Translator_TermbaseDialogTitle>Терминология</Translator_TermbaseDialogTitle>
   <Translator_TermbaseDescription>Управляйте фиксированными терминами перед переводом.</Translator_TermbaseDescription>
   <Translator_TermbaseColumns>Исходный термин -> Целевой термин</Translator_TermbaseColumns>
-  <Translator_TermbaseEmpty>Терминов пока нет. Управление терминами будет реализовано на следующем этапе.</Translator_TermbaseEmpty>
+  <Translator_TermbaseEmpty>Терминов пока нет.</Translator_TermbaseEmpty>
   <Translator_TermbaseAddRow>Добавить строку</Translator_TermbaseAddRow>
   <Translator_TermbaseClearAll>Очистить</Translator_TermbaseClearAll>
   <Translator_TermbaseTargetLanguage>Целевой язык</Translator_TermbaseTargetLanguage>
@@ -37,6 +37,9 @@
   <Translator_AiTranslatePartialFailed>Переведённый мод экспортирован с некоторыми ошибками.</Translator_AiTranslatePartialFailed>
   <Translator_AiTranslatePartialFailedWithDetails>Переведённый мод экспортирован с некоторыми ошибками. Сводка ошибок: {0}</Translator_AiTranslatePartialFailedWithDetails>
   <Translator_OutputDirectory>Папка вывода: {0}</Translator_OutputDirectory>
+  <Translator_OpenOutputFolder>Открыть папку вывода</Translator_OpenOutputFolder>
+  <Translator_OutputFolderNotFound>Папка вывода не существует.</Translator_OutputFolderNotFound>
+  <Translator_OpenOutputFolderFailed>Не удалось открыть папку вывода: {0}</Translator_OpenOutputFolderFailed>
   <Translator_AiTranslateConfigInvalid>Некорректная конфигурация AI: {0}</Translator_AiTranslateConfigInvalid>
   <Translator_AiTranslateFailed>Ошибка AI-перевода: {0}</Translator_AiTranslateFailed>
   <Translator_ModSettingsCategory>Auto Translator</Translator_ModSettingsCategory>
@@ -50,6 +53,11 @@
   <Translator_ModSettingConcurrencyDescription>Количество вызовов модели, отправляемых параллельно. Более высокая параллельность ускоряет выполнение, но слишком высокое значение может вызвать ограничение по частоте.</Translator_ModSettingConcurrencyDescription>
   <Translator_ModSettingRetryCount>Количество повторных попыток</Translator_ModSettingRetryCount>
   <Translator_ModSettingRetryCountDescription>Число повторов после сбоя одного вызова модели.</Translator_ModSettingRetryCountDescription>
+  <Translator_ModSettingDefaultOutputLocation>Расположение вывода по умолчанию</Translator_ModSettingDefaultOutputLocation>
+  <Translator_ModSettingDefaultOutputLocationDescription>Выберите место, куда по умолчанию записываются переведённые файлы.</Translator_ModSettingDefaultOutputLocationDescription>
+  <Translator_OutputModeGeneratedMod>Сгенерированный мод</Translator_OutputModeGeneratedMod>
+  <Translator_OutputModeOriginalMod>Оригинальный мод</Translator_OutputModeOriginalMod>
+  <Translator_OutputModeButtonTip>Расположение вывода: {0}</Translator_OutputModeButtonTip>
   <Translator_ModSettingsValidateConfig>Проверить</Translator_ModSettingsValidateConfig>
   <Translator_ModSettingsValidating>Проверка конфигурации...</Translator_ModSettingsValidating>
   <Translator_ModSettingsValidationSuccess>Конфигурация успешно проверена.</Translator_ModSettingsValidationSuccess>
