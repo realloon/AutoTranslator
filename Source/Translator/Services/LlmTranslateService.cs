@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using JetBrains.Annotations;
+using Verse;
 
 namespace Translator.Services;
 
@@ -12,6 +13,7 @@ internal sealed class LlmTranslateResult {
     public bool Success;
     public string Message = string.Empty;
     public int UpdatedCount;
+    public int PendingCount;
 }
 
 internal sealed class LlmConfigValidationResult {
@@ -20,6 +22,9 @@ internal sealed class LlmConfigValidationResult {
 }
 
 internal static class LlmTranslateService {
+    private const int MaxEstimatedCharsPerBatch = 18000;
+    private const int RequestTimeoutSeconds = 600;
+
     private static readonly JsonSerializerOptions JsonOptions = new() {
         WriteIndented = true,
         PropertyNameCaseInsensitive = true,
@@ -57,6 +62,7 @@ internal static class LlmTranslateService {
     public static LlmTranslateResult TranslateWorkset(LanguageWorksetFile workset,
         string targetLanguageFolder,
         string targetLanguageDisplayName) {
+        var pendingCount = 0;
         try {
             if (!TryGetActiveConfig(out var apiUrl, out var apiKey, out var model, out var batchSize,
                     out var concurrency, out var retryCount,
@@ -64,28 +70,25 @@ internal static class LlmTranslateService {
                 return new LlmTranslateResult {
                     Success = false,
                     Message = configError,
-                    UpdatedCount = 0
+                    UpdatedCount = 0,
+                    PendingCount = 0
                 };
             }
 
             var pending = CollectPendingEntries(workset);
+            pendingCount = pending.Count;
             if (pending.Count == 0) {
                 return new LlmTranslateResult {
                     Success = true,
                     Message = "No pending entries.",
-                    UpdatedCount = 0
+                    UpdatedCount = 0,
+                    PendingCount = 0
                 };
             }
 
             var translatedById = new Dictionary<string, string>(StringComparer.Ordinal);
             var termbaseGlossary = TermbaseService.GetGlossaryForLanguage(targetLanguageFolder);
-            var batches = new List<BatchRequest>();
-            for (var i = 0; i < pending.Count; i += batchSize) {
-                batches.Add(new BatchRequest {
-                    BatchNo = batches.Count + 1,
-                    Items = pending.Skip(i).Take(batchSize).ToList()
-                });
-            }
+            var batches = BuildBatches(pending, batchSize, MaxEstimatedCharsPerBatch);
 
             var failedBatches = new List<string>();
             for (var i = 0; i < batches.Count; i += concurrency) {
@@ -118,7 +121,8 @@ internal static class LlmTranslateService {
                 return new LlmTranslateResult {
                     Success = false,
                     Message = BuildBatchFailureMessage(failedBatches),
-                    UpdatedCount = 0
+                    UpdatedCount = 0,
+                    PendingCount = pending.Count
                 };
             }
 
@@ -135,13 +139,15 @@ internal static class LlmTranslateService {
             return new LlmTranslateResult {
                 Success = true,
                 Message = "OK",
-                UpdatedCount = updatedCount
+                UpdatedCount = updatedCount,
+                PendingCount = pending.Count
             };
         } catch (Exception ex) {
             return new LlmTranslateResult {
                 Success = false,
                 Message = ex.Message,
-                UpdatedCount = 0
+                UpdatedCount = 0,
+                PendingCount = pendingCount
             };
         }
     }
@@ -266,6 +272,10 @@ internal static class LlmTranslateService {
                     ErrorMessage = string.Empty,
                     Translations = translations
                 };
+            } catch (TaskCanceledException ex) {
+                lastException = new TimeoutException(
+                    $"Request timed out or was canceled (timeout={RequestTimeoutSeconds}s, batchNo={batch.BatchNo}, entries={batch.Items.Count}, attempt={attempt + 1}/{retryCount + 1}). Consider lowering Batch Size/Concurrency in Mod Settings.",
+                    ex);
             } catch (Exception ex) {
                 lastException = ex;
             }
@@ -375,19 +385,21 @@ internal static class LlmTranslateService {
             (hasGlossary
                 ? "When termbase rules are provided, follow them exactly for the matching source terms. "
                 : string.Empty) +
-            "Output JSON only with shape: {\"translations\":[{\"id\":\"...\",\"translation\":\"...\"}]} and include every id exactly once.";
+            "Return a JSON object with shape {\"translations\":[{\"id\":\"...\",\"translation\":\"...\"}]}, and provide each id exactly once.";
 
         var userPrompt =
             $"Target language: {targetLanguage}\n" +
             (hasGlossary
                 ? $"Termbase rules (source -> target, mandatory):\n{JsonSerializer.Serialize(glossaryItems, JsonOptions)}\n"
-                : string.Empty) +
+                : string.Empty
+            ) +
             "Entries:\n" +
             JsonSerializer.Serialize(payloadItems, JsonOptions);
 
         var requestPayload = new {
             model,
-            temperature = 0.2,
+            temperature = 0.0,
+            max_tokens = EstimateMaxTokensForBatch(batch),
             response_format = new {
                 type = "json_object"
             },
@@ -422,14 +434,56 @@ internal static class LlmTranslateService {
         }
 
         var normalizedJson = ExtractJsonObject(content);
-        var translatedPayload = JsonSerializer.Deserialize<BatchTranslationResponse>(normalizedJson, JsonOptions);
-        if (translatedPayload?.Translations is null) {
-            throw new InvalidOperationException("Invalid LLM translation payload.");
+        if (!TryDeserializeBatchResponse(normalizedJson, out var translatedPayload, out var deserializeError)) {
+            var repairedJson = TryRepairBatchJsonWithLlm(apiUrl, apiKey, model, normalizedJson);
+            var repaired = !repairedJson.NullOrEmpty() &&
+                           TryDeserializeBatchResponse(repairedJson, out translatedPayload, out _);
+            if (!repaired) {
+                throw new InvalidOperationException(
+                    $"Invalid LLM translation payload: {deserializeError}");
+            }
         }
 
-        return translatedPayload.Translations
-            .Where(item => !string.IsNullOrEmpty(item.Id) && item.Translation is not null)
-            .ToDictionary(item => item.Id, item => item.Translation!, StringComparer.Ordinal);
+        if (translatedPayload?.Translations is null) {
+            throw new InvalidOperationException("Invalid LLM translation payload: missing translations array.");
+        }
+
+        var expectedIds = batch
+            .Select(item => item.Id)
+            .ToHashSet(StringComparer.Ordinal);
+        var matchedTranslations = new Dictionary<string, string>(StringComparer.Ordinal);
+        var duplicateIdCount = 0;
+        var unknownIdCount = 0;
+
+        foreach (var item in translatedPayload.Translations) {
+            if (string.IsNullOrEmpty(item.Id)) {
+                continue;
+            }
+
+            if (!expectedIds.Contains(item.Id)) {
+                unknownIdCount += 1;
+                continue;
+            }
+
+            if (!matchedTranslations.TryAdd(item.Id, item.Translation ?? string.Empty)) {
+                duplicateIdCount += 1;
+                matchedTranslations[item.Id] = item.Translation ?? string.Empty;
+            }
+        }
+
+        var emptyTranslationCount = matchedTranslations.Count(pair => string.IsNullOrWhiteSpace(pair.Value));
+        var missingCount = expectedIds.Count(id => !matchedTranslations.ContainsKey(id));
+        if (missingCount > 0 || emptyTranslationCount > 0 || unknownIdCount > 0 || duplicateIdCount > 0) {
+            var missingSample = expectedIds
+                .Where(id => !matchedTranslations.ContainsKey(id))
+                .Take(3)
+                .ToList();
+            var sampleText = missingSample.Count == 0 ? "none" : string.Join(", ", missingSample);
+            throw new InvalidOperationException(
+                $"LLM batch response is incomplete. expected={expectedIds.Count}, matched={matchedTranslations.Count}, missing={missingCount}, empty={emptyTranslationCount}, unknown={unknownIdCount}, duplicate={duplicateIdCount}, missingSample=[{sampleText}]");
+        }
+
+        return matchedTranslations;
     }
 
     private static string ExtractJsonObject(string content) {
@@ -445,10 +499,121 @@ internal static class LlmTranslateService {
     private static HttpClient CreateHttpClient() {
         ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
         var client = new HttpClient {
-            Timeout = TimeSpan.FromSeconds(90)
+            Timeout = TimeSpan.FromSeconds(RequestTimeoutSeconds)
         };
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         return client;
+    }
+
+    private static List<BatchRequest> BuildBatches(IReadOnlyList<PendingTranslationItem> pending,
+        int maxEntriesPerBatch, int maxEstimatedCharsPerBatch) {
+        var batches = new List<BatchRequest>();
+        var currentItems = new List<PendingTranslationItem>();
+        var currentChars = 0;
+
+        foreach (var item in pending) {
+            var estimatedChars = EstimateChars(item);
+            var exceedCount = currentItems.Count >= maxEntriesPerBatch;
+            var exceedChars = currentItems.Count > 0 && currentChars + estimatedChars > maxEstimatedCharsPerBatch;
+            if (exceedCount || exceedChars) {
+                batches.Add(new BatchRequest {
+                    BatchNo = batches.Count + 1,
+                    Items = currentItems.ToList()
+                });
+                currentItems.Clear();
+                currentChars = 0;
+            }
+
+            currentItems.Add(item);
+            currentChars += estimatedChars;
+        }
+
+        if (currentItems.Count > 0) {
+            batches.Add(new BatchRequest {
+                BatchNo = batches.Count + 1,
+                Items = currentItems
+            });
+        }
+
+        return batches;
+    }
+
+    private static int EstimateChars(PendingTranslationItem item) {
+        var tagLength = string.IsNullOrEmpty(item.Tag) ? 0 : item.Tag.Length;
+        var originalLength = string.IsNullOrEmpty(item.Original) ? 0 : item.Original.Length;
+        var defTypeLength = item.DefType?.Length ?? 0;
+        return Math.Max(64, tagLength + originalLength + defTypeLength + 32);
+    }
+
+    private static int EstimateMaxTokensForBatch(IReadOnlyList<PendingTranslationItem> batch) {
+        var estimatedChars = batch.Sum(EstimateChars);
+        var estimatedTokens = estimatedChars / 3;
+        return Math.Clamp(estimatedTokens + 2000, 3000, 16000);
+    }
+
+    private static bool TryDeserializeBatchResponse(string json, out BatchTranslationResponse? response,
+        out string error) {
+        try {
+            response = JsonSerializer.Deserialize<BatchTranslationResponse>(json, JsonOptions);
+            if (response?.Translations is null) {
+                error = "translations array is missing.";
+                return false;
+            }
+
+            error = string.Empty;
+            return true;
+        } catch (Exception ex) {
+            response = null;
+            error = ex.Message;
+            return false;
+        }
+    }
+
+    private static string TryRepairBatchJsonWithLlm(string apiUrl, string apiKey, string model, string brokenJson) {
+        try {
+            var requestPayload = new {
+                model,
+                temperature = 0.0,
+                max_tokens = 4000,
+                response_format = new {
+                    type = "json_object"
+                },
+                messages = new object[] {
+                    new {
+                        role = "system",
+                        content =
+                            "You are a JSON repair tool. Return a valid JSON object and keep all ids and translations unchanged."
+                    },
+                    new {
+                        role = "user",
+                        content =
+                            "Please produce a JSON object with shape {\"translations\":[{\"id\":\"...\",\"translation\":\"...\"}]}. Include all original translation items and keep values unchanged.\n" +
+                            brokenJson
+                    }
+                }
+            };
+
+            var requestJson = JsonSerializer.Serialize(requestPayload);
+            using var request = new HttpRequestMessage(HttpMethod.Post, apiUrl);
+            request.Content = new StringContent(requestJson, Encoding.UTF8, "application/json");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+
+            using var response = HttpClient.SendAsync(request).GetAwaiter().GetResult();
+            var responseJson = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            if (!response.IsSuccessStatusCode) {
+                return string.Empty;
+            }
+
+            var completion = JsonSerializer.Deserialize<ChatCompletionResponse>(responseJson, JsonOptions);
+            var content = completion?.Choices.FirstOrDefault()?.Message.Content ?? string.Empty;
+            if (content.NullOrEmpty()) {
+                return string.Empty;
+            }
+
+            return ExtractJsonObject(content);
+        } catch {
+            return string.Empty;
+        }
     }
 
     private sealed class PendingTranslationItem {
