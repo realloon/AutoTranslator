@@ -23,7 +23,7 @@
   <Translator_TermbaseDialogTitle>術語庫</Translator_TermbaseDialogTitle>
   <Translator_TermbaseDescription>在翻譯前管理固定術語。</Translator_TermbaseDescription>
   <Translator_TermbaseColumns>來源術語 -> 目標術語</Translator_TermbaseColumns>
-  <Translator_TermbaseEmpty>目前沒有術語。下一步將繼續實作術語管理。</Translator_TermbaseEmpty>
+  <Translator_TermbaseEmpty>目前沒有術語。</Translator_TermbaseEmpty>
   <Translator_TermbaseAddRow>新增行</Translator_TermbaseAddRow>
   <Translator_TermbaseClearAll>清空</Translator_TermbaseClearAll>
   <Translator_TermbaseTargetLanguage>目標語言</Translator_TermbaseTargetLanguage>
@@ -37,6 +37,9 @@
   <Translator_AiTranslatePartialFailed>翻譯模組已匯出，但存在部分錯誤。</Translator_AiTranslatePartialFailed>
   <Translator_AiTranslatePartialFailedWithDetails>翻譯模組已匯出，但存在部分錯誤。失敗摘要：{0}</Translator_AiTranslatePartialFailedWithDetails>
   <Translator_OutputDirectory>輸出目錄：{0}</Translator_OutputDirectory>
+  <Translator_OpenOutputFolder>開啟輸出目錄</Translator_OpenOutputFolder>
+  <Translator_OutputFolderNotFound>輸出目錄不存在。</Translator_OutputFolderNotFound>
+  <Translator_OpenOutputFolderFailed>開啟輸出目錄失敗：{0}</Translator_OpenOutputFolderFailed>
   <Translator_AiTranslateConfigInvalid>AI 設定無效：{0}</Translator_AiTranslateConfigInvalid>
   <Translator_AiTranslateFailed>AI 翻譯失敗：{0}</Translator_AiTranslateFailed>
   <Translator_ModSettingsCategory>Auto Translator</Translator_ModSettingsCategory>
@@ -50,6 +53,11 @@
   <Translator_ModSettingConcurrencyDescription>同時進行的模型呼叫數量。併發越高完成越早，但過高可能觸發平台限流。</Translator_ModSettingConcurrencyDescription>
   <Translator_ModSettingRetryCount>重試次數</Translator_ModSettingRetryCount>
   <Translator_ModSettingRetryCountDescription>單次模型呼叫失敗後重試的次數。</Translator_ModSettingRetryCountDescription>
+  <Translator_ModSettingDefaultOutputLocation>預設輸出位置</Translator_ModSettingDefaultOutputLocation>
+  <Translator_ModSettingDefaultOutputLocationDescription>選擇翻譯檔案預設寫入的位置。</Translator_ModSettingDefaultOutputLocationDescription>
+  <Translator_OutputModeGeneratedMod>產生的新模組</Translator_OutputModeGeneratedMod>
+  <Translator_OutputModeOriginalMod>原模組</Translator_OutputModeOriginalMod>
+  <Translator_OutputModeButtonTip>輸出位置：{0}</Translator_OutputModeButtonTip>
   <Translator_ModSettingsValidateConfig>驗證</Translator_ModSettingsValidateConfig>
   <Translator_ModSettingsValidating>正在驗證設定，請稍候...</Translator_ModSettingsValidating>
   <Translator_ModSettingsValidationSuccess>設定驗證成功。</Translator_ModSettingsValidationSuccess>
