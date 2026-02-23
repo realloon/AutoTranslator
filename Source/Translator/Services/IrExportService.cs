@@ -5,16 +5,10 @@ using Verse;
 
 namespace Translator.Services;
 
-internal sealed class TranslatorIrExportResult {
-    public bool Success;
-    public string Message = string.Empty;
-    public string? FilePath;
-    public List<LanguageWorksetFile> Worksets = [];
-}
-
 internal static class IrExportService {
     public static TranslatorIrExportResult Export(ModMetaData mod, IReadOnlyCollection<LoadedLanguage> targetLanguages,
-        LoadedLanguage defaultLanguage) {
+        LoadedLanguage defaultLanguage,
+        OutputLocationMode outputLocationMode) {
         try {
             if (targetLanguages.Count == 0) {
                 return new TranslatorIrExportResult {
@@ -47,11 +41,14 @@ internal static class IrExportService {
                 };
             }
 
+            var inOriginalMod = outputLocationMode == OutputLocationMode.OriginalMod;
             var exportToken = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
-            var outputModDir = ResolveExportModDirectory(mod, exportToken);
-            EnsureExportStructure(outputModDir);
+            var outputModDir = inOriginalMod ? mod.RootDir.FullName : ResolveExportModDirectory(mod, exportToken);
+            EnsureExportStructure(outputModDir, inOriginalMod);
             BuildLanguageDirectoryStructure(outputModDir, worksets);
-            WriteAboutFile(mod, outputModDir, exportToken);
+            if (!inOriginalMod) {
+                WriteAboutFile(mod, outputModDir, exportToken);
+            }
 
             return new TranslatorIrExportResult {
                 Success = true,
@@ -260,10 +257,12 @@ internal static class IrExportService {
         }
     }
 
-    private static void EnsureExportStructure(string outputModDir) {
+    private static void EnsureExportStructure(string outputModDir, bool inOriginalMod) {
         Directory.CreateDirectory(outputModDir);
-        Directory.CreateDirectory(Path.Combine(outputModDir, "About"));
         Directory.CreateDirectory(Path.Combine(outputModDir, "Languages"));
+        if (!inOriginalMod) {
+            Directory.CreateDirectory(Path.Combine(outputModDir, "About"));
+        }
     }
 
     private static void BuildLanguageDirectoryStructure(string outputModDir,
@@ -273,10 +272,21 @@ internal static class IrExportService {
                 continue;
             }
 
+            var hasKeyedEntries = workset.Keyed.Count > 0;
+            var hasDefInjectedEntries = workset.DefInjected.Count > 0;
+            if (!hasKeyedEntries && !hasDefInjectedEntries) {
+                continue;
+            }
+
             var languageRoot = Path.Combine(outputModDir, "Languages", workset.LanguageFolderName);
             Directory.CreateDirectory(languageRoot);
-            Directory.CreateDirectory(Path.Combine(languageRoot, LoadedLanguage.KeyedTranslationsFolderName));
-            Directory.CreateDirectory(Path.Combine(languageRoot, LoadedLanguage.DefInjectionsFolderName));
+            if (hasKeyedEntries) {
+                Directory.CreateDirectory(Path.Combine(languageRoot, LoadedLanguage.KeyedTranslationsFolderName));
+            }
+
+            if (hasDefInjectedEntries) {
+                Directory.CreateDirectory(Path.Combine(languageRoot, LoadedLanguage.DefInjectionsFolderName));
+            }
         }
     }
 
@@ -354,5 +364,16 @@ internal static class IrExportService {
         var result = builder.ToString().Trim('_');
         return result.NullOrEmpty() ? "unknown" : result;
     }
+}
 
+internal sealed class TranslatorIrExportResult {
+    public bool Success;
+    public string Message = string.Empty;
+    public string? FilePath;
+    public List<LanguageWorksetFile> Worksets = [];
+}
+
+public enum OutputLocationMode {
+    GeneratedMod = 0,
+    OriginalMod = 1
 }
