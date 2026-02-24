@@ -9,7 +9,6 @@ namespace Translator.Windows;
 public class Window_ExportLanguagePicker : Window {
     private static readonly Color ListBackgroundColor = new ColorInt(42, 43, 44).ToColor;
     private static readonly Color ListBorderColor = new(0.78f, 0.78f, 0.78f, 0.2f);
-    private static readonly Texture2D GeneralIcon = ContentFinder<Texture2D>.Get("UI/Icons/Options/OptionsGeneral");
 
     private readonly List<LoadedLanguage> _languages;
     private readonly HashSet<string> _selectedLanguageFolders;
@@ -127,7 +126,7 @@ public class Window_ExportLanguagePicker : Window {
 
     private void DrawFooter(Rect rect) {
         var modeButtonRect = new Rect(rect.x, rect.y, rect.height, rect.height);
-        if (Widgets.ButtonImage(modeButtonRect, GeneralIcon)) {
+        if (Widgets.ButtonImage(modeButtonRect, global::Translator.Translator.GeneralIcon)) {
             OpenOutputModeMenu();
         }
 

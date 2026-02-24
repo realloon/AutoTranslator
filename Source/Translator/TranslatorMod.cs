@@ -35,7 +35,7 @@ public sealed class TranslatorMod : Mod {
         listing.Begin(viewRect);
 
         listing.Label("Translator_ModSettingsDescription".Translate());
-        listing.GapLine();
+        listing.Gap(8f);
 
         listing.Label("Translator_ModSettingApiUrl".Translate());
         Settings.ApiUrl = listing.TextEntry(Settings.ApiUrl);
@@ -65,9 +65,16 @@ public sealed class TranslatorMod : Mod {
             BeginValidateConfig();
         }
 
+        listing.Gap(6f);
+        listing.GapLine();
         listing.Gap(10f);
 
         listing.Label("Translator_ModSettingBatchSize".Translate());
+        GUI.color = ColoredText.SubtleGrayColor;
+        listing.Label("Translator_ModSettingBatchSizeDescription".Translate());
+        GUI.color = Color.white;
+        listing.Gap(2f);
+
         if (_batchSizeBuffer.NullOrEmpty()) {
             _batchSizeBuffer = Settings.BatchSize.ToString();
         }
@@ -79,33 +86,34 @@ public sealed class TranslatorMod : Mod {
                 Settings.BatchSize = parsedBatchSize;
             }
         }
-        GUI.color = ColoredText.SubtleGrayColor;
-        listing.Label("Translator_ModSettingBatchSizeDescription".Translate());
-        GUI.color = Color.white;
         listing.Gap(6f);
 
         listing.Label($"{ "Translator_ModSettingConcurrency".Translate() }: {Settings.Concurrency}");
+        GUI.color = ColoredText.SubtleGrayColor;
+        listing.Label("Translator_ModSettingConcurrencyDescription".Translate());
+        GUI.color = Color.white;
+        listing.Gap(2f);
+
         Settings.Concurrency = Mathf.RoundToInt(listing.Slider(
             Settings.Concurrency,
             TranslatorSettings.MinConcurrency,
             TranslatorSettings.MaxConcurrency));
-
-        GUI.color = ColoredText.SubtleGrayColor;
-        listing.Label("Translator_ModSettingConcurrencyDescription".Translate());
-        GUI.color = Color.white;
         listing.Gap(6f);
 
         listing.Label($"{ "Translator_ModSettingRetryCount".Translate() }: {Settings.RetryCount}");
+        GUI.color = ColoredText.SubtleGrayColor;
+        listing.Label("Translator_ModSettingRetryCountDescription".Translate());
+        GUI.color = Color.white;
+        listing.Gap(2f);
+
         Settings.RetryCount = Mathf.RoundToInt(listing.Slider(
             Settings.RetryCount,
             TranslatorSettings.MinRetryCount,
             TranslatorSettings.MaxRetryCount));
-
-        GUI.color = ColoredText.SubtleGrayColor;
-        listing.Label("Translator_ModSettingRetryCountDescription".Translate());
-        GUI.color = Color.white;
         listing.Gap(6f);
 
+        listing.GapLine();
+        listing.Gap(6f);
         listing.Label("Translator_ModSettingDefaultOutputLocation".Translate());
         var outputLocationLabel = GetOutputLocationLabel(Settings.DefaultOutputLocationMode);
         if (listing.ButtonText(outputLocationLabel)) {
@@ -118,7 +126,9 @@ public sealed class TranslatorMod : Mod {
         GUI.color = ColoredText.SubtleGrayColor;
         listing.Label("Translator_ModSettingDefaultOutputLocationDescription".Translate());
         GUI.color = Color.white;
-        listing.Gap();
+        listing.Gap(6f);
+        listing.GapLine();
+        listing.Gap(6f);
 
         if (listing.ButtonText("Translator_ModSettingsResetDefaults".Translate())) {
             Settings.ResetToDefaults();

@@ -8,7 +8,7 @@ public sealed class TranslatorSettings : ModSettings {
     private const string DefaultModel = "gpt-5.2";
     private const int DefaultBatchSize = 80;
     private const int DefaultConcurrency = 2;
-    private const int DefaultRetryCount = 3;
+    private const int DefaultRetryCount = 1;
     public const int MinBatchSize = 10;
     public const int MaxBatchSize = 400;
     public const int MinConcurrency = 1;
