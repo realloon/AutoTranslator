@@ -126,7 +126,7 @@ public class Window_ExportLanguagePicker : Window {
 
     private void DrawFooter(Rect rect) {
         var modeButtonRect = new Rect(rect.x, rect.y, rect.height, rect.height);
-        if (Widgets.ButtonImage(modeButtonRect, global::Translator.Translator.GeneralIcon)) {
+        if (Widgets.ButtonImage(modeButtonRect, Translator.GeneralIcon)) {
             OpenOutputModeMenu();
         }
 
