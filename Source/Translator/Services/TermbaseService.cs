@@ -70,7 +70,6 @@ internal static class TermbaseService {
     public static TermbaseStoreResult SaveEntries(IEnumerable<TermbaseEntry> entries) {
         try {
             var normalizedEntries = entries
-                .Where(entry => entry is not null)
                 .Select(entry => new TermbaseEntry {
                     Source = entry.Source.NullOrEmpty() ? string.Empty : entry.Source.Trim(),
                     Target = entry.Target.NullOrEmpty() ? string.Empty : entry.Target.Trim(),

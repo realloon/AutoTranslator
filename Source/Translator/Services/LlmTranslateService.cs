@@ -218,9 +218,7 @@ internal static class LlmTranslateService {
             return false;
         }
 
-        if (!TryNormalizeApiUrl(uri, out apiUrl, out errorMessage)) {
-            return false;
-        }
+        apiUrl = NormalizeApiUrl(uri);
 
         if (string.IsNullOrWhiteSpace(apiKey)) {
             errorMessage = "Translator API key is empty. Configure it in Mod Settings.";
@@ -302,7 +300,7 @@ internal static class LlmTranslateService {
         return $"Some translation batches failed after retries: {message}";
     }
 
-    private static bool TryNormalizeApiUrl(Uri uri, out string normalizedApiUrl, out string errorMessage) {
+    private static string NormalizeApiUrl(Uri uri) {
         var builder = new UriBuilder(uri) {
             Query = string.Empty,
             Fragment = string.Empty
@@ -319,9 +317,7 @@ internal static class LlmTranslateService {
             builder.Path = $"{path}/v1/chat/completions";
         }
 
-        normalizedApiUrl = builder.Uri.AbsoluteUri;
-        errorMessage = string.Empty;
-        return true;
+        return builder.Uri.AbsoluteUri;
     }
 
     private static void ProbeConnection(string apiUrl, string apiKey, string model) {
@@ -444,10 +440,6 @@ internal static class LlmTranslateService {
             }
         }
 
-        if (translatedPayload?.Translations is null) {
-            throw new InvalidOperationException("Invalid LLM translation payload: missing translations array.");
-        }
-
         var expectedIds = batch
             .Select(item => item.Id)
             .ToHashSet(StringComparer.Ordinal);
@@ -551,19 +543,14 @@ internal static class LlmTranslateService {
         return Math.Clamp(estimatedTokens + 2000, 3000, 16000);
     }
 
-    private static bool TryDeserializeBatchResponse(string json, out BatchTranslationResponse? response,
+    private static bool TryDeserializeBatchResponse(string json, out BatchTranslationResponse response,
         out string error) {
         try {
-            response = JsonSerializer.Deserialize<BatchTranslationResponse>(json, JsonOptions);
-            if (response?.Translations is null) {
-                error = "translations array is missing.";
-                return false;
-            }
-
+            response = JsonSerializer.Deserialize<BatchTranslationResponse>(json, JsonOptions)!;
             error = string.Empty;
             return true;
         } catch (Exception ex) {
-            response = null;
+            response = null!;
             error = ex.Message;
             return false;
         }
@@ -606,11 +593,7 @@ internal static class LlmTranslateService {
 
             var completion = JsonSerializer.Deserialize<ChatCompletionResponse>(responseJson, JsonOptions);
             var content = completion?.Choices.FirstOrDefault()?.Message.Content ?? string.Empty;
-            if (content.NullOrEmpty()) {
-                return string.Empty;
-            }
-
-            return ExtractJsonObject(content);
+            return content.NullOrEmpty() ? string.Empty : ExtractJsonObject(content);
         } catch {
             return string.Empty;
         }

@@ -64,10 +64,6 @@ internal static class LanguageXmlWriteService {
 
             foreach (var group in defGroups) {
                 var defType = group.Key;
-                if (defType.NullOrEmpty()) {
-                    continue;
-                }
-
                 var defOutputPath = Path.Combine(
                     outputModDir,
                     "Languages",

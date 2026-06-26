@@ -32,15 +32,15 @@ internal static class DefStatsHelper {
 
                             stats.TranslatableInjectionItemCount += 1;
                             if (IsMissingSingleInjection(
-                                normalizedPath,
-                                injectionsByNormalizedPath)) {
+                                    normalizedPath,
+                                    injectionsByNormalizedPath)) {
                                 stats.MissingDefInjectionCount += 1;
                             }
 
                             return;
                         }
 
-                        var values = currentValueCollection?.ToList() ?? [];
+                        var values = currentValueCollection.ToList();
                         var translatableIndexes = new List<int>(values.Count);
                         for (var i = 0; i < values.Count; i++) {
                             if (DefInjectionUtility.ShouldCheckMissingInjection(values[i], fieldInfo, def)) {
@@ -94,11 +94,7 @@ internal static class DefStatsHelper {
             return true;
         }
 
-        if (existingInjection.IsFullListInjection) {
-            return true;
-        }
-
-        return existingInjection.isPlaceholder;
+        return existingInjection.IsFullListInjection || existingInjection.isPlaceholder;
     }
 
     private static int CountMissingCollectionInjections(string normalizedPath, IReadOnlyList<int> translatableIndexes,

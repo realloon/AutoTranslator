@@ -24,7 +24,7 @@ public class Window_Termbase : Window {
         absorbInputAroundWindow = true;
 
         _languages.AddRange(LanguageDatabase.AllLoadedLanguages
-            .Where(language => language is not null && !language.folderName.NullOrEmpty())
+            .Where(language => !language.folderName.NullOrEmpty())
             .OrderBy(language => language.folderName, StringComparer.OrdinalIgnoreCase));
         _selectedLanguageFolder = LanguageDatabase.activeLanguage?.folderName
                                   ?? _languages.FirstOrDefault()?.folderName

@@ -173,14 +173,14 @@ public class Window_TranslatorMain : Window {
         var statusText = _lastExportStatus!;
         var separatorIndex = statusText.IndexOf('\n');
 
-            if (separatorIndex < 0) {
-                GUI.color = _lastExportFailed ? ErrorColor : SuccessColor;
-                var statusHeight = Mathf.Max(22f, Text.CalcHeight(statusText, rect.width));
-                Widgets.Label(new Rect(rect.x, y, rect.width, statusHeight), statusText);
-                y += statusHeight + 2f;
-            } else {
-                var title = statusText[..separatorIndex];
-                var outputLine = statusText[(separatorIndex + 1)..];
+        if (separatorIndex < 0) {
+            GUI.color = _lastExportFailed ? ErrorColor : SuccessColor;
+            var statusHeight = Mathf.Max(22f, Text.CalcHeight(statusText, rect.width));
+            Widgets.Label(new Rect(rect.x, y, rect.width, statusHeight), statusText);
+            y += statusHeight + 2f;
+        } else {
+            var title = statusText[..separatorIndex];
+            var outputLine = statusText[(separatorIndex + 1)..];
 
             GUI.color = _lastExportFailed ? ErrorColor : SuccessColor;
             var titleHeight = Mathf.Max(20f, Text.CalcHeight(title, rect.width));
@@ -283,7 +283,7 @@ public class Window_TranslatorMain : Window {
         _lastOutputPath = exportResult.FilePath;
 
         var worksets = exportResult.Worksets
-            .Where(workset => workset is not null && !workset.LanguageFolderName.NullOrEmpty())
+            .Where(workset => !workset.LanguageFolderName.NullOrEmpty())
             .ToList();
         if (worksets.Count == 0) {
             _lastExportFailed = true;
@@ -323,15 +323,6 @@ public class Window_TranslatorMain : Window {
                 ? value
                 : workset.LanguageFolderName
         }).ToList();
-        if (targets.Count == 0) {
-            _lastExportFailed = true;
-            _lastExportStatus = BuildExportStatusWithOutput(
-                "Translator_AiTranslateFailed".Translate("No translation targets were created."),
-                exportResult.FilePath!);
-            Messages.Message(_lastExportStatus, MessageTypeDefOf.RejectInput);
-            _translateInProgress = false;
-            return;
-        }
 
         _lastExportFailed = false;
         _lastExportStatus = "Translator_AiTranslateInProgress".Translate();
@@ -396,11 +387,11 @@ public class Window_TranslatorMain : Window {
                         runResult.WrittenFileCount += xmlWriteResult.WrittenFileCount;
                     }
 
-                    if (xmlWriteResult.WrittenEntryCount == 0) {
-                        lock (runResultGate) {
-                            runResult.Failures.Add(
-                                $"{target.FolderName}: No XML entries written (pending={translateResult.PendingCount}, updated={translateResult.UpdatedCount}, total={afterCounts.TotalCount}, translated={afterCounts.TranslatedCount}).");
-                        }
+                    if (xmlWriteResult.WrittenEntryCount != 0) continue;
+
+                    lock (runResultGate) {
+                        runResult.Failures.Add(
+                            $"{target.FolderName}: No XML entries written (pending={translateResult.PendingCount}, updated={translateResult.UpdatedCount}, total={afterCounts.TotalCount}, translated={afterCounts.TranslatedCount}).");
                     }
                 }
             } catch (Exception ex) {

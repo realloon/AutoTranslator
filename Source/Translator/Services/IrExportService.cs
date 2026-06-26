@@ -21,8 +21,7 @@ internal static class IrExportService {
             var exportedLanguageFolders = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var worksets = new List<LanguageWorksetFile>();
             foreach (var language in targetLanguages) {
-                if (language is null || language.folderName.NullOrEmpty() ||
-                    !exportedLanguageFolders.Add(language.folderName)) {
+                if (language.folderName.NullOrEmpty() || !exportedLanguageFolders.Add(language.folderName)) {
                     continue;
                 }
 
@@ -71,13 +70,12 @@ internal static class IrExportService {
         var entries = new List<LanguageWorksetKeyedItem>();
         var seenKeys = new HashSet<string>(StringComparer.Ordinal);
 
-        foreach (var keyedReplacement in defaultLanguage.keyedReplacements) {
-            var key = keyedReplacement.Key;
+        foreach (var (key, value) in defaultLanguage.keyedReplacements) {
             if (!seenKeys.Add(key)) {
                 continue;
             }
 
-            var sourcePath = keyedReplacement.Value.fileSourceFullPath;
+            var sourcePath = value.fileSourceFullPath;
             if (sourcePath.NullOrEmpty() || !IsPathUnderRoot(sourcePath, modRoot)) {
                 continue;
             }
@@ -139,7 +137,7 @@ internal static class IrExportService {
                             return;
                         }
 
-                        var listValues = currentValueCollection?.ToList() ?? [];
+                        var listValues = currentValueCollection.ToList();
                         if (!injectionsByNormalizedPath.TryGetValue(normalizedPath, out var listInjection) ||
                             !listInjection.IsFullListInjection) {
                             listInjection = null;
@@ -212,11 +210,11 @@ internal static class IrExportService {
         var result = new Dictionary<Type, Dictionary<string, DefInjectionPackage.DefInjection>>();
         foreach (var package in activeLanguage.defInjections) {
             var defType = package.defType;
-            if (defType is null || result.ContainsKey(defType)) continue;
+            if (result.ContainsKey(defType)) continue;
 
             var lookup = new Dictionary<string, DefInjectionPackage.DefInjection>(StringComparer.Ordinal);
             foreach (var (key, injection) in package.injections) {
-                if (injection is null || !injection.ModifiesDefFromModOrNullCore(mod, defType)) {
+                if (!injection.ModifiesDefFromModOrNullCore(mod, defType)) {
                     continue;
                 }
 

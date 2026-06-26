@@ -24,7 +24,7 @@ public class Window_ExportLanguagePicker : Window {
         OutputLocationMode defaultOutputLocationMode,
         Action<IReadOnlyCollection<string>, OutputLocationMode> onConfirm) {
         _languages = languages
-            .Where(language => language is not null && !language.folderName.NullOrEmpty())
+            .Where(language => !language.folderName.NullOrEmpty())
             .OrderBy(language => language.folderName, StringComparer.OrdinalIgnoreCase)
             .ToList();
         _selectedLanguageFolders = new HashSet<string>(selectedLanguageFolders, StringComparer.OrdinalIgnoreCase);
@@ -168,9 +168,7 @@ public class Window_ExportLanguagePicker : Window {
         Find.WindowStack.Add(new FloatMenu(options));
     }
 
-    private static string GetOutputModeLabel(OutputLocationMode mode) {
-        return mode == OutputLocationMode.OriginalMod
-            ? "Translator_OutputModeOriginalMod".Translate()
-            : "Translator_OutputModeGeneratedMod".Translate();
-    }
+    private static string GetOutputModeLabel(OutputLocationMode mode) => mode == OutputLocationMode.OriginalMod
+        ? "Translator_OutputModeOriginalMod".Translate()
+        : "Translator_OutputModeGeneratedMod".Translate();
 }
