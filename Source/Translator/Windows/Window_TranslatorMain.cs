@@ -17,9 +17,9 @@ public class Window_TranslatorMain : Window {
     private readonly List<ModMetaData> _filteredMods = [];
     private readonly List<LoadedLanguage> _exportLanguages = [];
     private readonly HashSet<string> _selectedExportLanguageFolders = new(StringComparer.OrdinalIgnoreCase);
+    private readonly QuickSearchWidget _quickSearchWidget = new();
 
     private Vector2 _modsScrollPos = Vector2.zero;
-    private string _searchTerm = string.Empty;
     private string? _selectedPackageId;
     private string? _lastExportStatus;
     private bool _lastExportFailed;
@@ -61,24 +61,22 @@ public class Window_TranslatorMain : Window {
     private void DrawModListPanel(Rect rect) {
         var y = rect.y + 2f;
 
-        var searchLabelRect = new Rect(rect.x, y, 84f, 24f);
-        Widgets.Label(searchLabelRect, "Translator_ModSearchLabel".Translate());
-        var searchFieldRect = new Rect(searchLabelRect.xMax + 6f, y, rect.width - searchLabelRect.width - 6f, 24f);
-        var newSearchTerm = Widgets.TextField(searchFieldRect, _searchTerm);
-        if (newSearchTerm != _searchTerm) {
-            _searchTerm = newSearchTerm;
-            RefreshFilteredMods();
-        }
+        _quickSearchWidget.noResultsMatched = _filteredMods.Count == 0;
+        _quickSearchWidget.OnGUI(new Rect(rect.x, y, rect.width - 16f,
+            QuickSearchWidget.WidgetHeight), RefreshFilteredMods);
 
         y += 28f;
 
-        Widgets.Label(new Rect(rect.x, y, rect.width, 24f),
-            "Translator_ModCount".Translate(_filteredMods.Count, _allMods.Count));
-        y += 24f;
+        if (_quickSearchWidget.filter.Active) {
+            Widgets.Label(new Rect(rect.x, y, rect.width, 24f),
+                "Translator_ModCount".Translate(_filteredMods.Count, _allMods.Count));
+            y += 24f;
+        }
 
         var listRect = new Rect(rect.x, y, rect.width, rect.yMax - y);
-        var viewRect = new Rect(0f, 0f, listRect.width, _filteredMods.Count * 46f);
-        Widgets.BeginScrollView(listRect, ref _modsScrollPos, viewRect, showScrollbars: false);
+        var viewWidth = listRect.width - 16f;
+        var viewRect = new Rect(0f, 0f, viewWidth, _filteredMods.Count * 46f);
+        Widgets.BeginScrollView(listRect, ref _modsScrollPos, viewRect);
 
         var rowY = 0f;
         foreach (var mod in _filteredMods) {
@@ -94,9 +92,9 @@ public class Window_TranslatorMain : Window {
                 _selectedPackageId = mod.PackageId;
             }
 
-            Widgets.Label(new Rect(rowRect.x + 8f, rowRect.y + 2f, rowRect.width - 16f, 22f), mod.Name);
+            Widgets.LabelEllipses(new Rect(rowRect.x + 8f, rowRect.y + 2f, rowRect.width - 16f, 22f), mod.Name);
             GUI.color = ColoredText.SubtleGrayColor;
-            Widgets.Label(new Rect(rowRect.x + 8f, rowRect.y + 20f, rowRect.width - 16f, 20f),
+            Widgets.LabelEllipses(new Rect(rowRect.x + 8f, rowRect.y + 20f, rowRect.width - 16f, 20f),
                 mod.PackageIdPlayerFacing);
             GUI.color = Color.white;
 
@@ -107,45 +105,53 @@ public class Window_TranslatorMain : Window {
     }
 
     private void DrawWorkflowPanel(Rect rect) {
-        var y = rect.y + 2f;
-
+        var y = rect.y;
         var selectedMod = GetSelectedMod();
         var (stats, translateStats) = StatsService.GetOrBuildStats(selectedMod);
 
+        Widgets.Label(new Rect(rect.x, y, rect.width, 24f), selectedMod.Name);
+        y += 24f;
+
         Widgets.Label(new Rect(rect.x, y, rect.width, 24f), "Translator_DefStatsTitle".Translate());
-        y += 26f;
-        Widgets.Label(new Rect(rect.x, y, rect.width, 22f),
+        y += 24f;
+
+        Widgets.Label(new Rect(rect.x, y, rect.width, 24f),
             "Translator_DefStatsFields".Translate(stats.TranslatableInjectionItemCount));
-        y += 22f;
-        Widgets.Label(new Rect(rect.x, y, rect.width, 22f),
+        y += 24f;
+
+        Widgets.Label(new Rect(rect.x, y, rect.width, 24f),
             "Translator_DefStatsMissingDefInjection".Translate(stats.MissingDefInjectionCount));
-        y += 36f;
+        y += 32f;
 
         Widgets.DrawLineHorizontal(rect.x, y, rect.width, SectionDividerColor);
-        y += 16f;
+        y += 12f;
 
         Widgets.Label(new Rect(rect.x, y, rect.width, 24f), "Translator_StaticScanTitle".Translate());
-        y += 26f;
-        Widgets.Label(new Rect(rect.x, y, rect.width, 22f),
+        y += 24f;
+
+        Widgets.Label(new Rect(rect.x, y, rect.width, 24f),
             "Translator_StaticScanUniqueKeys".Translate(translateStats.UniqueLiteralKeyCount));
-        y += 22f;
-        Widgets.Label(new Rect(rect.x, y, rect.width, 22f),
+        y += 24f;
+
+        Widgets.Label(new Rect(rect.x, y, rect.width, 24f),
             "Translator_StaticScanMissingKeys".Translate(translateStats.MissingKeyCount));
-        y += 30f;
+        y += 36f;
 
         var termbaseButtonLabel = "Translator_TermbaseButton".Translate();
         var exportButtonLabel = "Translator_ExportIrButton".Translate();
         const float buttonGap = 8f;
-        var termbaseButtonWidth = Mathf.Max(130f, Text.CalcSize(termbaseButtonLabel).x + 28f);
-        var exportButtonWidth = Mathf.Max(210f, Text.CalcSize(exportButtonLabel).x + 28f);
+        const float buttonHeight = 30f;
+        var termbaseButtonWidth = Mathf.Max(130f, Text.CalcSize(termbaseButtonLabel).x + 8f);
+        var exportButtonWidth = Mathf.Max(210f, Text.CalcSize(exportButtonLabel).x + 8f);
         if (termbaseButtonWidth + buttonGap + exportButtonWidth > rect.width) {
             var halfWidth = (rect.width - buttonGap) / 2f;
             termbaseButtonWidth = halfWidth;
             exportButtonWidth = halfWidth;
         }
 
-        var termbaseButtonRect = new Rect(rect.x, y, termbaseButtonWidth, 30f);
-        var exportButtonRect = new Rect(termbaseButtonRect.xMax + buttonGap, y, exportButtonWidth, 30f);
+        var buttonY = rect.yMax - buttonHeight;
+        var termbaseButtonRect = new Rect(rect.x, buttonY, termbaseButtonWidth, buttonHeight);
+        var exportButtonRect = new Rect(termbaseButtonRect.xMax + buttonGap, buttonY, exportButtonWidth, buttonHeight);
         if (Widgets.ButtonText(termbaseButtonRect, termbaseButtonLabel)) {
             OpenTermbaseWindow();
         }
@@ -153,8 +159,6 @@ public class Window_TranslatorMain : Window {
         if (Widgets.ButtonText(exportButtonRect, exportButtonLabel)) {
             OpenExportLanguagePicker(selectedMod);
         }
-
-        y += 36f;
 
         if (_lastExportStatus.NullOrEmpty()) return;
 
@@ -571,13 +575,12 @@ public class Window_TranslatorMain : Window {
     private void RefreshFilteredMods() {
         _filteredMods.Clear();
 
-        if (string.IsNullOrWhiteSpace(_searchTerm)) {
+        if (!_quickSearchWidget.filter.Active) {
             _filteredMods.AddRange(_allMods);
         } else {
-            var keyword = _searchTerm.Trim();
             _filteredMods.AddRange(_allMods.Where(m =>
-                m.Name.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0
-                || m.PackageIdPlayerFacing.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0));
+                _quickSearchWidget.filter.Matches(m.Name)
+                || _quickSearchWidget.filter.Matches(m.PackageIdPlayerFacing)));
         }
 
         if (_selectedPackageId is null && _filteredMods.Count > 0) {

@@ -2,7 +2,6 @@
 <LanguageData>
   <Translator_MainMenuButton>Auto Translator</Translator_MainMenuButton>
   <Translator_WindowTitle>Auto Translator</Translator_WindowTitle>
-  <Translator_ModSearchLabel>Поиск</Translator_ModSearchLabel>
   <Translator_ModCount>Показано модов {0}/{1}</Translator_ModCount>
   <Translator_DefStatsTitle>Из Def</Translator_DefStatsTitle>
   <Translator_DefStatsFields>Переводимых def-injections: {0}</Translator_DefStatsFields>
@@ -41,7 +40,6 @@
   <Translator_AiTranslateConfigInvalid>Некорректная конфигурация AI: {0}</Translator_AiTranslateConfigInvalid>
   <Translator_AiTranslateFailed>Ошибка AI-перевода: {0}</Translator_AiTranslateFailed>
   <Translator_ModSettingsCategory>Auto Translator</Translator_ModSettingsCategory>
-  <Translator_ModSettingsDescription>Настройте API endpoint, ключ и модель для AI-перевода.</Translator_ModSettingsDescription>
   <Translator_ModSettingApiUrl>API URL (совместимый с OpenAI)</Translator_ModSettingApiUrl>
   <Translator_ModSettingApiKey>API Key</Translator_ModSettingApiKey>
   <Translator_ModSettingModel>Модель</Translator_ModSettingModel>

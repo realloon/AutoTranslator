@@ -34,9 +34,6 @@ public sealed class TranslatorMod : Mod {
         var listing = new Listing_Standard();
         listing.Begin(viewRect);
 
-        listing.Label("Translator_ModSettingsDescription".Translate());
-        listing.Gap(8f);
-
         listing.Label("Translator_ModSettingApiUrl".Translate());
         Settings.ApiUrl = listing.TextEntry(Settings.ApiUrl);
         listing.Gap(6f);
@@ -86,9 +83,10 @@ public sealed class TranslatorMod : Mod {
                 Settings.BatchSize = parsedBatchSize;
             }
         }
+
         listing.Gap(6f);
 
-        listing.Label($"{ "Translator_ModSettingConcurrency".Translate() }: {Settings.Concurrency}");
+        listing.Label($"{"Translator_ModSettingConcurrency".Translate()}: {Settings.Concurrency}");
         GUI.color = ColoredText.SubtleGrayColor;
         listing.Label("Translator_ModSettingConcurrencyDescription".Translate());
         GUI.color = Color.white;
@@ -100,7 +98,7 @@ public sealed class TranslatorMod : Mod {
             TranslatorSettings.MaxConcurrency));
         listing.Gap(6f);
 
-        listing.Label($"{ "Translator_ModSettingRetryCount".Translate() }: {Settings.RetryCount}");
+        listing.Label($"{"Translator_ModSettingRetryCount".Translate()}: {Settings.RetryCount}");
         GUI.color = ColoredText.SubtleGrayColor;
         listing.Label("Translator_ModSettingRetryCountDescription".Translate());
         GUI.color = Color.white;
@@ -205,6 +203,6 @@ public sealed class TranslatorMod : Mod {
         var modeText = mode == OutputLocationMode.OriginalMod
             ? "Translator_OutputModeOriginalMod".Translate()
             : "Translator_OutputModeGeneratedMod".Translate();
-        return $"{ "Translator_ModSettingDefaultOutputLocation".Translate() }: {modeText}";
+        return $"{"Translator_ModSettingDefaultOutputLocation".Translate()}: {modeText}";
     }
 }
