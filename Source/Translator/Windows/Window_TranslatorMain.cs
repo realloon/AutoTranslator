@@ -115,13 +115,6 @@ public class Window_TranslatorMain : Window {
             return;
         }
 
-        Widgets.Label(new Rect(rect.x, y, rect.width, 24f), "Translator_SelectedModLabel".Translate(selectedMod.Name));
-        y += 22f;
-        GUI.color = ColoredText.SubtleGrayColor;
-        Widgets.Label(new Rect(rect.x, y, rect.width, 22f), selectedMod.PackageIdPlayerFacing);
-        GUI.color = Color.white;
-        y += 34f;
-
         var (stats, translateStats) = StatsService.GetOrBuildStats(selectedMod);
 
         Widgets.Label(new Rect(rect.x, y, rect.width, 24f), "Translator_DefStatsTitle".Translate());

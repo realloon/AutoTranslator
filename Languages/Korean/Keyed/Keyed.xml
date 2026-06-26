@@ -5,7 +5,6 @@
   <Translator_ModSearchLabel>검색</Translator_ModSearchLabel>
   <Translator_ModCount>모드 표시 {0}/{1}</Translator_ModCount>
   <Translator_NoModSelected>계속하려면 왼쪽 목록에서 모드를 선택하세요.</Translator_NoModSelected>
-  <Translator_SelectedModLabel>선택됨: {0}</Translator_SelectedModLabel>
   <Translator_DefStatsTitle>From Def</Translator_DefStatsTitle>
   <Translator_DefStatsFields>번역 가능한 def-injections: {0}</Translator_DefStatsFields>
   <Translator_DefStatsMissingDefInjection>현재 언어에서 누락된 def-injections: {0}</Translator_DefStatsMissingDefInjection>
