@@ -1,7 +1,6 @@
 using UnityEngine;
 using RimWorld;
 using Verse;
-using Translator;
 using Translator.Services;
 
 namespace Translator.Windows;
