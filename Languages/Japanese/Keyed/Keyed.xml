@@ -4,7 +4,6 @@
   <Translator_WindowTitle>Auto Translator</Translator_WindowTitle>
   <Translator_ModSearchLabel>検索</Translator_ModSearchLabel>
   <Translator_ModCount>表示中のMod {0}/{1}</Translator_ModCount>
-  <Translator_NoModSelected>続行するには左側のリストからModを選択してください。</Translator_NoModSelected>
   <Translator_DefStatsTitle>From Def</Translator_DefStatsTitle>
   <Translator_DefStatsFields>翻訳可能なdef-injections: {0}</Translator_DefStatsFields>
   <Translator_DefStatsMissingDefInjection>現在の言語で不足しているdef-injections: {0}</Translator_DefStatsMissingDefInjection>

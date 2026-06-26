@@ -4,7 +4,6 @@
   <Translator_WindowTitle>Auto Translator</Translator_WindowTitle>
   <Translator_ModSearchLabel>搜索</Translator_ModSearchLabel>
   <Translator_ModCount>显示模组 {0}/{1}</Translator_ModCount>
-  <Translator_NoModSelected>请先在左侧列表中选择一个模组。</Translator_NoModSelected>
   <Translator_DefStatsTitle>来源于 Def</Translator_DefStatsTitle>
   <Translator_DefStatsFields>可翻译注入项：{0}</Translator_DefStatsFields>
   <Translator_DefStatsMissingDefInjection>当前语言缺失 Def-injection：{0}</Translator_DefStatsMissingDefInjection>

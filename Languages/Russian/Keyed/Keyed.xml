@@ -4,7 +4,6 @@
   <Translator_WindowTitle>Auto Translator</Translator_WindowTitle>
   <Translator_ModSearchLabel>Поиск</Translator_ModSearchLabel>
   <Translator_ModCount>Показано модов {0}/{1}</Translator_ModCount>
-  <Translator_NoModSelected>Выберите мод в списке слева, чтобы продолжить.</Translator_NoModSelected>
   <Translator_DefStatsTitle>Из Def</Translator_DefStatsTitle>
   <Translator_DefStatsFields>Переводимых def-injections: {0}</Translator_DefStatsFields>
   <Translator_DefStatsMissingDefInjection>Отсутствует def-injections для текущего языка: {0}</Translator_DefStatsMissingDefInjection>

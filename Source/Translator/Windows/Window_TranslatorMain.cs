@@ -110,11 +110,6 @@ public class Window_TranslatorMain : Window {
         var y = rect.y + 2f;
 
         var selectedMod = GetSelectedMod();
-        if (selectedMod is null) {
-            Widgets.Label(new Rect(rect.x, y, rect.width, 48f), "Translator_NoModSelected".Translate());
-            return;
-        }
-
         var (stats, translateStats) = StatsService.GetOrBuildStats(selectedMod);
 
         Widgets.Label(new Rect(rect.x, y, rect.width, 24f), "Translator_DefStatsTitle".Translate());
@@ -568,17 +563,9 @@ public class Window_TranslatorMain : Window {
             $"total={TotalCount}, translated={TranslatedCount}, pending={PendingCount}, keyed={KeyedTotal}/{KeyedTranslated}, def={DefTotal}/{DefTranslated}";
     }
 
-    private ModMetaData? GetSelectedMod() {
-        if (_selectedPackageId is null) {
-            return null;
-        }
-
-        var selected = _allMods.FirstOrDefault(m => m.PackageId == _selectedPackageId);
-        if (selected is null) {
-            _selectedPackageId = null;
-        }
-
-        return selected;
+    private ModMetaData GetSelectedMod() {
+        var selectedPackageId = _selectedPackageId ?? throw new InvalidOperationException("No mod selected.");
+        return _allMods.First(m => m.PackageId == selectedPackageId);
     }
 
     private void RefreshFilteredMods() {
