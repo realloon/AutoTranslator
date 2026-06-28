@@ -1,22 +1,23 @@
-using System.Text.Json;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Verse;
 
 namespace Translator.Services;
 
 internal sealed class TermbaseEntry {
-    public string Source { get; set; } = string.Empty;
-    public string Target { get; set; } = string.Empty;
-    public string TargetLanguageFolder { get; set; } = string.Empty;
+    public string Source = string.Empty;
+    public string Target = string.Empty;
+    public string TargetLanguageFolder = string.Empty;
 }
 
 internal sealed class TermbaseTranslation {
-    public string Language { get; set; } = string.Empty;
-    public string Target { get; set; } = string.Empty;
+    public string Language = string.Empty;
+    public string Target = string.Empty;
 }
 
 internal sealed class TermbaseSourceTerm {
-    public string Source { get; set; } = string.Empty;
-    public List<TermbaseTranslation> Translations { get; set; } = [];
+    public string Source = string.Empty;
+    public List<TermbaseTranslation> Translations = [];
 }
 
 internal sealed class TermbaseStoreResult {
@@ -25,10 +26,9 @@ internal sealed class TermbaseStoreResult {
 }
 
 internal static class TermbaseService {
-    private static readonly JsonSerializerOptions JsonOptions = new() {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        WriteIndented = true,
-        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    private static readonly JsonSerializerSettings JsonSettings = new() {
+        ContractResolver = new CamelCasePropertyNamesContractResolver(),
+        Formatting = Formatting.Indented
     };
 
     public static IReadOnlyList<TermbaseEntry> LoadEntries() {
@@ -43,7 +43,7 @@ internal static class TermbaseService {
                 return [];
             }
 
-            var sourceTerms = JsonSerializer.Deserialize<List<TermbaseSourceTerm>>(json, JsonOptions) ?? [];
+            var sourceTerms = JsonConvert.DeserializeObject<List<TermbaseSourceTerm>>(json, JsonSettings) ?? [];
             return sourceTerms
                 .Where(sourceTerm => sourceTerm is not null)
                 .SelectMany(sourceTerm => {
@@ -97,7 +97,7 @@ internal static class TermbaseService {
                         .ToList()
                 })
                 .ToList();
-            var json = JsonSerializer.Serialize(sourceTerms, JsonOptions);
+            var json = JsonConvert.SerializeObject(sourceTerms, JsonSettings);
 
             var filePath = GetTermbaseFilePath();
             var directory = Path.GetDirectoryName(filePath);

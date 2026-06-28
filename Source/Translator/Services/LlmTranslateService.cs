@@ -2,9 +2,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using JetBrains.Annotations;
+using Newtonsoft.Json;
 using Verse;
 
 namespace Translator.Services;
@@ -25,10 +23,8 @@ internal static class LlmTranslateService {
     private const int MaxEstimatedCharsPerBatch = 18000;
     private const int RequestTimeoutSeconds = 600;
 
-    private static readonly JsonSerializerOptions JsonOptions = new() {
-        WriteIndented = true,
-        PropertyNameCaseInsensitive = true,
-        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    private static readonly JsonSerializerSettings IndentedJsonSettings = new() {
+        Formatting = Formatting.Indented
     };
 
     private static readonly HttpClient HttpClient = CreateHttpClient();
@@ -230,19 +226,19 @@ internal static class LlmTranslateService {
             return false;
         }
 
-        if (batchSize < TranslatorSettings.MinBatchSize || batchSize > TranslatorSettings.MaxBatchSize) {
+        if (batchSize is < TranslatorSettings.MinBatchSize or > TranslatorSettings.MaxBatchSize) {
             errorMessage =
                 $"Translator batch size is invalid. Configure a value between {TranslatorSettings.MinBatchSize} and {TranslatorSettings.MaxBatchSize} in Mod Settings.";
             return false;
         }
 
-        if (concurrency < TranslatorSettings.MinConcurrency || concurrency > TranslatorSettings.MaxConcurrency) {
+        if (concurrency is < TranslatorSettings.MinConcurrency or > TranslatorSettings.MaxConcurrency) {
             errorMessage =
                 $"Translator concurrency is invalid. Configure a value between {TranslatorSettings.MinConcurrency} and {TranslatorSettings.MaxConcurrency} in Mod Settings.";
             return false;
         }
 
-        if (retryCount < TranslatorSettings.MinRetryCount || retryCount > TranslatorSettings.MaxRetryCount) {
+        if (retryCount is < TranslatorSettings.MinRetryCount or > TranslatorSettings.MaxRetryCount) {
             errorMessage =
                 $"Translator retry count is invalid. Configure a value between {TranslatorSettings.MinRetryCount} and {TranslatorSettings.MaxRetryCount} in Mod Settings.";
             return false;
@@ -337,7 +333,7 @@ internal static class LlmTranslateService {
             }
         };
 
-        var requestJson = JsonSerializer.Serialize(requestPayload);
+        var requestJson = JsonConvert.SerializeObject(requestPayload);
         using var request = new HttpRequestMessage(HttpMethod.Post, apiUrl);
         request.Content = new StringContent(requestJson, Encoding.UTF8, "application/json");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
@@ -386,11 +382,11 @@ internal static class LlmTranslateService {
         var userPrompt =
             $"Target language: {targetLanguage}\n" +
             (hasGlossary
-                ? $"Termbase rules (source -> target, mandatory):\n{JsonSerializer.Serialize(glossaryItems, JsonOptions)}\n"
+                ? $"Termbase rules (source -> target, mandatory):\n{JsonConvert.SerializeObject(glossaryItems, IndentedJsonSettings)}\n"
                 : string.Empty
             ) +
             "Entries:\n" +
-            JsonSerializer.Serialize(payloadItems, JsonOptions);
+            JsonConvert.SerializeObject(payloadItems, IndentedJsonSettings);
 
         var requestPayload = new {
             model,
@@ -411,7 +407,7 @@ internal static class LlmTranslateService {
             }
         };
 
-        var requestJson = JsonSerializer.Serialize(requestPayload);
+        var requestJson = JsonConvert.SerializeObject(requestPayload);
         using var request = new HttpRequestMessage(HttpMethod.Post, apiUrl);
         request.Content = new StringContent(requestJson, Encoding.UTF8, "application/json");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
@@ -423,7 +419,7 @@ internal static class LlmTranslateService {
                 $"LLM request failed ({(int)response.StatusCode}): {response.ReasonPhrase}; {responseJson}");
         }
 
-        var completion = JsonSerializer.Deserialize<ChatCompletionResponse>(responseJson, JsonOptions);
+        var completion = JsonConvert.DeserializeObject<ChatCompletionResponse>(responseJson);
         var content = completion?.Choices.FirstOrDefault()?.Message.Content ?? string.Empty;
         if (string.IsNullOrEmpty(content)) {
             throw new InvalidOperationException("LLM response content is empty.");
@@ -546,7 +542,7 @@ internal static class LlmTranslateService {
     private static bool TryDeserializeBatchResponse(string json, out BatchTranslationResponse response,
         out string error) {
         try {
-            response = JsonSerializer.Deserialize<BatchTranslationResponse>(json, JsonOptions)!;
+            response = JsonConvert.DeserializeObject<BatchTranslationResponse>(json)!;
             error = string.Empty;
             return true;
         } catch (Exception ex) {
@@ -580,7 +576,7 @@ internal static class LlmTranslateService {
                 }
             };
 
-            var requestJson = JsonSerializer.Serialize(requestPayload);
+            var requestJson = JsonConvert.SerializeObject(requestPayload);
             using var request = new HttpRequestMessage(HttpMethod.Post, apiUrl);
             request.Content = new StringContent(requestJson, Encoding.UTF8, "application/json");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
@@ -591,7 +587,7 @@ internal static class LlmTranslateService {
                 return string.Empty;
             }
 
-            var completion = JsonSerializer.Deserialize<ChatCompletionResponse>(responseJson, JsonOptions);
+            var completion = JsonConvert.DeserializeObject<ChatCompletionResponse>(responseJson);
             var content = completion?.Choices.FirstOrDefault()?.Message.Content ?? string.Empty;
             return content.NullOrEmpty() ? string.Empty : ExtractJsonObject(content);
         } catch {
@@ -610,45 +606,41 @@ internal static class LlmTranslateService {
 
     private sealed class BatchRequest {
         public int BatchNo;
-        public List<PendingTranslationItem> Items { get; set; } = [];
+        public List<PendingTranslationItem> Items = [];
     }
 
     private sealed class BatchExecutionResult {
         public int BatchNo;
         public bool Success;
         public string ErrorMessage = string.Empty;
-        public Dictionary<string, string> Translations { get; set; } = new(StringComparer.Ordinal);
+        public Dictionary<string, string> Translations = new(StringComparer.Ordinal);
     }
 
     private sealed class ChatCompletionResponse {
-        [JsonPropertyName("choices")]
-        public List<ChatChoice> Choices { get; set; } = [];
+        [JsonProperty("choices")]
+        public List<ChatChoice> Choices = [];
     }
 
     private sealed class ChatChoice {
-        [UsedImplicitly]
-        [JsonPropertyName("message")]
-        public ChatMessage Message { get; set; } = new();
+        [JsonProperty("message")]
+        public ChatMessage Message = new();
     }
 
     private sealed class ChatMessage {
-        [UsedImplicitly]
-        [JsonPropertyName("content")]
-        public string Content { get; set; } = string.Empty;
+        [JsonProperty("content")]
+        public string Content = string.Empty;
     }
 
     private sealed class BatchTranslationResponse {
-        [JsonPropertyName("translations")]
-        public List<TranslatedEntry> Translations { get; set; } = [];
+        [JsonProperty("translations")]
+        public List<TranslatedEntry> Translations = [];
     }
 
     private sealed class TranslatedEntry {
-        [UsedImplicitly]
-        [JsonPropertyName("id")]
-        public string Id { get; set; } = string.Empty;
+        [JsonProperty("id")]
+        public string Id = string.Empty;
 
-        [UsedImplicitly]
-        [JsonPropertyName("translation")]
-        public string? Translation { get; set; }
+        [JsonProperty("translation")]
+        public string? Translation = string.Empty;
     }
 }
