@@ -1,5 +1,6 @@
-using Verse;
 using Translator.Services;
+using UnityEngine;
+using Verse;
 
 namespace Translator;
 
@@ -41,10 +42,11 @@ public sealed class TranslatorSettings : ModSettings {
         Scribe_Values.Look(ref BatchSize, "batchSize", DefaultBatchSize);
         Scribe_Values.Look(ref Concurrency, "concurrency", DefaultConcurrency);
         Scribe_Values.Look(ref RetryCount, "retryCount", DefaultRetryCount);
-        var outputMode = (int)DefaultOutputLocationMode;
-        Scribe_Values.Look(ref outputMode, "defaultOutputLocationMode");
-        DefaultOutputLocationMode = Enum.IsDefined(typeof(OutputLocationMode), outputMode)
-            ? (OutputLocationMode)outputMode
-            : OutputLocationMode.GeneratedMod;
+        Scribe_Values.Look(ref DefaultOutputLocationMode, "defaultOutputLocationMode");
+
+        // Normalize once at the load/save boundary so downstream code can trust these values.
+        BatchSize = Mathf.Clamp(BatchSize, MinBatchSize, MaxBatchSize);
+        Concurrency = Mathf.Clamp(Concurrency, MinConcurrency, MaxConcurrency);
+        RetryCount = Mathf.Clamp(RetryCount, MinRetryCount, MaxRetryCount);
     }
 }

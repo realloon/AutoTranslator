@@ -12,15 +12,12 @@ public sealed class TranslatorMod : Mod {
     private bool _lastValidationFailed;
     private Task<LlmConfigValidationResult>? _validateConfigTask;
     private Vector2 _settingsScrollPosition = Vector2.zero;
-    private string _batchSizeBuffer = string.Empty;
 
     public TranslatorMod(ModContentPack content) : base(content) {
         Settings = GetSettings<TranslatorSettings>();
     }
 
-    public override string SettingsCategory() {
-        return "Translator_ModSettingsCategory".Translate();
-    }
+    public override string SettingsCategory() => "Translator_ModSettingsCategory".Translate();
 
     public override void DoSettingsWindowContents(Rect inRect) {
         ConsumeValidationTaskResultIfReady();
@@ -66,24 +63,14 @@ public sealed class TranslatorMod : Mod {
         listing.GapLine();
         listing.Gap(10f);
 
-        listing.Label("Translator_ModSettingBatchSize".Translate());
+        listing.Label($"{"Translator_ModSettingBatchSize".Translate()}: {Settings.BatchSize}");
         GUI.color = ColoredText.SubtleGrayColor;
         listing.Label("Translator_ModSettingBatchSizeDescription".Translate());
         GUI.color = Color.white;
         listing.Gap(2f);
 
-        if (_batchSizeBuffer.NullOrEmpty()) {
-            _batchSizeBuffer = Settings.BatchSize.ToString();
-        }
-
-        var newBatchSizeBuffer = listing.TextEntry(_batchSizeBuffer);
-        if (newBatchSizeBuffer != _batchSizeBuffer) {
-            _batchSizeBuffer = newBatchSizeBuffer;
-            if (int.TryParse(_batchSizeBuffer.Trim(), out var parsedBatchSize)) {
-                Settings.BatchSize = parsedBatchSize;
-            }
-        }
-
+        Settings.BatchSize = Mathf.RoundToInt(listing.Slider(Settings.BatchSize,
+            TranslatorSettings.MinBatchSize, TranslatorSettings.MaxBatchSize));
         listing.Gap(6f);
 
         listing.Label($"{"Translator_ModSettingConcurrency".Translate()}: {Settings.Concurrency}");
@@ -92,10 +79,8 @@ public sealed class TranslatorMod : Mod {
         GUI.color = Color.white;
         listing.Gap(2f);
 
-        Settings.Concurrency = Mathf.RoundToInt(listing.Slider(
-            Settings.Concurrency,
-            TranslatorSettings.MinConcurrency,
-            TranslatorSettings.MaxConcurrency));
+        Settings.Concurrency = Mathf.RoundToInt(listing.Slider(Settings.Concurrency,
+            TranslatorSettings.MinConcurrency, TranslatorSettings.MaxConcurrency));
         listing.Gap(6f);
 
         listing.Label($"{"Translator_ModSettingRetryCount".Translate()}: {Settings.RetryCount}");
@@ -104,10 +89,8 @@ public sealed class TranslatorMod : Mod {
         GUI.color = Color.white;
         listing.Gap(2f);
 
-        Settings.RetryCount = Mathf.RoundToInt(listing.Slider(
-            Settings.RetryCount,
-            TranslatorSettings.MinRetryCount,
-            TranslatorSettings.MaxRetryCount));
+        Settings.RetryCount = Mathf.RoundToInt(listing.Slider(Settings.RetryCount,
+            TranslatorSettings.MinRetryCount, TranslatorSettings.MaxRetryCount));
         listing.Gap(6f);
 
         listing.GapLine();
@@ -115,10 +98,9 @@ public sealed class TranslatorMod : Mod {
         listing.Label("Translator_ModSettingDefaultOutputLocation".Translate());
         var outputLocationLabel = GetOutputLocationLabel(Settings.DefaultOutputLocationMode);
         if (listing.ButtonText(outputLocationLabel)) {
-            Settings.DefaultOutputLocationMode =
-                Settings.DefaultOutputLocationMode == OutputLocationMode.GeneratedMod
-                    ? OutputLocationMode.OriginalMod
-                    : OutputLocationMode.GeneratedMod;
+            Settings.DefaultOutputLocationMode = Settings.DefaultOutputLocationMode == OutputLocationMode.GeneratedMod
+                ? OutputLocationMode.OriginalMod
+                : OutputLocationMode.GeneratedMod;
         }
 
         GUI.color = ColoredText.SubtleGrayColor;
@@ -134,22 +116,11 @@ public sealed class TranslatorMod : Mod {
 
         listing.End();
         Widgets.EndScrollView();
-
-        Settings.ApiUrl = Settings.ApiUrl.Trim();
-        Settings.ApiKey = Settings.ApiKey.Trim();
-        Settings.Model = Settings.Model.Trim();
-        NormalizeNumericSettings();
     }
 
     private void BeginValidateConfig() {
-        if (_validateConfigTask is not null) {
-            return;
-        }
+        if (_validateConfigTask is not null) return;
 
-        Settings.ApiUrl = Settings.ApiUrl.Trim();
-        Settings.ApiKey = Settings.ApiKey.Trim();
-        Settings.Model = Settings.Model.Trim();
-        NormalizeNumericSettings();
         WriteSettings();
 
         _lastValidationStatus = "Translator_ModSettingsValidating".Translate();
@@ -158,22 +129,12 @@ public sealed class TranslatorMod : Mod {
     }
 
     private void ConsumeValidationTaskResultIfReady() {
-        if (_validateConfigTask is null || !_validateConfigTask.IsCompleted) {
-            return;
-        }
+        if (_validateConfigTask is null || !_validateConfigTask.IsCompleted) return;
 
         var completedTask = _validateConfigTask;
         _validateConfigTask = null;
 
-        LlmConfigValidationResult result;
-        try {
-            result = completedTask.GetAwaiter().GetResult();
-        } catch (Exception ex) {
-            result = new LlmConfigValidationResult {
-                Success = false,
-                Message = ex.Message
-            };
-        }
+        var result = completedTask.GetAwaiter().GetResult();
 
         if (result.Success) {
             _lastValidationFailed = false;
@@ -183,20 +144,6 @@ public sealed class TranslatorMod : Mod {
 
         _lastValidationFailed = true;
         _lastValidationStatus = "Translator_ModSettingsValidationFailed".Translate(result.Message);
-    }
-
-    private void NormalizeNumericSettings() {
-        Settings.BatchSize = Mathf.Clamp(Settings.BatchSize, TranslatorSettings.MinBatchSize,
-            TranslatorSettings.MaxBatchSize);
-        Settings.Concurrency = Mathf.Clamp(Settings.Concurrency, TranslatorSettings.MinConcurrency,
-            TranslatorSettings.MaxConcurrency);
-        Settings.RetryCount = Mathf.Clamp(Settings.RetryCount, TranslatorSettings.MinRetryCount,
-            TranslatorSettings.MaxRetryCount);
-        Settings.DefaultOutputLocationMode = Settings.DefaultOutputLocationMode is
-            OutputLocationMode.GeneratedMod or OutputLocationMode.OriginalMod
-            ? Settings.DefaultOutputLocationMode
-            : OutputLocationMode.GeneratedMod;
-        _batchSizeBuffer = Settings.BatchSize.ToString();
     }
 
     private static string GetOutputLocationLabel(OutputLocationMode mode) {
