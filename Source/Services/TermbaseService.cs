@@ -31,16 +31,26 @@ internal static class TermbaseService {
         Formatting = Formatting.Indented
     };
 
+    // ponytail: memoized on file write time; switch to explicit invalidation if a filesystem reports coarse timestamps.
+    private static IReadOnlyList<TermbaseEntry>? _cachedEntries;
+    private static DateTime _cachedWriteTimeUtc;
+
     public static IReadOnlyList<TermbaseEntry> LoadEntries() {
         try {
             var filePath = GetTermbaseFilePath();
             if (!File.Exists(filePath)) {
+                _cachedEntries = null;
                 return [];
+            }
+
+            var writeTimeUtc = File.GetLastWriteTimeUtc(filePath);
+            if (_cachedEntries is not null && writeTimeUtc == _cachedWriteTimeUtc) {
+                return _cachedEntries;
             }
 
             var json = File.ReadAllText(filePath);
             var sourceTerms = JsonConvert.DeserializeObject<List<TermbaseSourceTerm>>(json, JsonSettings) ?? [];
-            return [
+            _cachedEntries = [
                 .. sourceTerms
                     .SelectMany(sourceTerm => sourceTerm.Translations.Select(translation => new TermbaseEntry {
                         Source = sourceTerm.Source.Trim(),
@@ -49,6 +59,8 @@ internal static class TermbaseService {
                     }))
                     .Where(entry => !entry.Source.NullOrEmpty() && !entry.Target.NullOrEmpty())
             ];
+            _cachedWriteTimeUtc = writeTimeUtc;
+            return _cachedEntries;
         } catch (Exception ex) {
             Log.Error($"[Translator] Failed to load termbase: {ex}");
             return [];

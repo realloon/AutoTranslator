@@ -48,11 +48,12 @@ public class Window_Termbase : Window {
 
         const float footerHeight = 34f;
         const float footerGap = 10f;
+        var selectedIndexes = GetSelectedLanguageEntryIndexes();
         var listRect = new Rect(0f, y, inRect.width, inRect.height - y - footerHeight - footerGap);
-        DrawEntriesList(listRect);
+        DrawEntriesList(listRect, selectedIndexes);
 
         var footerRect = new Rect(0f, inRect.height - footerHeight, inRect.width, footerHeight);
-        DrawFooter(footerRect);
+        DrawFooter(footerRect, selectedIndexes.Count);
     }
 
     private float DrawHeaderActions(Rect rect) {
@@ -101,7 +102,7 @@ public class Window_Termbase : Window {
         return rowHeight;
     }
 
-    private void DrawEntriesList(Rect rect) {
+    private void DrawEntriesList(Rect rect, List<int> selectedIndexes) {
         const float contentPadding = 8f;
         const float rowHeight = 32f;
         const float rowGap = 6f;
@@ -116,7 +117,6 @@ public class Window_Termbase : Window {
             rect.y + contentPadding,
             Mathf.Max(0f, rect.width - contentPadding * 2f),
             Mathf.Max(0f, rect.height - contentPadding * 2f));
-        var selectedIndexes = GetSelectedLanguageEntryIndexes();
         var rowCount = Mathf.Max(1, selectedIndexes.Count);
         var contentHeight = 30f + rowCount * (rowHeight + rowGap);
         var viewRect = new Rect(0f, 0f, scrollRect.width - 16f, Mathf.Max(scrollRect.height, contentHeight));
@@ -175,10 +175,10 @@ public class Window_Termbase : Window {
         Widgets.EndScrollView();
     }
 
-    private void DrawFooter(Rect rect) {
+    private void DrawFooter(Rect rect, int entryCount) {
         var closeLabel = "Close".Translate();
         var closeWidth = Mathf.Max(120f, Text.CalcSize(closeLabel).x + 24f);
-        var langAndCountLabel = $"{GetSelectedLanguageDisplayName()} ({GetSelectedLanguageEntryCount()})";
+        var langAndCountLabel = $"{GetSelectedLanguageDisplayName()} ({entryCount})";
         var langButtonWidth = Mathf.Max(180f, Text.CalcSize(langAndCountLabel).x + 24f);
         var maxLangButtonWidth = Mathf.Max(120f, rect.width - closeWidth - 12f);
         langButtonWidth = Mathf.Min(langButtonWidth, maxLangButtonWidth);
@@ -225,8 +225,6 @@ public class Window_Termbase : Window {
 
         return indexes;
     }
-
-    private int GetSelectedLanguageEntryCount() => GetSelectedLanguageEntryIndexes().Count;
 
     private void OpenLanguageMenu() {
         if (_languages.Count == 0) {

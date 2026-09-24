@@ -9,6 +9,7 @@
   <Translator_StaticScanTitle>來源於 key</Translator_StaticScanTitle>
   <Translator_StaticScanUniqueKeys>可翻譯 Key：{0}</Translator_StaticScanUniqueKeys>
   <Translator_StaticScanMissingKeys>目前語言缺失 keyed：{0}</Translator_StaticScanMissingKeys>
+  <Translator_StatsComputing>正在統計…</Translator_StatsComputing>
   <Translator_ExportLanguageDialogTitle>選擇翻譯語言</Translator_ExportLanguageDialogTitle>
   <Translator_SelectAllLanguages>全選</Translator_SelectAllLanguages>
   <Translator_ClearLanguageSelection>清空</Translator_ClearLanguageSelection>

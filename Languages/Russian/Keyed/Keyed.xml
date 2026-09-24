@@ -9,6 +9,7 @@
   <Translator_StaticScanTitle>Из Key</Translator_StaticScanTitle>
   <Translator_StaticScanUniqueKeys>Переводимых Key: {0}</Translator_StaticScanUniqueKeys>
   <Translator_StaticScanMissingKeys>Отсутствует keyed для текущего языка: {0}</Translator_StaticScanMissingKeys>
+  <Translator_StatsComputing>Подсчёт статистики…</Translator_StatsComputing>
   <Translator_ExportLanguageDialogTitle>Выберите языки перевода</Translator_ExportLanguageDialogTitle>
   <Translator_SelectAllLanguages>Выбрать все</Translator_SelectAllLanguages>
   <Translator_ClearLanguageSelection>Очистить</Translator_ClearLanguageSelection>

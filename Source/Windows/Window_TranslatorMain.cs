@@ -14,6 +14,7 @@ public class Window_TranslatorMain : Window {
     public override Vector2 InitialSize => new(760f, 520f);
 
     private readonly List<ModMetaData> _allMods = [];
+    private readonly Dictionary<string, ModMetaData> _allModsByPackageId = new(StringComparer.Ordinal);
     private readonly List<ModMetaData> _filteredMods = [];
     private readonly List<LoadedLanguage> _exportLanguages = [];
     private readonly HashSet<string> _selectedExportLanguageFolders = new(StringComparer.OrdinalIgnoreCase);
@@ -31,6 +32,10 @@ public class Window_TranslatorMain : Window {
         absorbInputAroundWindow = true;
 
         _allMods.AddRange(ModsConfig.ActiveModsInLoadOrder.Where(mod => !IsOfficialLudeonMod(mod)));
+        foreach (var mod in _allMods) {
+            _allModsByPackageId[mod.PackageId] = mod;
+        }
+
         InitializeExportLanguages();
         RefreshFilteredMods();
     }
@@ -77,9 +82,13 @@ public class Window_TranslatorMain : Window {
         var viewRect = new Rect(0f, 0f, viewWidth, _filteredMods.Count * 46f);
         Widgets.BeginScrollView(listRect, ref _modsScrollPos, viewRect);
 
-        var rowY = 0f;
-        foreach (var mod in _filteredMods) {
-            var rowRect = new Rect(0f, rowY, viewRect.width, 42f);
+        const float rowHeight = 42f;
+        var firstVisible = Mathf.Max(0, Mathf.FloorToInt(_modsScrollPos.y / rowHeight));
+        var lastVisible = Mathf.Min(_filteredMods.Count - 1,
+            Mathf.CeilToInt((_modsScrollPos.y + listRect.height) / rowHeight));
+        for (var i = firstVisible; i <= lastVisible; i++) {
+            var mod = _filteredMods[i];
+            var rowRect = new Rect(0f, i * rowHeight, viewRect.width, rowHeight);
             var isSelected = _selectedPackageId == mod.PackageId;
             if (isSelected) {
                 Widgets.DrawHighlightSelected(rowRect);
@@ -96,8 +105,6 @@ public class Window_TranslatorMain : Window {
             Widgets.LabelEllipses(new Rect(rowRect.x + 8f, rowRect.y + 20f, rowRect.width - 16f, 20f),
                 mod.PackageIdPlayerFacing);
             GUI.color = Color.white;
-
-            rowY += 42f;
         }
 
         Widgets.EndScrollView();
@@ -106,35 +113,42 @@ public class Window_TranslatorMain : Window {
     private void DrawWorkflowPanel(Rect rect) {
         var y = rect.y;
         var selectedMod = GetSelectedMod();
-        var (stats, translateStats) = StatsService.GetOrBuildStats(selectedMod);
+        var stats = StatsService.RequestStats(selectedMod);
 
         Widgets.Label(new Rect(rect.x, y, rect.width, 24f), selectedMod.Name);
         y += 24f;
 
-        Widgets.Label(new Rect(rect.x, y, rect.width, 24f), "Translator_DefStatsTitle".Translate());
-        y += 24f;
+        if (stats is null) {
+            GUI.color = ColoredText.SubtleGrayColor;
+            Widgets.Label(new Rect(rect.x, y, rect.width, 24f), "Translator_StatsComputing".Translate());
+            GUI.color = Color.white;
+            y += 24f;
+        } else {
+            Widgets.Label(new Rect(rect.x, y, rect.width, 24f), "Translator_DefStatsTitle".Translate());
+            y += 24f;
 
-        Widgets.Label(new Rect(rect.x, y, rect.width, 24f),
-            "Translator_DefStatsFields".Translate(stats.TranslatableInjectionItemCount));
-        y += 24f;
+            Widgets.Label(new Rect(rect.x, y, rect.width, 24f),
+                "Translator_DefStatsFields".Translate(stats.DefStats.TranslatableInjectionItemCount));
+            y += 24f;
 
-        Widgets.Label(new Rect(rect.x, y, rect.width, 24f),
-            "Translator_DefStatsMissingDefInjection".Translate(stats.MissingDefInjectionCount));
-        y += 32f;
+            Widgets.Label(new Rect(rect.x, y, rect.width, 24f),
+                "Translator_DefStatsMissingDefInjection".Translate(stats.DefStats.MissingDefInjectionCount));
+            y += 32f;
 
-        Widgets.DrawLineHorizontal(rect.x, y, rect.width, SectionDividerColor);
-        y += 12f;
+            Widgets.DrawLineHorizontal(rect.x, y, rect.width, SectionDividerColor);
+            y += 12f;
 
-        Widgets.Label(new Rect(rect.x, y, rect.width, 24f), "Translator_StaticScanTitle".Translate());
-        y += 24f;
+            Widgets.Label(new Rect(rect.x, y, rect.width, 24f), "Translator_StaticScanTitle".Translate());
+            y += 24f;
 
-        Widgets.Label(new Rect(rect.x, y, rect.width, 24f),
-            "Translator_StaticScanUniqueKeys".Translate(translateStats.UniqueLiteralKeyCount));
-        y += 24f;
+            Widgets.Label(new Rect(rect.x, y, rect.width, 24f),
+                "Translator_StaticScanUniqueKeys".Translate(stats.KeyStats.UniqueLiteralKeyCount));
+            y += 24f;
 
-        Widgets.Label(new Rect(rect.x, y, rect.width, 24f),
-            "Translator_StaticScanMissingKeys".Translate(translateStats.MissingKeyCount));
-        y += 36f;
+            Widgets.Label(new Rect(rect.x, y, rect.width, 24f),
+                "Translator_StaticScanMissingKeys".Translate(stats.KeyStats.MissingKeyCount));
+            y += 36f;
+        }
 
         var termbaseButtonLabel = "Translator_TermbaseButton".Translate();
         var exportButtonLabel = "Translator_ExportIrButton".Translate();
@@ -423,7 +437,7 @@ public class Window_TranslatorMain : Window {
 
     private ModMetaData GetSelectedMod() {
         var selectedPackageId = _selectedPackageId ?? throw new InvalidOperationException("No mod selected.");
-        return _allMods.First(m => m.PackageId == selectedPackageId);
+        return _allModsByPackageId[selectedPackageId];
     }
 
     private void RefreshFilteredMods() {

@@ -9,6 +9,7 @@
   <Translator_StaticScanTitle>From Key</Translator_StaticScanTitle>
   <Translator_StaticScanUniqueKeys>번역 가능한 Key: {0}</Translator_StaticScanUniqueKeys>
   <Translator_StaticScanMissingKeys>현재 언어에서 누락된 keyed: {0}</Translator_StaticScanMissingKeys>
+  <Translator_StatsComputing>통계 계산 중…</Translator_StatsComputing>
   <Translator_ExportLanguageDialogTitle>번역 언어 선택</Translator_ExportLanguageDialogTitle>
   <Translator_SelectAllLanguages>전체 선택</Translator_SelectAllLanguages>
   <Translator_ClearLanguageSelection>지우기</Translator_ClearLanguageSelection>

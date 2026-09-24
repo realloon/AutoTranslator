@@ -9,6 +9,7 @@
   <Translator_StaticScanTitle>From Key</Translator_StaticScanTitle>
   <Translator_StaticScanUniqueKeys>翻訳可能なKey: {0}</Translator_StaticScanUniqueKeys>
   <Translator_StaticScanMissingKeys>現在の言語で不足しているkeyed: {0}</Translator_StaticScanMissingKeys>
+  <Translator_StatsComputing>統計を計算中…</Translator_StatsComputing>
   <Translator_ExportLanguageDialogTitle>翻訳言語を選択</Translator_ExportLanguageDialogTitle>
   <Translator_SelectAllLanguages>すべて選択</Translator_SelectAllLanguages>
   <Translator_ClearLanguageSelection>クリア</Translator_ClearLanguageSelection>

@@ -134,15 +134,18 @@ internal static class LlmTranslateService {
             var batches = BuildBatches(pending, config.BatchSize, MaxEstimatedCharsPerBatch);
 
             var failedBatches = new List<string>();
-            for (var i = 0; i < batches.Count; i += config.Concurrency) {
-                var wave = batches.Skip(i).Take(config.Concurrency).ToList();
-                var waveTasks = wave
-                    .Select(batch => Task.Run(() =>
+            for (var start = 0; start < batches.Count; start += config.Concurrency) {
+                var end = Math.Min(start + config.Concurrency, batches.Count);
+                var waveTasks = new Task<BatchExecutionResult>[end - start];
+                for (var j = start; j < end; j++) {
+                    var batch = batches[j];
+                    waveTasks[j - start] = Task.Run(() =>
                         RequestBatchTranslationsWithRetry(config,
                             targetLanguageDisplayName,
                             batch,
-                            termbaseGlossary)))
-                    .ToArray();
+                            termbaseGlossary));
+                }
+
                 Task.WhenAll(waveTasks).GetAwaiter().GetResult();
                 foreach (var task in waveTasks) {
                     var batchResult = task.Result;

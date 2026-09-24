@@ -19,30 +19,57 @@ internal sealed class StatsSnapshot {
 }
 
 internal static class StatsService {
-    private static readonly Dictionary<string, Lazy<StatsSnapshot>> StatsByPackageId = [];
-    private static string? _statsLanguageCacheKey;
+    private static readonly Dictionary<string, StatsSnapshot> StatsByPackageId = [];
+    private static readonly object Gate = new();
+    private static string? _pendingPackageId;
+    private static string? _statsActiveFolder;
+    private static string? _statsDefaultFolder;
 
-    public static (DefTranslationStats DefStats, StaticTranslateStats KeyStats) GetOrBuildStats(ModMetaData mod) {
+    /// <summary>
+    /// Returns cached stats, or null while a background build is queued/running.
+    /// </summary>
+    public static StatsSnapshot? RequestStats(ModMetaData mod) {
         var activeLanguage = LanguageDatabase.activeLanguage;
         var defaultLanguage = LanguageDatabase.defaultLanguage;
         activeLanguage.LoadData();
         defaultLanguage.LoadData();
         RefreshStatsCacheByLanguage(activeLanguage, defaultLanguage);
 
-        if (!StatsByPackageId.TryGetValue(mod.PackageId, out var lazyStats)) {
-            lazyStats = new Lazy<StatsSnapshot>(() => BuildStatsSnapshot(mod, activeLanguage, defaultLanguage),
-                LazyThreadSafetyMode.None);
-            StatsByPackageId[mod.PackageId] = lazyStats;
+        lock (Gate) {
+            if (StatsByPackageId.TryGetValue(mod.PackageId, out var snapshot)) {
+                return snapshot;
+            }
+
+            if (_pendingPackageId is not null) {
+                return null;
+            }
+
+            _pendingPackageId = mod.PackageId;
         }
 
-        try {
-            var snapshot = lazyStats.Value;
-            return (snapshot.DefStats, snapshot.KeyStats);
-        } catch (Exception ex) {
-            StatsByPackageId.Remove(mod.PackageId);
-            Log.Error($"[Translator] Failed to build stats for {mod.PackageId}: {ex}");
-            return (new DefTranslationStats(), new StaticTranslateStats());
-        }
+        var packageId = mod.PackageId;
+        Task.Run(() => {
+            StatsSnapshot snapshot;
+            try {
+                snapshot = BuildStatsSnapshot(mod, activeLanguage, defaultLanguage);
+            } catch (Exception ex) {
+                Log.Error($"[Translator] Failed to build stats for {packageId}: {ex}");
+                snapshot = new StatsSnapshot();
+            }
+
+            lock (Gate) {
+                if (_statsActiveFolder == activeLanguage.folderName
+                    && _statsDefaultFolder == defaultLanguage.folderName) {
+                    StatsByPackageId[packageId] = snapshot;
+                }
+
+                if (_pendingPackageId == packageId) {
+                    _pendingPackageId = null;
+                }
+            }
+        });
+
+        return null;
     }
 
     private static StatsSnapshot BuildStatsSnapshot(ModMetaData mod, LoadedLanguage activeLanguage,
@@ -54,12 +81,15 @@ internal static class StatsService {
     }
 
     private static void RefreshStatsCacheByLanguage(LoadedLanguage activeLanguage, LoadedLanguage defaultLanguage) {
-        var cacheKey = $"{activeLanguage.folderName}|{defaultLanguage.folderName}";
-        if (_statsLanguageCacheKey == cacheKey) {
+        if (_statsActiveFolder == activeLanguage.folderName && _statsDefaultFolder == defaultLanguage.folderName) {
             return;
         }
 
-        StatsByPackageId.Clear();
-        _statsLanguageCacheKey = cacheKey;
+        lock (Gate) {
+            StatsByPackageId.Clear();
+            _pendingPackageId = null;
+            _statsActiveFolder = activeLanguage.folderName;
+            _statsDefaultFolder = defaultLanguage.folderName;
+        }
     }
 }

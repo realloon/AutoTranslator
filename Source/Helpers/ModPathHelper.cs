@@ -3,8 +3,9 @@ using System.Text;
 namespace Translator.Helpers;
 
 internal static class ModPathHelper {
-    public static bool IsPathUnderRoot(string path, string root) {
-        return Normalize(path).StartsWith(Normalize(root), StringComparison.OrdinalIgnoreCase);
+    /// <param name="normalizedRoot">A path already passed through <see cref="Normalize"/>.</param>
+    public static bool IsPathUnderRoot(string path, string normalizedRoot) {
+        return Normalize(path).StartsWith(normalizedRoot, StringComparison.OrdinalIgnoreCase);
     }
 
     public static string Normalize(string path) {

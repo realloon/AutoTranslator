@@ -9,6 +9,7 @@
   <Translator_StaticScanTitle>From key</Translator_StaticScanTitle>
   <Translator_StaticScanUniqueKeys>Translatable keys: {0}</Translator_StaticScanUniqueKeys>
   <Translator_StaticScanMissingKeys>Missing keyed in current language: {0}</Translator_StaticScanMissingKeys>
+  <Translator_StatsComputing>Calculating statistics...</Translator_StatsComputing>
   <Translator_ExportLanguageDialogTitle>Select Translation Languages</Translator_ExportLanguageDialogTitle>
   <Translator_SelectAllLanguages>Select All</Translator_SelectAllLanguages>
   <Translator_ClearLanguageSelection>Clear</Translator_ClearLanguageSelection>
