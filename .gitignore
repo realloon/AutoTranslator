@@ -1,9 +1,3 @@
+Source/obj
+
 Assemblies/
-
-Source/Translator/.idea
-Source/Translator/bin
-Source/Translator/obj
-*.DotSettings.user
-
-.codex/
-AGENTS.md
