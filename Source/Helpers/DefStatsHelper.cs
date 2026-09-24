@@ -17,23 +17,15 @@ internal static class DefStatsHelper {
             try {
                 packagesByDefType.TryGetValue(defType, out var package);
                 var injectionsByNormalizedPath = BuildNormalizedInjectionLookup(package);
-                DefInjectionUtility.ForEachPossibleDefInjection(
-                    defType,
-                    (_, normalizedPath, isCollection, currentValue, currentValueCollection, translationAllowed,
-                        fullListTranslationAllowed, fieldInfo, def) => {
-                        if (!translationAllowed) {
-                            return;
-                        }
+                DefInjectionUtility.ForEachPossibleDefInjection(defType, (_, normalizedPath, isCollection, currentValue,
+                        currentValueCollection, translationAllowed, fullListTranslationAllowed, fieldInfo, def) => {
+                        if (!translationAllowed) return;
 
                         if (!isCollection) {
-                            if (!DefInjectionUtility.ShouldCheckMissingInjection(currentValue, fieldInfo, def)) {
-                                return;
-                            }
+                            if (!DefInjectionUtility.ShouldCheckMissingInjection(currentValue, fieldInfo, def)) return;
 
                             stats.TranslatableInjectionItemCount += 1;
-                            if (IsMissingSingleInjection(
-                                    normalizedPath,
-                                    injectionsByNormalizedPath)) {
+                            if (IsMissingSingleInjection(normalizedPath, injectionsByNormalizedPath)) {
                                 stats.MissingDefInjectionCount += 1;
                             }
 
@@ -48,9 +40,7 @@ internal static class DefStatsHelper {
                             }
                         }
 
-                        if (translatableIndexes.Count == 0) {
-                            return;
-                        }
+                        if (translatableIndexes.Count == 0) return;
 
                         stats.TranslatableInjectionItemCount += translatableIndexes.Count;
                         stats.MissingDefInjectionCount += CountMissingCollectionInjections(

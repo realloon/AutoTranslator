@@ -17,14 +17,12 @@ public static class Patch_MainMenuDrawer {
     private static IEnumerable<CodeInstruction>
         DoMainMenuControlsTranspiler(IEnumerable<CodeInstruction> instructions) {
         var codes = new List<CodeInstruction>(instructions);
-        var drawMethod =
-            AccessTools.Method(typeof(OptionListingUtility), nameof(OptionListingUtility.DrawOptionListing));
+        var drawMethod = AccessTools.Method(typeof(OptionListingUtility),
+            nameof(OptionListingUtility.DrawOptionListing));
         var addButtonMethod = AccessTools.Method(typeof(Patch_MainMenuDrawer), nameof(TryAddTranslatorButton));
 
         for (var i = 0; i < codes.Count; i++) {
-            if (!codes[i].Calls(drawMethod)) {
-                continue;
-            }
+            if (!codes[i].Calls(drawMethod)) continue;
 
             if (i < 1 || !IsLoadLocalInstruction(codes[i - 1])) {
                 Log.Error("[Translator] Could not inject main menu button: unexpected IL pattern.");
@@ -52,9 +50,7 @@ public static class Patch_MainMenuDrawer {
     }
 
     private static void TryAddTranslatorButton(List<ListableOption> options) {
-        if (Current.ProgramState != ProgramState.Entry) {
-            return;
-        }
+        if (Current.ProgramState != ProgramState.Entry) return;
 
         var insertIndex = Math.Max(0, options.Count - 1);
         options.Insert(insertIndex, new ListableOption("Translator_MainMenuButton".Translate(),
