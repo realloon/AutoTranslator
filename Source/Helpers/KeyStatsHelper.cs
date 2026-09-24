@@ -23,31 +23,17 @@ internal static class KeyStatsHelper {
 
     private static IReadOnlyCollection<string> CollectDefaultKeyedKeysForMod(ModMetaData mod,
         LoadedLanguage defaultLanguage) {
-        var modRoot = NormalizePath(mod.RootDir.FullName);
+        var modRoot = ModPathHelper.Normalize(mod.RootDir.FullName);
         var keys = new HashSet<string>(StringComparer.Ordinal);
 
+        // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
         foreach (var keyedReplacement in defaultLanguage.keyedReplacements) {
             var source = keyedReplacement.Value.fileSourceFullPath;
-            if (source.NullOrEmpty() || !IsPathUnderRoot(source, modRoot)) continue;
+            if (source.NullOrEmpty() || !ModPathHelper.IsPathUnderRoot(source, modRoot)) continue;
 
             keys.Add(keyedReplacement.Key);
         }
 
         return keys;
-    }
-
-    private static bool IsPathUnderRoot(string path, string root) {
-        var normalizedPath = NormalizePath(path);
-        return normalizedPath.StartsWith(root, StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static string NormalizePath(string path) {
-        try {
-            return Path.GetFullPath(path)
-                .Replace('\\', '/')
-                .TrimEnd('/');
-        } catch {
-            return path.Replace('\\', '/').TrimEnd('/');
-        }
     }
 }

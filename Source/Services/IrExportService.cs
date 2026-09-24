@@ -2,6 +2,7 @@ using System.Text;
 using System.Xml.Linq;
 using RimWorld;
 using Verse;
+using Translator.Helpers;
 
 namespace Translator.Services;
 
@@ -66,7 +67,7 @@ internal static class IrExportService {
 
     private static List<LanguageWorksetKeyedItem> BuildKeyedEntries(ModMetaData mod, LoadedLanguage activeLanguage,
         LoadedLanguage defaultLanguage) {
-        var modRoot = NormalizePath(mod.RootDir.FullName);
+        var modRoot = ModPathHelper.Normalize(mod.RootDir.FullName);
         var entries = new List<LanguageWorksetKeyedItem>();
         var seenKeys = new HashSet<string>(StringComparer.Ordinal);
 
@@ -76,7 +77,7 @@ internal static class IrExportService {
             }
 
             var sourcePath = value.fileSourceFullPath;
-            if (sourcePath.NullOrEmpty() || !IsPathUnderRoot(sourcePath, modRoot)) {
+            if (sourcePath.NullOrEmpty() || !ModPathHelper.IsPathUnderRoot(sourcePath, modRoot)) {
                 continue;
             }
 
@@ -223,7 +224,9 @@ internal static class IrExportService {
                     normalizedPath = key;
                 }
 
-                if (normalizedPath.NullOrEmpty() || !lookup.TryAdd(normalizedPath, injection)) { }
+                if (!normalizedPath.NullOrEmpty()) {
+                    lookup.TryAdd(normalizedPath, injection);
+                }
             }
 
             result.Add(defType, lookup);
@@ -238,21 +241,6 @@ internal static class IrExportService {
         }
 
         return replacement.value ?? string.Empty;
-    }
-
-    private static bool IsPathUnderRoot(string path, string root) {
-        var normalizedPath = NormalizePath(path);
-        return normalizedPath.StartsWith(root, StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static string NormalizePath(string path) {
-        try {
-            return Path.GetFullPath(path)
-                .Replace('\\', '/')
-                .TrimEnd('/');
-        } catch {
-            return path.Replace('\\', '/').TrimEnd('/');
-        }
     }
 
     private static void EnsureExportStructure(string outputModDir, bool inOriginalMod) {
