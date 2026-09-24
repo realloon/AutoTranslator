@@ -277,7 +277,7 @@ internal static class IrExportService {
                 )));
 
         var aboutPath = Path.Combine(outputModDir, "About", "About.xml");
-        File.WriteAllText(aboutPath, aboutDoc.ToString(), Encoding.UTF8);
+        aboutDoc.Save(aboutPath);
     }
 
     private static string BuildExportFolderName(ModMetaData mod, string exportToken) {

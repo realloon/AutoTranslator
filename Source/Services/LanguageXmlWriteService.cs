@@ -1,4 +1,3 @@
-using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using Translator.Helpers;
@@ -32,6 +31,7 @@ internal static class LanguageXmlWriteService {
                 .OrderBy(item => item.Tag, StringComparer.Ordinal)
                 .Select(item => new XmlEntry {
                     Tag = item.Tag,
+                    Original = item.Original,
                     Translation = item.Translation
                 })
                 .ToList();
@@ -63,6 +63,7 @@ internal static class LanguageXmlWriteService {
                     .OrderBy(item => item.Tag, StringComparer.Ordinal)
                     .Select(item => new XmlEntry {
                         Tag = item.Tag,
+                        Original = item.Original,
                         Translation = item.Translation
                     })
                     .ToList();
@@ -105,6 +106,11 @@ internal static class LanguageXmlWriteService {
                 continue;
             }
 
+            if (!entry.Original.NullOrEmpty()) {
+                // Vanilla translation files carry the source text as an " EN: ... " comment before each entry.
+                root.Add(new XComment(SanitizeXComment($" EN: {entry.Original.Replace("\n", "\\n")} ")));
+            }
+
             root.Add(element);
             writtenCount += 1;
         }
@@ -116,10 +122,9 @@ internal static class LanguageXmlWriteService {
         var directory = Path.GetDirectoryName(outputFilePath)!;
         Directory.CreateDirectory(directory);
 
-        var doc = new XDocument(
-            new XDeclaration("1.0", "utf-8", null),
-            root);
-        File.WriteAllText(outputFilePath, doc.ToString(), Encoding.UTF8);
+        new XDocument(
+            new XDeclaration("1.0", "UTF-8", null),
+            root).Save(outputFilePath);
         return writtenCount;
     }
 
@@ -139,6 +144,18 @@ internal static class LanguageXmlWriteService {
         }
     }
 
+    private static string SanitizeXComment(string comment) {
+        while (comment.Contains("-----")) {
+            comment = comment.Replace("-----", "- - -");
+        }
+
+        while (comment.Contains("--")) {
+            comment = comment.Replace("--", "- -");
+        }
+
+        return comment;
+    }
+
     private static string NormalizeTagForXmlName(string tag) {
         if (tag.NullOrEmpty()) {
             return string.Empty;
@@ -156,6 +173,7 @@ internal static class LanguageXmlWriteService {
 
     private sealed class XmlEntry {
         public string Tag = string.Empty;
+        public string Original = string.Empty;
         public string Translation = string.Empty;
     }
 }
