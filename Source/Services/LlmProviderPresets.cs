@@ -33,7 +33,14 @@ internal static class LlmProviderPresets {
         DisableThinking = true
     };
 
-    public static readonly IReadOnlyList<LlmProviderPreset> All = [DeepSeek, Vercel];
+    public static readonly LlmProviderPreset OpenRouter = new() {
+        Id = "openrouter",
+        Label = "OpenRouter",
+        BaseUrl = "https://openrouter.ai/api/v1",
+        Protocol = LlmApiProtocol.ChatCompletions
+    };
+
+    public static readonly IReadOnlyList<LlmProviderPreset> All = [DeepSeek, Vercel, OpenRouter];
 
     public static LlmProviderPreset? Find(string providerId) {
         return All.FirstOrDefault(preset => preset.Id == providerId);
