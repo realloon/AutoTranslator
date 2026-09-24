@@ -23,10 +23,11 @@ public class Window_ExportLanguagePicker : Window {
         IEnumerable<string> selectedLanguageFolders,
         OutputLocationMode defaultOutputLocationMode,
         Action<IReadOnlyCollection<string>, OutputLocationMode> onConfirm) {
-        _languages = languages
-            .Where(language => !language.folderName.NullOrEmpty())
-            .OrderBy(language => language.folderName, StringComparer.OrdinalIgnoreCase)
-            .ToList();
+        _languages = [
+            .. languages
+                .Where(language => !language.folderName.NullOrEmpty())
+                .OrderBy(language => language.folderName, StringComparer.OrdinalIgnoreCase)
+        ];
         _selectedLanguageFolders = new HashSet<string>(selectedLanguageFolders, StringComparer.OrdinalIgnoreCase);
         if (_selectedLanguageFolders.Count == 0 && LanguageDatabase.activeLanguage is not null) {
             _selectedLanguageFolders.Add(LanguageDatabase.activeLanguage.folderName);
@@ -154,7 +155,7 @@ public class Window_ExportLanguagePicker : Window {
             return;
         }
 
-        _onConfirm(_selectedLanguageFolders.ToList(), _outputLocationMode);
+        _onConfirm([.. _selectedLanguageFolders], _outputLocationMode);
         Close();
     }
 

@@ -44,23 +44,15 @@ internal static class TermbaseService {
             }
 
             var sourceTerms = JsonConvert.DeserializeObject<List<TermbaseSourceTerm>>(json, JsonSettings) ?? [];
-            return sourceTerms
-                .Where(sourceTerm => sourceTerm is not null)
-                .SelectMany(sourceTerm => {
-                    var source = sourceTerm.Source.NullOrEmpty() ? string.Empty : sourceTerm.Source.Trim();
-                    return (sourceTerm.Translations)
-                        .Where(translation => translation is not null)
-                        .Select(translation => new TermbaseEntry {
-                            Source = source,
-                            Target = translation.Target.NullOrEmpty() ? string.Empty : translation.Target.Trim(),
-                            TargetLanguageFolder = translation.Language.NullOrEmpty()
-                                ? string.Empty
-                                : translation.Language.Trim()
-                        });
-                })
-                .Where(entry => !entry.Source.NullOrEmpty())
-                .Where(entry => !entry.Target.NullOrEmpty())
-                .ToList();
+            return [
+                .. sourceTerms
+                    .SelectMany(sourceTerm => sourceTerm.Translations.Select(translation => new TermbaseEntry {
+                        Source = sourceTerm.Source.Trim(),
+                        Target = translation.Target.Trim(),
+                        TargetLanguageFolder = translation.Language.Trim()
+                    }))
+                    .Where(entry => !entry.Source.NullOrEmpty() && !entry.Target.NullOrEmpty())
+            ];
         } catch (Exception ex) {
             Log.Error($"[Translator] Failed to load termbase: {ex}");
             return [];
@@ -71,15 +63,13 @@ internal static class TermbaseService {
         try {
             var normalizedEntries = entries
                 .Select(entry => new TermbaseEntry {
-                    Source = entry.Source.NullOrEmpty() ? string.Empty : entry.Source.Trim(),
-                    Target = entry.Target.NullOrEmpty() ? string.Empty : entry.Target.Trim(),
-                    TargetLanguageFolder = entry.TargetLanguageFolder.NullOrEmpty()
-                        ? string.Empty
-                        : entry.TargetLanguageFolder.Trim()
+                    Source = entry.Source.Trim(),
+                    Target = entry.Target.Trim(),
+                    TargetLanguageFolder = entry.TargetLanguageFolder.Trim()
                 })
-                .Where(entry => !entry.TargetLanguageFolder.NullOrEmpty())
-                .Where(entry => !entry.Source.NullOrEmpty())
-                .Where(entry => !entry.Target.NullOrEmpty())
+                .Where(entry => !entry.TargetLanguageFolder.NullOrEmpty() &&
+                                !entry.Source.NullOrEmpty() &&
+                                !entry.Target.NullOrEmpty())
                 .ToList();
 
             var sourceTerms = normalizedEntries
@@ -87,14 +77,15 @@ internal static class TermbaseService {
                 .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
                 .Select(group => new TermbaseSourceTerm {
                     Source = group.First().Source,
-                    Translations = group
-                        .GroupBy(entry => entry.TargetLanguageFolder, StringComparer.OrdinalIgnoreCase)
-                        .OrderBy(languageGroup => languageGroup.Key, StringComparer.OrdinalIgnoreCase)
-                        .Select(languageGroup => new TermbaseTranslation {
-                            Language = languageGroup.First().TargetLanguageFolder,
-                            Target = languageGroup.Last().Target
-                        })
-                        .ToList()
+                    Translations = [
+                        .. group
+                            .GroupBy(entry => entry.TargetLanguageFolder, StringComparer.OrdinalIgnoreCase)
+                            .OrderBy(languageGroup => languageGroup.Key, StringComparer.OrdinalIgnoreCase)
+                            .Select(languageGroup => new TermbaseTranslation {
+                                Language = languageGroup.First().TargetLanguageFolder,
+                                Target = languageGroup.Last().Target
+                            })
+                    ]
                 })
                 .ToList();
             var json = JsonConvert.SerializeObject(sourceTerms, JsonSettings);
@@ -125,15 +116,9 @@ internal static class TermbaseService {
 
         var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         foreach (var entry in LoadEntries()) {
-            if (!string.Equals(entry.TargetLanguageFolder, targetLanguageFolder, StringComparison.OrdinalIgnoreCase)) {
-                continue;
+            if (string.Equals(entry.TargetLanguageFolder, targetLanguageFolder, StringComparison.OrdinalIgnoreCase)) {
+                map[entry.Source] = entry.Target;
             }
-
-            if (entry.Source.NullOrEmpty() || entry.Target.NullOrEmpty()) {
-                continue;
-            }
-
-            map[entry.Source] = entry.Target;
         }
 
         return map;

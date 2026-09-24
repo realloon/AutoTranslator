@@ -30,12 +30,7 @@ public class Window_Termbase : Window {
                                   ?? _languages.FirstOrDefault()?.folderName
                                   ?? string.Empty;
 
-        _entries.AddRange(TermbaseService.LoadEntries()
-            .Select(entry => new TermbaseEntry {
-                Source = entry.Source,
-                Target = entry.Target,
-                TargetLanguageFolder = entry.TargetLanguageFolder
-            }));
+        _entries.AddRange(TermbaseService.LoadEntries());
     }
 
     public override void DoWindowContents(Rect inRect) {
@@ -215,13 +210,9 @@ public class Window_Termbase : Window {
             return "Translator_TermbaseNoLanguage".Translate().ToString();
         }
 
-        var language = _languages.FirstOrDefault(item =>
-            string.Equals(item.folderName, _selectedLanguageFolder, StringComparison.OrdinalIgnoreCase));
-        if (language is null) {
-            return _selectedLanguageFolder;
-        }
-
-        return language.DisplayName.NullOrEmpty() ? language.folderName : language.DisplayName;
+        var language = _languages.FirstOrDefault(item => item.folderName
+            .Equals(_selectedLanguageFolder, StringComparison.OrdinalIgnoreCase));
+        return language is null ? _selectedLanguageFolder : DisplayNameOf(language);
     }
 
     private List<int> GetSelectedLanguageEntryIndexes() {
@@ -236,9 +227,7 @@ public class Window_Termbase : Window {
         return indexes;
     }
 
-    private int GetSelectedLanguageEntryCount() {
-        return GetSelectedLanguageEntryIndexes().Count;
-    }
+    private int GetSelectedLanguageEntryCount() => GetSelectedLanguageEntryIndexes().Count;
 
     private void OpenLanguageMenu() {
         if (_languages.Count == 0) {
@@ -248,10 +237,10 @@ public class Window_Termbase : Window {
 
         var options = new List<FloatMenuOption>();
 
+        // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
         foreach (var language in _languages) {
-            var label = language.DisplayName.NullOrEmpty() ? language.folderName : language.DisplayName;
             var folder = language.folderName;
-            options.Add(new FloatMenuOption(label, () => { _selectedLanguageFolder = folder; }));
+            options.Add(new FloatMenuOption(DisplayNameOf(language), () => { _selectedLanguageFolder = folder; }));
         }
 
         Find.WindowStack.Add(new FloatMenu(options));
@@ -263,10 +252,12 @@ public class Window_Termbase : Window {
 
     private static string GetSourceLanguageDisplayName() {
         var sourceLanguage = LanguageDatabase.defaultLanguage ?? LanguageDatabase.activeLanguage;
-        if (sourceLanguage is null) {
-            return "Translator_TermbaseNoLanguage".Translate().ToString();
-        }
+        return sourceLanguage is null
+            ? "Translator_TermbaseNoLanguage".Translate().ToString()
+            : DisplayNameOf(sourceLanguage);
+    }
 
-        return sourceLanguage.DisplayName.NullOrEmpty() ? sourceLanguage.folderName : sourceLanguage.DisplayName;
+    private static string DisplayNameOf(LoadedLanguage language) {
+        return language.DisplayName.NullOrEmpty() ? language.folderName : language.DisplayName;
     }
 }
