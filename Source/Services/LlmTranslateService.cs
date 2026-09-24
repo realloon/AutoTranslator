@@ -18,6 +18,24 @@ internal sealed class LlmConfigValidationResult {
     public string Message = string.Empty;
 }
 
+internal sealed class LlmModelListResult {
+    public bool Success;
+    public string Message = string.Empty;
+    public List<string> Models = [];
+}
+
+internal sealed class LlmActiveConfig {
+    public string ApiUrl = string.Empty;
+    public string ModelsUrl = string.Empty;
+    public string ApiKey = string.Empty;
+    public string Model = string.Empty;
+    public int BatchSize;
+    public int Concurrency;
+    public int RetryCount;
+    public LlmApiProtocol Protocol;
+    public LlmProviderPreset? Preset;
+}
+
 internal static class LlmTranslateService {
     private const int MaxEstimatedCharsPerBatch = 18000;
     private const int RequestTimeoutSeconds = 600;
@@ -30,8 +48,7 @@ internal static class LlmTranslateService {
 
     public static LlmConfigValidationResult ValidateCurrentConfig(bool testConnection) {
         try {
-            if (!TryGetActiveConfig(out var apiUrl, out var apiKey, out var model, out _, out _, out _,
-                    out var configError)) {
+            if (!TryGetActiveConfig(out var config, out var configError)) {
                 return new LlmConfigValidationResult {
                     Success = false,
                     Message = configError
@@ -39,7 +56,7 @@ internal static class LlmTranslateService {
             }
 
             if (testConnection) {
-                ProbeConnection(apiUrl, apiKey, model);
+                ProbeConnection(config);
             }
 
             return new LlmConfigValidationResult {
@@ -54,14 +71,49 @@ internal static class LlmTranslateService {
         }
     }
 
+    public static LlmModelListResult FetchModels() {
+        try {
+            if (!TryGetActiveConfig(out var config, out var configError, requireModel: false)) {
+                return new LlmModelListResult {
+                    Success = false,
+                    Message = configError
+                };
+            }
+
+            using var request = new HttpRequestMessage(HttpMethod.Get, config.ModelsUrl);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", config.ApiKey);
+            using var response = HttpClient.SendAsync(request).GetAwaiter().GetResult();
+            var responseJson = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            if (!response.IsSuccessStatusCode) {
+                return new LlmModelListResult {
+                    Success = false,
+                    Message = $"{(int)response.StatusCode}: {response.ReasonPhrase}"
+                };
+            }
+
+            var parsed = JsonConvert.DeserializeObject<ModelListResponse>(responseJson);
+            var models = parsed?.Data
+                .Select(entry => entry.Id)
+                .Where(id => !string.IsNullOrEmpty(id))
+                .ToList() ?? [];
+            return new LlmModelListResult {
+                Success = true,
+                Models = models
+            };
+        } catch (Exception ex) {
+            return new LlmModelListResult {
+                Success = false,
+                Message = ex.Message
+            };
+        }
+    }
+
     public static LlmTranslateResult TranslateWorkset(LanguageWorksetFile workset,
         string targetLanguageFolder,
         string targetLanguageDisplayName) {
         var pendingCount = 0;
         try {
-            if (!TryGetActiveConfig(out var apiUrl, out var apiKey, out var model, out var batchSize,
-                    out var concurrency, out var retryCount,
-                    out var configError)) {
+            if (!TryGetActiveConfig(out var config, out var configError)) {
                 return new LlmTranslateResult {
                     Success = false,
                     Message = configError,
@@ -83,19 +135,16 @@ internal static class LlmTranslateService {
 
             var translatedById = new Dictionary<string, string>(StringComparer.Ordinal);
             var termbaseGlossary = TermbaseService.GetGlossaryForLanguage(targetLanguageFolder);
-            var batches = BuildBatches(pending, batchSize, MaxEstimatedCharsPerBatch);
+            var batches = BuildBatches(pending, config.BatchSize, MaxEstimatedCharsPerBatch);
 
             var failedBatches = new List<string>();
-            for (var i = 0; i < batches.Count; i += concurrency) {
-                var wave = batches.Skip(i).Take(concurrency).ToList();
+            for (var i = 0; i < batches.Count; i += config.Concurrency) {
+                var wave = batches.Skip(i).Take(config.Concurrency).ToList();
                 var waveTasks = wave
                     .Select(batch => Task.Run(() =>
-                        RequestBatchTranslationsWithRetry(apiUrl,
-                            apiKey,
-                            model,
+                        RequestBatchTranslationsWithRetry(config,
                             targetLanguageDisplayName,
                             batch,
-                            retryCount,
                             termbaseGlossary)))
                     .ToArray();
                 Task.WhenAll(waveTasks).GetAwaiter().GetResult();
@@ -187,60 +236,77 @@ internal static class LlmTranslateService {
         return result;
     }
 
-    private static bool TryGetActiveConfig(out string apiUrl,
-        out string apiKey,
-        out string model,
-        out int batchSize,
-        out int concurrency,
-        out int retryCount,
-        out string errorMessage) {
+    private static bool TryGetActiveConfig(out LlmActiveConfig config, out string errorMessage,
+        bool requireModel = true) {
         var settings = TranslatorMod.Settings;
-        apiUrl = settings.ApiUrl.Trim();
-        apiKey = settings.ApiKey.Trim();
-        model = settings.Model.Trim();
-        batchSize = settings.BatchSize;
-        concurrency = settings.Concurrency;
-        retryCount = settings.RetryCount;
+        var preset = LlmProviderPresets.Find(settings.ProviderId);
+        var protocol = preset?.Protocol ?? settings.CustomProtocol;
+        var apiKey = settings.GetApiKey(settings.ProviderId).Trim();
+        var model = settings.GetModel(settings.ProviderId).Trim();
 
-        if (string.IsNullOrWhiteSpace(apiUrl)) {
-            errorMessage = "Translator API URL is empty. Configure it in Mod Settings.";
-            return false;
+        string apiUrl;
+        string modelsUrl;
+        if (preset is not null) {
+            modelsUrl = preset.BaseUrl.TrimEnd('/') + "/models";
+            apiUrl = protocol == LlmApiProtocol.Responses
+                ? preset.BaseUrl.TrimEnd('/') + "/responses"
+                : NormalizeApiUrl(new Uri(preset.BaseUrl));
+        } else {
+            apiUrl = settings.ApiUrl.Trim();
+            if (string.IsNullOrWhiteSpace(apiUrl)) {
+                errorMessage = "Translator API URL is empty. Configure it in Mod Settings.";
+                config = new LlmActiveConfig();
+                return false;
+            }
+
+            if (!Uri.TryCreate(apiUrl, UriKind.Absolute, out var uri)
+                || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)) {
+                errorMessage = "Translator API URL is invalid. Configure a valid http/https endpoint in Mod Settings.";
+                config = new LlmActiveConfig();
+                return false;
+            }
+
+            var chatUrl = NormalizeApiUrl(uri);
+            modelsUrl = BuildModelsUrl(chatUrl);
+            apiUrl = protocol == LlmApiProtocol.Responses ? BuildResponsesUrl(chatUrl) : chatUrl;
         }
-
-        if (!Uri.TryCreate(apiUrl, UriKind.Absolute, out var uri)
-            || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)) {
-            errorMessage = "Translator API URL is invalid. Configure a valid http/https endpoint in Mod Settings.";
-            return false;
-        }
-
-        apiUrl = NormalizeApiUrl(uri);
 
         if (string.IsNullOrWhiteSpace(apiKey)) {
             errorMessage = "Translator API key is empty. Configure it in Mod Settings.";
+            config = new LlmActiveConfig();
             return false;
         }
 
-        if (string.IsNullOrWhiteSpace(model)) {
+        if (requireModel && string.IsNullOrWhiteSpace(model)) {
             errorMessage = "Translator model is empty. Configure it in Mod Settings.";
+            config = new LlmActiveConfig();
             return false;
         }
 
+        config = new LlmActiveConfig {
+            ApiUrl = apiUrl,
+            ModelsUrl = modelsUrl,
+            ApiKey = apiKey,
+            Model = model,
+            BatchSize = settings.BatchSize,
+            Concurrency = settings.Concurrency,
+            RetryCount = settings.RetryCount,
+            Protocol = protocol,
+            Preset = preset
+        };
         errorMessage = string.Empty;
         return true;
     }
 
-    private static BatchExecutionResult RequestBatchTranslationsWithRetry(string apiUrl,
-        string apiKey,
-        string model,
+    private static BatchExecutionResult RequestBatchTranslationsWithRetry(LlmActiveConfig config,
         string targetLanguage,
         BatchRequest batch,
-        int retryCount,
         IReadOnlyDictionary<string, string> termbaseGlossary) {
         Exception? lastException = null;
-        for (var attempt = 0; attempt <= retryCount; attempt++) {
+        for (var attempt = 0; attempt <= config.RetryCount; attempt++) {
             try {
                 var translations =
-                    RequestBatchTranslations(apiUrl, apiKey, model, targetLanguage, batch.Items, termbaseGlossary);
+                    RequestBatchTranslations(config, targetLanguage, batch.Items, termbaseGlossary);
                 return new BatchExecutionResult {
                     BatchNo = batch.BatchNo,
                     Success = true,
@@ -249,7 +315,7 @@ internal static class LlmTranslateService {
                 };
             } catch (TaskCanceledException ex) {
                 lastException = new TimeoutException(
-                    $"Request timed out or was canceled (timeout={RequestTimeoutSeconds}s, batchNo={batch.BatchNo}, entries={batch.Items.Count}, attempt={attempt + 1}/{retryCount + 1}). Consider lowering Batch Size/Concurrency in Mod Settings.",
+                    $"Request timed out or was canceled (timeout={RequestTimeoutSeconds}s, batchNo={batch.BatchNo}, entries={batch.Items.Count}, attempt={attempt + 1}/{config.RetryCount + 1}). Consider lowering Batch Size/Concurrency in Mod Settings.",
                     ex);
             } catch (Exception ex) {
                 lastException = ex;
@@ -277,6 +343,21 @@ internal static class LlmTranslateService {
         return $"Some translation batches failed after retries: {message}";
     }
 
+    private static string BuildModelsUrl(string chatCompletionsUrl) {
+        return ReplaceEndpoint(chatCompletionsUrl, "/models");
+    }
+
+    private static string BuildResponsesUrl(string chatCompletionsUrl) {
+        return ReplaceEndpoint(chatCompletionsUrl, "/responses");
+    }
+
+    private static string ReplaceEndpoint(string chatCompletionsUrl, string endpoint) {
+        const string suffix = "/chat/completions";
+        return chatCompletionsUrl.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)
+            ? chatCompletionsUrl[..^suffix.Length] + endpoint
+            : chatCompletionsUrl.TrimEnd('/') + endpoint;
+    }
+
     private static string NormalizeApiUrl(Uri uri) {
         var builder = new UriBuilder(uri) {
             Query = string.Empty,
@@ -297,27 +378,41 @@ internal static class LlmTranslateService {
         return builder.Uri.AbsoluteUri;
     }
 
-    private static void ProbeConnection(string apiUrl, string apiKey, string model) {
-        var requestPayload = new {
-            model,
-            temperature = 0.0,
-            max_tokens = 1,
-            messages = new object[] {
-                new {
-                    role = "system",
-                    content = "Health check."
+    private static void ProbeConnection(LlmActiveConfig config) {
+        var requestPayload = config.Protocol == LlmApiProtocol.Responses
+            ? new Dictionary<string, object> {
+                ["model"] = config.Model,
+                ["instructions"] = "Health check.",
+                ["input"] = new object[] {
+                    new {
+                        role = "user",
+                        content = "Reply with OK."
+                    }
                 },
-                new {
-                    role = "user",
-                    content = "Reply with OK."
-                }
+                ["max_output_tokens"] = 1,
+                ["store"] = false
             }
-        };
+            : new Dictionary<string, object> {
+                ["model"] = config.Model,
+                ["temperature"] = 0.0,
+                ["max_tokens"] = 1,
+                ["messages"] = new object[] {
+                    new {
+                        role = "system",
+                        content = "Health check."
+                    },
+                    new {
+                        role = "user",
+                        content = "Reply with OK."
+                    }
+                }
+            };
+        ApplyProviderOptions(requestPayload, config);
 
         var requestJson = JsonConvert.SerializeObject(requestPayload);
-        using var request = new HttpRequestMessage(HttpMethod.Post, apiUrl);
+        using var request = new HttpRequestMessage(HttpMethod.Post, config.ApiUrl);
         request.Content = new StringContent(requestJson, Encoding.UTF8, "application/json");
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", config.ApiKey);
 
         using var response = HttpClient.SendAsync(request).GetAwaiter().GetResult();
         var responseJson = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
@@ -327,9 +422,60 @@ internal static class LlmTranslateService {
         }
     }
 
-    private static Dictionary<string, string> RequestBatchTranslations(string apiUrl,
-        string apiKey,
-        string model,
+    private static void ApplyProviderOptions(Dictionary<string, object> requestPayload, LlmActiveConfig config) {
+        if (config.Preset is not { DisableThinking: true }) return;
+
+        if (config.Protocol == LlmApiProtocol.Responses) {
+            requestPayload["reasoning"] = new { effort = "none" };
+        } else {
+            requestPayload["thinking"] = new { type = "disabled" };
+        }
+    }
+
+    private static Dictionary<string, object> BuildRequestPayload(LlmActiveConfig config, string systemPrompt,
+        string userPrompt, IReadOnlyList<PendingTranslationItem> batch) {
+        if (config.Protocol == LlmApiProtocol.Responses) {
+            return new Dictionary<string, object> {
+                ["model"] = config.Model,
+                ["instructions"] = systemPrompt,
+                ["input"] = new object[] {
+                    new {
+                        role = "user",
+                        content = userPrompt
+                    }
+                },
+                ["temperature"] = 0.0,
+                ["max_output_tokens"] = EstimateMaxTokensForBatch(batch),
+                ["text"] = new {
+                    format = new {
+                        type = "json_object"
+                    }
+                },
+                ["store"] = false
+            };
+        }
+
+        return new Dictionary<string, object> {
+            ["model"] = config.Model,
+            ["temperature"] = 0.0,
+            ["max_tokens"] = EstimateMaxTokensForBatch(batch),
+            ["response_format"] = new {
+                type = "json_object"
+            },
+            ["messages"] = new object[] {
+                new {
+                    role = "system",
+                    content = systemPrompt
+                },
+                new {
+                    role = "user",
+                    content = userPrompt
+                }
+            }
+        };
+    }
+
+    private static Dictionary<string, string> RequestBatchTranslations(LlmActiveConfig config,
         string targetLanguage,
         IReadOnlyList<PendingTranslationItem> batch,
         IReadOnlyDictionary<string, string> termbaseGlossary) {
@@ -369,29 +515,13 @@ internal static class LlmTranslateService {
             "Entries:\n" +
             JsonConvert.SerializeObject(payloadItems, IndentedJsonSettings);
 
-        var requestPayload = new {
-            model,
-            temperature = 0.0,
-            max_tokens = EstimateMaxTokensForBatch(batch),
-            response_format = new {
-                type = "json_object"
-            },
-            messages = new object[] {
-                new {
-                    role = "system",
-                    content = systemPrompt
-                },
-                new {
-                    role = "user",
-                    content = userPrompt
-                }
-            }
-        };
+        var requestPayload = BuildRequestPayload(config, systemPrompt, userPrompt, batch);
+        ApplyProviderOptions(requestPayload, config);
 
         var requestJson = JsonConvert.SerializeObject(requestPayload);
-        using var request = new HttpRequestMessage(HttpMethod.Post, apiUrl);
+        using var request = new HttpRequestMessage(HttpMethod.Post, config.ApiUrl);
         request.Content = new StringContent(requestJson, Encoding.UTF8, "application/json");
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", config.ApiKey);
 
         using var response = HttpClient.SendAsync(request).GetAwaiter().GetResult();
         var responseJson = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
@@ -400,8 +530,7 @@ internal static class LlmTranslateService {
                 $"LLM request failed ({(int)response.StatusCode}): {response.ReasonPhrase}; {responseJson}");
         }
 
-        var completion = JsonConvert.DeserializeObject<ChatCompletionResponse>(responseJson);
-        var content = completion?.Choices.FirstOrDefault()?.Message.Content ?? string.Empty;
+        var content = ExtractResponseContent(responseJson, config.Protocol);
         if (string.IsNullOrEmpty(content)) {
             throw new InvalidOperationException("LLM response content is empty.");
         }
@@ -447,6 +576,22 @@ internal static class LlmTranslateService {
         }
 
         return matchedTranslations;
+    }
+
+    private static string ExtractResponseContent(string responseJson, LlmApiProtocol protocol) {
+        if (protocol == LlmApiProtocol.Responses) {
+            var response = JsonConvert.DeserializeObject<ResponsesResponse>(responseJson);
+            if (response is null) return string.Empty;
+
+            return string.Concat(response.Output
+                .Where(item => item.Type == "message")
+                .SelectMany(item => item.Content)
+                .Where(part => part.Type == "output_text")
+                .Select(part => part.Text));
+        }
+
+        var completion = JsonConvert.DeserializeObject<ChatCompletionResponse>(responseJson);
+        return completion?.Choices.FirstOrDefault()?.Message.Content ?? string.Empty;
     }
 
     private static string ExtractJsonObject(string content) {
@@ -546,6 +691,37 @@ internal static class LlmTranslateService {
         public bool Success;
         public string ErrorMessage = string.Empty;
         public Dictionary<string, string> Translations = new(StringComparer.Ordinal);
+    }
+
+    private sealed class ResponsesResponse {
+        [JsonProperty("output")]
+        public List<ResponsesOutputItem> Output = [];
+    }
+
+    private sealed class ResponsesOutputItem {
+        [JsonProperty("type")]
+        public string Type = string.Empty;
+
+        [JsonProperty("content")]
+        public List<ResponsesContentPart> Content = [];
+    }
+
+    private sealed class ResponsesContentPart {
+        [JsonProperty("type")]
+        public string Type = string.Empty;
+
+        [JsonProperty("text")]
+        public string Text = string.Empty;
+    }
+
+    private sealed class ModelListResponse {
+        [JsonProperty("data")]
+        public List<ModelEntry> Data = [];
+    }
+
+    private sealed class ModelEntry {
+        [JsonProperty("id")]
+        public string Id = string.Empty;
     }
 
     private sealed class ChatCompletionResponse {

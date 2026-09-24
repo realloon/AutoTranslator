@@ -40,9 +40,21 @@
   <Translator_AiTranslateConfigInvalid>AI設定が無効です: {0}</Translator_AiTranslateConfigInvalid>
   <Translator_AiTranslateFailed>AI翻訳に失敗しました: {0}</Translator_AiTranslateFailed>
   <Translator_ModSettingsCategory>Auto Translator</Translator_ModSettingsCategory>
-  <Translator_ModSettingApiUrl>API URL (OpenAI-compatible)</Translator_ModSettingApiUrl>
+  <Translator_ModSettingsTabConnection>接続</Translator_ModSettingsTabConnection>
+  <Translator_ModSettingsTabAdvanced>詳細</Translator_ModSettingsTabAdvanced>
+  <Translator_ModSettingProtocol>APIプロトコル</Translator_ModSettingProtocol>
+  <Translator_ModSettingProtocolChat>Chat Completions API</Translator_ModSettingProtocolChat>
+  <Translator_ModSettingProtocolResponses>Responses API</Translator_ModSettingProtocolResponses>
+  <Translator_ModSettingApiUrl>API URL</Translator_ModSettingApiUrl>
   <Translator_ModSettingApiKey>API Key</Translator_ModSettingApiKey>
+  <Translator_ModSettingProvider>プロバイダー</Translator_ModSettingProvider>
+  <Translator_ModSettingProviderCustom>カスタム</Translator_ModSettingProviderCustom>
+  <Translator_ModSettingProviderDeepSeek>DeepSeek</Translator_ModSettingProviderDeepSeek>
   <Translator_ModSettingModel>モデル</Translator_ModSettingModel>
+  <Translator_ModSettingModelSelect>モデルを選択</Translator_ModSettingModelSelect>
+  <Translator_ModSettingModelCustom>カスタム…</Translator_ModSettingModelCustom>
+  <Translator_ModSettingModelsLoading>モデルを読み込み中…</Translator_ModSettingModelsLoading>
+  <Translator_ModSettingModelsFailed>モデルの読み込みに失敗: {0}</Translator_ModSettingModelsFailed>
   <Translator_ModSettingBatchSize>リクエスト分割</Translator_ModSettingBatchSize>
   <Translator_ModSettingBatchSizeDescription>1回のモデル呼び出しに含める項目数です。項目が多いほど一貫性は向上しやすいですが、コンテキスト長は適切な範囲に保ってください。</Translator_ModSettingBatchSizeDescription>
   <Translator_ModSettingConcurrency>並列数</Translator_ModSettingConcurrency>
@@ -56,7 +68,8 @@
   <Translator_OutputModeButtonTip>出力先: {0}</Translator_OutputModeButtonTip>
   <Translator_ModSettingsValidateConfig>検証</Translator_ModSettingsValidateConfig>
   <Translator_ModSettingsValidating>設定を検証中...</Translator_ModSettingsValidating>
-  <Translator_ModSettingsValidationSuccess>設定の検証に成功しました。</Translator_ModSettingsValidationSuccess>
+  <Translator_ModSettingsValidationSuccess>検証に成功し、設定を保存しました。</Translator_ModSettingsValidationSuccess>
   <Translator_ModSettingsValidationFailed>設定の検証に失敗しました: {0}</Translator_ModSettingsValidationFailed>
   <Translator_ModSettingsResetDefaults>デフォルトに戻す</Translator_ModSettingsResetDefaults>
+  <Translator_ModSettingsResetNotice>新しいプロバイダー設定のため Auto Translator の設定がリセットされました。Mod設定でAPIキーを再入力してください。</Translator_ModSettingsResetNotice>
 </LanguageData>

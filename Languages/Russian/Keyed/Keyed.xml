@@ -40,9 +40,21 @@
   <Translator_AiTranslateConfigInvalid>Некорректная конфигурация AI: {0}</Translator_AiTranslateConfigInvalid>
   <Translator_AiTranslateFailed>Ошибка AI-перевода: {0}</Translator_AiTranslateFailed>
   <Translator_ModSettingsCategory>Auto Translator</Translator_ModSettingsCategory>
-  <Translator_ModSettingApiUrl>API URL (совместимый с OpenAI)</Translator_ModSettingApiUrl>
+  <Translator_ModSettingsTabConnection>Подключение</Translator_ModSettingsTabConnection>
+  <Translator_ModSettingsTabAdvanced>Дополнительно</Translator_ModSettingsTabAdvanced>
+  <Translator_ModSettingProtocol>Протокол API</Translator_ModSettingProtocol>
+  <Translator_ModSettingProtocolChat>Chat Completions API</Translator_ModSettingProtocolChat>
+  <Translator_ModSettingProtocolResponses>Responses API</Translator_ModSettingProtocolResponses>
+  <Translator_ModSettingApiUrl>API URL</Translator_ModSettingApiUrl>
   <Translator_ModSettingApiKey>API Key</Translator_ModSettingApiKey>
+  <Translator_ModSettingProvider>Провайдер</Translator_ModSettingProvider>
+  <Translator_ModSettingProviderCustom>Свой</Translator_ModSettingProviderCustom>
+  <Translator_ModSettingProviderDeepSeek>DeepSeek</Translator_ModSettingProviderDeepSeek>
   <Translator_ModSettingModel>Модель</Translator_ModSettingModel>
+  <Translator_ModSettingModelSelect>Выбрать модель</Translator_ModSettingModelSelect>
+  <Translator_ModSettingModelCustom>Свой…</Translator_ModSettingModelCustom>
+  <Translator_ModSettingModelsLoading>Загрузка моделей…</Translator_ModSettingModelsLoading>
+  <Translator_ModSettingModelsFailed>Не удалось загрузить модели: {0}</Translator_ModSettingModelsFailed>
   <Translator_ModSettingBatchSize>Размер пакета запроса</Translator_ModSettingBatchSize>
   <Translator_ModSettingBatchSizeDescription>Количество записей в одном вызове модели. Большее число обычно повышает согласованность, но держите его в разумных пределах контекстного окна.</Translator_ModSettingBatchSizeDescription>
   <Translator_ModSettingConcurrency>Параллельность</Translator_ModSettingConcurrency>
@@ -56,7 +68,8 @@
   <Translator_OutputModeButtonTip>Расположение вывода: {0}</Translator_OutputModeButtonTip>
   <Translator_ModSettingsValidateConfig>Проверить</Translator_ModSettingsValidateConfig>
   <Translator_ModSettingsValidating>Проверка конфигурации...</Translator_ModSettingsValidating>
-  <Translator_ModSettingsValidationSuccess>Конфигурация успешно проверена.</Translator_ModSettingsValidationSuccess>
+  <Translator_ModSettingsValidationSuccess>Проверка успешна, настройки сохранены.</Translator_ModSettingsValidationSuccess>
   <Translator_ModSettingsValidationFailed>Ошибка проверки конфигурации: {0}</Translator_ModSettingsValidationFailed>
   <Translator_ModSettingsResetDefaults>Сбросить по умолчанию</Translator_ModSettingsResetDefaults>
+  <Translator_ModSettingsResetNotice>Настройки Auto Translator сброшены из-за новой конфигурации провайдера. Укажите API-ключ заново в настройках мода.</Translator_ModSettingsResetNotice>
 </LanguageData>

@@ -1,4 +1,5 @@
 using JetBrains.Annotations;
+using RimWorld;
 using UnityEngine;
 using Verse;
 using Translator.Services;
@@ -7,62 +8,159 @@ namespace Translator;
 
 [UsedImplicitly]
 public sealed class TranslatorMod : Mod {
+    private const float Grid = 8f;
+    private const float TabsAreaHeight = Grid * 5f;
     public static TranslatorSettings Settings { get; private set; } = null!;
     private string _lastValidationStatus = string.Empty;
     private bool _lastValidationFailed;
     private Task<LlmConfigValidationResult>? _validateConfigTask;
-    private Vector2 _settingsScrollPosition = Vector2.zero;
+    private Task<LlmModelListResult>? _fetchModelsTask;
+    private readonly List<string> _availableModels = [];
+    private readonly HashSet<string> _customModelProviders = [];
+    private string _modelsFetchedProvider = string.Empty;
+    private int _activeSettingsTab;
 
     public TranslatorMod(ModContentPack content) : base(content) {
         Settings = GetSettings<TranslatorSettings>();
+        if (!Settings.PendingReconfigureNotice) return;
+
+        Settings.PendingReconfigureNotice = false;
+        WriteSettings();
+        LongEventHandler.ExecuteWhenFinished(() =>
+            Messages.Message("Translator_ModSettingsResetNotice".Translate(), MessageTypeDefOf.SilentInput));
     }
 
     public override string SettingsCategory() => "Translator_ModSettingsCategory".Translate();
 
     public override void DoSettingsWindowContents(Rect inRect) {
         ConsumeValidationTaskResultIfReady();
+        ConsumeModelFetchTaskResultIfReady();
 
-        const float scrollbarWidth = 16f;
-        const float minContentHeight = 780f;
-        var viewHeight = Mathf.Max(minContentHeight, inRect.height - 1f);
-        var viewRect = new Rect(0f, 0f, inRect.width - scrollbarWidth, viewHeight);
-        Widgets.BeginScrollView(inRect, ref _settingsScrollPosition, viewRect);
+        var y = inRect.y;
+        DrawSettingsTabs(new Rect(inRect.x, y, inRect.width, Grid * 4f));
 
+        var contentRect = new Rect(inRect.x, y + TabsAreaHeight, inRect.width,
+            inRect.height - TabsAreaHeight);
         var listing = new Listing_Standard();
-        listing.Begin(viewRect);
+        listing.Begin(contentRect);
+        if (_activeSettingsTab == 0) {
+            DrawConnectionSettings(listing);
+        } else {
+            DrawAdvancedSettings(listing);
+        }
 
-        listing.Label("Translator_ModSettingApiUrl".Translate());
-        Settings.ApiUrl = listing.TextEntry(Settings.ApiUrl);
+        listing.End();
+    }
+
+    private void DrawSettingsTabs(Rect rect) {
+        var tabs = new[] {
+            (Index: 0, Label: "Translator_ModSettingsTabConnection".Translate()),
+            (Index: 1, Label: "Translator_ModSettingsTabAdvanced".Translate())
+        };
+        const float tabHeight = Grid * 4f;
+        var tabWidth = (rect.width - Grid * (tabs.Length - 1)) / tabs.Length;
+
+        for (var i = 0; i < tabs.Length; i++) {
+            var tab = tabs[i];
+            var tabRect = new Rect(rect.x + i * (tabWidth + Grid), rect.y, tabWidth, tabHeight);
+            var selected = _activeSettingsTab == tab.Index;
+            var background = selected ? new Color(1f, 1f, 1f, 0.12f) : new Color(1f, 1f, 1f, 0.035f);
+
+            Widgets.DrawBoxSolid(tabRect, background);
+            if (selected) {
+                Widgets.DrawHighlightSelected(tabRect);
+            } else {
+                Widgets.DrawHighlightIfMouseover(tabRect);
+            }
+
+            if (Widgets.ButtonInvisible(tabRect)) {
+                _activeSettingsTab = tab.Index;
+            }
+
+            var oldAnchor = Text.Anchor;
+            Text.Anchor = TextAnchor.MiddleCenter;
+            Widgets.Label(tabRect, tab.Label);
+            Text.Anchor = oldAnchor;
+        }
+    }
+
+    private void DrawConnectionSettings(Listing_Standard listing) {
+        listing.Label("Translator_ModSettingProvider".Translate());
+        if (listing.ButtonText(GetProviderLabel(Settings.ProviderId))) {
+            OpenProviderMenu();
+        }
+
         listing.Gap(6f);
+
+        var preset = LlmProviderPresets.Find(Settings.ProviderId);
+        if (preset is null) {
+            listing.Label("Translator_ModSettingProtocol".Translate());
+            if (listing.ButtonText(GetProtocolLabel(Settings.CustomProtocol))) {
+                Settings.CustomProtocol = Settings.CustomProtocol == LlmApiProtocol.ChatCompletions
+                    ? LlmApiProtocol.Responses
+                    : LlmApiProtocol.ChatCompletions;
+            }
+
+            listing.Gap(6f);
+
+            listing.Label("Translator_ModSettingApiUrl".Translate());
+            Settings.ApiUrl = listing.TextEntry(Settings.ApiUrl);
+            listing.Gap(6f);
+        }
 
         listing.Label("Translator_ModSettingApiKey".Translate());
-        Settings.ApiKey = listing.TextEntry(Settings.ApiKey);
+        var apiKey = Settings.GetApiKey(Settings.ProviderId);
+        var newApiKey = listing.TextEntry(apiKey);
+        if (newApiKey != apiKey) {
+            Settings.SetApiKey(Settings.ProviderId, newApiKey);
+        }
+
         listing.Gap(6f);
+
+        if (preset is not null && !Settings.GetApiKey(Settings.ProviderId).NullOrEmpty() &&
+            _modelsFetchedProvider != Settings.ProviderId) {
+            _modelsFetchedProvider = Settings.ProviderId;
+            StartFetchModels();
+        }
 
         listing.Label("Translator_ModSettingModel".Translate());
-        Settings.Model = listing.TextEntry(Settings.Model);
-        listing.Gap(6f);
+        var model = Settings.GetModel(Settings.ProviderId);
+        if (preset is null) {
+            var newModel = listing.TextEntry(model);
+            if (newModel != model) {
+                Settings.SetModel(Settings.ProviderId, newModel);
+            }
+        } else {
+            if (listing.ButtonText(model.NullOrEmpty() ? "Translator_ModSettingModelSelect".Translate() : model)) {
+                OpenModelMenu();
+            }
 
-        if (_validateConfigTask is not null) {
-            GUI.color = Color.yellow;
-            listing.Label("Translator_ModSettingsValidating".Translate());
-            GUI.color = Color.white;
-            listing.Gap(8f);
-        } else if (!_lastValidationStatus.NullOrEmpty()) {
-            GUI.color = _lastValidationFailed ? new Color(0.95f, 0.35f, 0.35f) : new Color(0.35f, 0.95f, 0.35f);
-            listing.Label(_lastValidationStatus);
-            GUI.color = Color.white;
-            listing.Gap(8f);
+            if (IsCustomModel(Settings.ProviderId, model)) {
+                var newModel = listing.TextEntry(model);
+                if (newModel != model) {
+                    Settings.SetModel(Settings.ProviderId, newModel);
+                }
+            }
         }
+
+        listing.Gap(6f);
 
         if (listing.ButtonText("Translator_ModSettingsValidateConfig".Translate())) {
             BeginValidateConfig();
         }
 
-        listing.Gap(6f);
-        listing.GapLine();
-        listing.Gap(10f);
+        if (_validateConfigTask is not null) {
+            GUI.color = Color.yellow;
+            listing.Label("Translator_ModSettingsValidating".Translate());
+            GUI.color = Color.white;
+        } else if (!_lastValidationStatus.NullOrEmpty()) {
+            GUI.color = _lastValidationFailed ? new Color(0.95f, 0.35f, 0.35f) : new Color(0.35f, 0.95f, 0.35f);
+            listing.Label(_lastValidationStatus);
+            GUI.color = Color.white;
+        }
+    }
 
+    private void DrawAdvancedSettings(Listing_Standard listing) {
         listing.Label($"{"Translator_ModSettingBatchSize".Translate()}: {Settings.BatchSize}");
         GUI.color = ColoredText.SubtleGrayColor;
         listing.Label("Translator_ModSettingBatchSizeDescription".Translate());
@@ -113,9 +211,6 @@ public sealed class TranslatorMod : Mod {
         if (listing.ButtonText("Translator_ModSettingsResetDefaults".Translate())) {
             Settings.ResetToDefaults();
         }
-
-        listing.End();
-        Widgets.EndScrollView();
     }
 
     private void BeginValidateConfig() {
@@ -144,6 +239,85 @@ public sealed class TranslatorMod : Mod {
 
         _lastValidationFailed = true;
         _lastValidationStatus = "Translator_ModSettingsValidationFailed".Translate(result.Message);
+    }
+
+    private void OpenProviderMenu() {
+        var options = LlmProviderPresets.All
+            .Select(preset => new FloatMenuOption(preset.LabelKey.Translate(), () => SelectProvider(preset.Id)))
+            .ToList();
+        options.Add(new FloatMenuOption(LlmProviderPresets.CustomLabelKey.Translate(),
+            () => SelectProvider(LlmProviderPresets.CustomId)));
+        Find.WindowStack.Add(new FloatMenu(options));
+    }
+
+    private void SelectProvider(string providerId) {
+        Settings.ProviderId = providerId;
+        _availableModels.Clear();
+        _modelsFetchedProvider = string.Empty;
+        _validateConfigTask = null;
+        _lastValidationStatus = string.Empty;
+        _lastValidationFailed = false;
+    }
+
+    private void OpenModelMenu() {
+        if (_availableModels.Count == 0) {
+            StartFetchModels();
+        }
+
+        var options = new List<FloatMenuOption>();
+        if (_fetchModelsTask is not null) {
+            options.Add(new FloatMenuOption("Translator_ModSettingModelsLoading".Translate(), null));
+        } else {
+            options.AddRange(_availableModels.Select(model => new FloatMenuOption(model, () => SelectModel(model))));
+        }
+
+        options.Add(new FloatMenuOption("Translator_ModSettingModelCustom".Translate(),
+            () => _customModelProviders.Add(Settings.ProviderId)));
+        Find.WindowStack.Add(new FloatMenu(options));
+    }
+
+    private void SelectModel(string model) {
+        Settings.SetModel(Settings.ProviderId, model);
+        _customModelProviders.Remove(Settings.ProviderId);
+    }
+
+    private bool IsCustomModel(string providerId, string model) {
+        if (_customModelProviders.Contains(providerId)) return true;
+        return !model.NullOrEmpty() && _availableModels.Count > 0 && !_availableModels.Contains(model);
+    }
+
+    private void StartFetchModels() {
+        if (_fetchModelsTask is not null) return;
+
+        _availableModels.Clear();
+        _fetchModelsTask = Task.Run(LlmTranslateService.FetchModels);
+    }
+
+    private void ConsumeModelFetchTaskResultIfReady() {
+        if (_fetchModelsTask is null || !_fetchModelsTask.IsCompleted) return;
+
+        var completedTask = _fetchModelsTask;
+        _fetchModelsTask = null;
+        var result = completedTask.GetAwaiter().GetResult();
+        if (!result.Success) {
+            Messages.Message("Translator_ModSettingModelsFailed".Translate(result.Message),
+                MessageTypeDefOf.SilentInput);
+            return;
+        }
+
+        _availableModels.Clear();
+        _availableModels.AddRange(result.Models);
+    }
+
+    private static string GetProtocolLabel(LlmApiProtocol protocol) {
+        return protocol == LlmApiProtocol.Responses
+            ? "Translator_ModSettingProtocolResponses".Translate()
+            : "Translator_ModSettingProtocolChat".Translate();
+    }
+
+    private static string GetProviderLabel(string providerId) {
+        return LlmProviderPresets.Find(providerId)?.LabelKey.Translate()
+               ?? LlmProviderPresets.CustomLabelKey.Translate();
     }
 
     private static string GetOutputLocationLabel(OutputLocationMode mode) {

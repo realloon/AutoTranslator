@@ -40,9 +40,21 @@
   <Translator_AiTranslateConfigInvalid>AI configuration is invalid: {0}</Translator_AiTranslateConfigInvalid>
   <Translator_AiTranslateFailed>AI translation failed: {0}</Translator_AiTranslateFailed>
   <Translator_ModSettingsCategory>Auto Translator</Translator_ModSettingsCategory>
-  <Translator_ModSettingApiUrl>API URL (OpenAI-compatible)</Translator_ModSettingApiUrl>
+  <Translator_ModSettingsTabConnection>Connection</Translator_ModSettingsTabConnection>
+  <Translator_ModSettingsTabAdvanced>Advanced</Translator_ModSettingsTabAdvanced>
+  <Translator_ModSettingProtocol>API Protocol</Translator_ModSettingProtocol>
+  <Translator_ModSettingProtocolChat>Chat Completions API</Translator_ModSettingProtocolChat>
+  <Translator_ModSettingProtocolResponses>Responses API</Translator_ModSettingProtocolResponses>
+  <Translator_ModSettingApiUrl>API URL</Translator_ModSettingApiUrl>
   <Translator_ModSettingApiKey>API Key</Translator_ModSettingApiKey>
+  <Translator_ModSettingProvider>Provider</Translator_ModSettingProvider>
+  <Translator_ModSettingProviderCustom>Custom</Translator_ModSettingProviderCustom>
+  <Translator_ModSettingProviderDeepSeek>DeepSeek</Translator_ModSettingProviderDeepSeek>
   <Translator_ModSettingModel>Model</Translator_ModSettingModel>
+  <Translator_ModSettingModelSelect>Select a model</Translator_ModSettingModelSelect>
+  <Translator_ModSettingModelCustom>Custom...</Translator_ModSettingModelCustom>
+  <Translator_ModSettingModelsLoading>Loading models...</Translator_ModSettingModelsLoading>
+  <Translator_ModSettingModelsFailed>Failed to load models: {0}</Translator_ModSettingModelsFailed>
   <Translator_ModSettingBatchSize>Request Chunking</Translator_ModSettingBatchSize>
   <Translator_ModSettingBatchSizeDescription>Number of entries included in a single model call. More entries generally improve consistency, but keep it within a reasonable context length.</Translator_ModSettingBatchSizeDescription>
   <Translator_ModSettingConcurrency>Concurrency</Translator_ModSettingConcurrency>
@@ -56,7 +68,8 @@
   <Translator_OutputModeButtonTip>Output location: {0}</Translator_OutputModeButtonTip>
   <Translator_ModSettingsValidateConfig>Validate</Translator_ModSettingsValidateConfig>
   <Translator_ModSettingsValidating>Validating configuration...</Translator_ModSettingsValidating>
-  <Translator_ModSettingsValidationSuccess>Configuration validated successfully.</Translator_ModSettingsValidationSuccess>
+  <Translator_ModSettingsValidationSuccess>Validation succeeded, configuration saved.</Translator_ModSettingsValidationSuccess>
   <Translator_ModSettingsValidationFailed>Configuration validation failed: {0}</Translator_ModSettingsValidationFailed>
   <Translator_ModSettingsResetDefaults>Reset to defaults</Translator_ModSettingsResetDefaults>
+  <Translator_ModSettingsResetNotice>Auto Translator settings were reset for the new provider configuration. Please set your API key again in Mod Settings.</Translator_ModSettingsResetNotice>
 </LanguageData>

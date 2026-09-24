@@ -40,9 +40,21 @@
   <Translator_AiTranslateConfigInvalid>AI 구성 정보가 올바르지 않습니다: {0}</Translator_AiTranslateConfigInvalid>
   <Translator_AiTranslateFailed>AI 번역 실패: {0}</Translator_AiTranslateFailed>
   <Translator_ModSettingsCategory>Auto Translator</Translator_ModSettingsCategory>
-  <Translator_ModSettingApiUrl>API URL (OpenAI-compatible)</Translator_ModSettingApiUrl>
+  <Translator_ModSettingsTabConnection>연결</Translator_ModSettingsTabConnection>
+  <Translator_ModSettingsTabAdvanced>고급</Translator_ModSettingsTabAdvanced>
+  <Translator_ModSettingProtocol>API 프로토콜</Translator_ModSettingProtocol>
+  <Translator_ModSettingProtocolChat>Chat Completions API</Translator_ModSettingProtocolChat>
+  <Translator_ModSettingProtocolResponses>Responses API</Translator_ModSettingProtocolResponses>
+  <Translator_ModSettingApiUrl>API URL</Translator_ModSettingApiUrl>
   <Translator_ModSettingApiKey>API Key</Translator_ModSettingApiKey>
+  <Translator_ModSettingProvider>공급자</Translator_ModSettingProvider>
+  <Translator_ModSettingProviderCustom>사용자 지정</Translator_ModSettingProviderCustom>
+  <Translator_ModSettingProviderDeepSeek>DeepSeek</Translator_ModSettingProviderDeepSeek>
   <Translator_ModSettingModel>모델</Translator_ModSettingModel>
+  <Translator_ModSettingModelSelect>모델 선택</Translator_ModSettingModelSelect>
+  <Translator_ModSettingModelCustom>사용자 지정…</Translator_ModSettingModelCustom>
+  <Translator_ModSettingModelsLoading>모델 불러오는 중…</Translator_ModSettingModelsLoading>
+  <Translator_ModSettingModelsFailed>모델을 불러오지 못했습니다: {0}</Translator_ModSettingModelsFailed>
   <Translator_ModSettingBatchSize>요청 청크 단위</Translator_ModSettingBatchSize>
   <Translator_ModSettingBatchSizeDescription>한 번의 모델 호출에 포함되는 항목 수입니다. 항목이 많을수록 일관성이 좋아지는 경향이 있지만, 컨텍스트 길이는 합리적인 범위로 유지하세요.</Translator_ModSettingBatchSizeDescription>
   <Translator_ModSettingConcurrency>동시성</Translator_ModSettingConcurrency>
@@ -56,7 +68,8 @@
   <Translator_OutputModeButtonTip>출력 위치: {0}</Translator_OutputModeButtonTip>
   <Translator_ModSettingsValidateConfig>검증</Translator_ModSettingsValidateConfig>
   <Translator_ModSettingsValidating>구성을 검증하는 중...</Translator_ModSettingsValidating>
-  <Translator_ModSettingsValidationSuccess>구성 검증에 성공했습니다.</Translator_ModSettingsValidationSuccess>
+  <Translator_ModSettingsValidationSuccess>검증 성공, 설정이 저장되었습니다.</Translator_ModSettingsValidationSuccess>
   <Translator_ModSettingsValidationFailed>구성 검증 실패: {0}</Translator_ModSettingsValidationFailed>
   <Translator_ModSettingsResetDefaults>기본값으로 재설정</Translator_ModSettingsResetDefaults>
+  <Translator_ModSettingsResetNotice>새 공급자 구성으로 인해 Auto Translator 설정이 초기화되었습니다. 모드 설정에서 API 키를 다시 입력해 주세요.</Translator_ModSettingsResetNotice>
 </LanguageData>

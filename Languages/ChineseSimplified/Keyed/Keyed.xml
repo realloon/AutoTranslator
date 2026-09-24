@@ -40,9 +40,21 @@
   <Translator_AiTranslateConfigInvalid>AI 配置无效：{0}</Translator_AiTranslateConfigInvalid>
   <Translator_AiTranslateFailed>AI 翻译失败：{0}</Translator_AiTranslateFailed>
   <Translator_ModSettingsCategory>Auto Translator</Translator_ModSettingsCategory>
-  <Translator_ModSettingApiUrl>API 地址（OpenAI 兼容格式）</Translator_ModSettingApiUrl>
+  <Translator_ModSettingsTabConnection>连接</Translator_ModSettingsTabConnection>
+  <Translator_ModSettingsTabAdvanced>高级</Translator_ModSettingsTabAdvanced>
+  <Translator_ModSettingProtocol>接口协议</Translator_ModSettingProtocol>
+  <Translator_ModSettingProtocolChat>Chat Completions API</Translator_ModSettingProtocolChat>
+  <Translator_ModSettingProtocolResponses>Responses API</Translator_ModSettingProtocolResponses>
+  <Translator_ModSettingApiUrl>API 地址</Translator_ModSettingApiUrl>
   <Translator_ModSettingApiKey>API Key</Translator_ModSettingApiKey>
+  <Translator_ModSettingProvider>提供商</Translator_ModSettingProvider>
+  <Translator_ModSettingProviderCustom>自定义</Translator_ModSettingProviderCustom>
+  <Translator_ModSettingProviderDeepSeek>DeepSeek</Translator_ModSettingProviderDeepSeek>
   <Translator_ModSettingModel>模型</Translator_ModSettingModel>
+  <Translator_ModSettingModelSelect>选择模型</Translator_ModSettingModelSelect>
+  <Translator_ModSettingModelCustom>自定义…</Translator_ModSettingModelCustom>
+  <Translator_ModSettingModelsLoading>正在加载模型…</Translator_ModSettingModelsLoading>
+  <Translator_ModSettingModelsFailed>加载模型失败：{0}</Translator_ModSettingModelsFailed>
   <Translator_ModSettingBatchSize>请求分片</Translator_ModSettingBatchSize>
   <Translator_ModSettingBatchSizeDescription>单次模型调用包含的条目数。条目越多一致性越好，但应控制在合理的上下文长度内。</Translator_ModSettingBatchSizeDescription>
   <Translator_ModSettingConcurrency>并发数</Translator_ModSettingConcurrency>
@@ -56,7 +68,8 @@
   <Translator_OutputModeButtonTip>输出位置：{0}</Translator_OutputModeButtonTip>
   <Translator_ModSettingsValidateConfig>验证</Translator_ModSettingsValidateConfig>
   <Translator_ModSettingsValidating>正在验证配置，请稍候...</Translator_ModSettingsValidating>
-  <Translator_ModSettingsValidationSuccess>配置验证成功。</Translator_ModSettingsValidationSuccess>
+  <Translator_ModSettingsValidationSuccess>验证成功，配置已保存</Translator_ModSettingsValidationSuccess>
   <Translator_ModSettingsValidationFailed>配置验证失败：{0}</Translator_ModSettingsValidationFailed>
   <Translator_ModSettingsResetDefaults>恢复默认值</Translator_ModSettingsResetDefaults>
+  <Translator_ModSettingsResetNotice>Auto Translator 设置已因新的提供商配置而重置，请在模组设置中重新填写 API Key。</Translator_ModSettingsResetNotice>
 </LanguageData>
