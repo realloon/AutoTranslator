@@ -7,7 +7,7 @@ public enum LlmApiProtocol {
 
 internal sealed class LlmProviderPreset {
     public string Id = string.Empty;
-    public string LabelKey = string.Empty;
+    public string Label = string.Empty;
     public string BaseUrl = string.Empty;
     public LlmApiProtocol Protocol = LlmApiProtocol.ChatCompletions;
     public bool DisableThinking;
@@ -19,13 +19,21 @@ internal static class LlmProviderPresets {
 
     public static readonly LlmProviderPreset DeepSeek = new() {
         Id = "deepseek",
-        LabelKey = "Translator_ModSettingProviderDeepSeek",
+        Label = "DeepSeek",
         BaseUrl = "https://api.deepseek.com",
         Protocol = LlmApiProtocol.Responses,
         DisableThinking = true
     };
 
-    public static readonly IReadOnlyList<LlmProviderPreset> All = [DeepSeek];
+    public static readonly LlmProviderPreset Vercel = new() {
+        Id = "vercel",
+        Label = "Vercel AI Gateway",
+        BaseUrl = "https://ai-gateway.vercel.sh/v1",
+        Protocol = LlmApiProtocol.Responses,
+        DisableThinking = true
+    };
+
+    public static readonly IReadOnlyList<LlmProviderPreset> All = [DeepSeek, Vercel];
 
     public static LlmProviderPreset? Find(string providerId) {
         return All.FirstOrDefault(preset => preset.Id == providerId);

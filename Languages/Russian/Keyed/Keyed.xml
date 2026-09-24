@@ -49,7 +49,6 @@
   <Translator_ModSettingApiKey>API Key</Translator_ModSettingApiKey>
   <Translator_ModSettingProvider>Провайдер</Translator_ModSettingProvider>
   <Translator_ModSettingProviderCustom>Свой</Translator_ModSettingProviderCustom>
-  <Translator_ModSettingProviderDeepSeek>DeepSeek</Translator_ModSettingProviderDeepSeek>
   <Translator_ModSettingModel>Модель</Translator_ModSettingModel>
   <Translator_ModSettingModelSelect>Выбрать модель</Translator_ModSettingModelSelect>
   <Translator_ModSettingModelCustom>Свой…</Translator_ModSettingModelCustom>

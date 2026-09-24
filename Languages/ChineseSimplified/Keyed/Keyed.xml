@@ -49,7 +49,6 @@
   <Translator_ModSettingApiKey>API Key</Translator_ModSettingApiKey>
   <Translator_ModSettingProvider>提供商</Translator_ModSettingProvider>
   <Translator_ModSettingProviderCustom>自定义</Translator_ModSettingProviderCustom>
-  <Translator_ModSettingProviderDeepSeek>DeepSeek</Translator_ModSettingProviderDeepSeek>
   <Translator_ModSettingModel>模型</Translator_ModSettingModel>
   <Translator_ModSettingModelSelect>选择模型</Translator_ModSettingModelSelect>
   <Translator_ModSettingModelCustom>自定义…</Translator_ModSettingModelCustom>

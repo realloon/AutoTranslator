@@ -243,7 +243,7 @@ public sealed class TranslatorMod : Mod {
 
     private void OpenProviderMenu() {
         var options = LlmProviderPresets.All
-            .Select(preset => new FloatMenuOption(preset.LabelKey.Translate(), () => SelectProvider(preset.Id)))
+            .Select(preset => new FloatMenuOption(preset.Label, () => SelectProvider(preset.Id)))
             .ToList();
         options.Add(new FloatMenuOption(LlmProviderPresets.CustomLabelKey.Translate(),
             () => SelectProvider(LlmProviderPresets.CustomId)));
@@ -316,7 +316,7 @@ public sealed class TranslatorMod : Mod {
     }
 
     private static string GetProviderLabel(string providerId) {
-        return LlmProviderPresets.Find(providerId)?.LabelKey.Translate()
+        return LlmProviderPresets.Find(providerId)?.Label
                ?? LlmProviderPresets.CustomLabelKey.Translate();
     }
 
