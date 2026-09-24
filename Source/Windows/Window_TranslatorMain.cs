@@ -230,9 +230,7 @@ public class Window_TranslatorMain : Window {
     private void TryExportAndAiTranslate(ModMetaData selectedMod, IReadOnlyCollection<string> selectedLanguageFolders,
         OutputLocationMode outputLocationMode) {
         if (_translateInProgress) {
-            _lastExportFailed = true;
-            _lastExportStatus = "Translator_AiTranslateFailed".Translate("A translation task is already running.");
-            Messages.Message(_lastExportStatus, MessageTypeDefOf.RejectInput);
+            ShowExportFailure("Translator_AiTranslateFailed".Translate("A translation task is already running."));
             return;
         }
 
@@ -242,19 +240,13 @@ public class Window_TranslatorMain : Window {
 
         var configValidation = LlmTranslateService.ValidateCurrentConfig(testConnection: false);
         if (!configValidation.Success) {
-            _lastExportFailed = true;
-            _lastExportStatus = "Translator_AiTranslateConfigInvalid".Translate(configValidation.Message);
-            Messages.Message(_lastExportStatus, MessageTypeDefOf.RejectInput);
-            _translateInProgress = false;
+            FailExport("Translator_AiTranslateConfigInvalid".Translate(configValidation.Message));
             return;
         }
 
         var selectedLanguages = ResolveSelectedLanguages(selectedLanguageFolders);
         if (selectedLanguages.Count == 0) {
-            _lastExportFailed = true;
-            _lastExportStatus = "Translator_ExportNoLanguageSelected".Translate();
-            Messages.Message("Translator_ExportNoLanguageSelected".Translate(), MessageTypeDefOf.RejectInput);
-            _translateInProgress = false;
+            FailExport("Translator_ExportNoLanguageSelected".Translate());
             return;
         }
 
@@ -265,10 +257,7 @@ public class Window_TranslatorMain : Window {
             outputLocationMode);
         if (!exportResult.Success || exportResult.FilePath.NullOrEmpty()) {
             var error = exportResult.Message.NullOrEmpty() ? "Export failed." : exportResult.Message;
-            _lastExportFailed = true;
-            _lastExportStatus = "Translator_AiTranslateFailed".Translate(error);
-            Messages.Message(_lastExportStatus, MessageTypeDefOf.RejectInput);
-            _translateInProgress = false;
+            FailExport("Translator_AiTranslateFailed".Translate(error));
             return;
         }
 
@@ -278,10 +267,7 @@ public class Window_TranslatorMain : Window {
             .Where(workset => !workset.LanguageFolderName.NullOrEmpty())
             .ToList();
         if (worksets.Count == 0) {
-            _lastExportFailed = true;
-            _lastExportStatus = "Translator_AiTranslateFailed".Translate("No worksets were generated.");
-            Messages.Message(_lastExportStatus, MessageTypeDefOf.RejectInput);
-            _translateInProgress = false;
+            FailExport("Translator_AiTranslateFailed".Translate("No worksets were generated."));
             return;
         }
 
@@ -295,12 +281,8 @@ public class Window_TranslatorMain : Window {
         if (totalCollectedEntries == 0) {
             var reason =
                 $"No translatable entries were collected for selected languages. {BuildSnapshotSummary(preflightCounts)}";
-            _lastExportFailed = true;
-            _lastExportStatus = BuildExportStatusWithOutput(
-                "Translator_AiTranslateFailed".Translate(reason),
-                exportResult.FilePath!);
-            Messages.Message(_lastExportStatus, MessageTypeDefOf.RejectInput);
-            _translateInProgress = false;
+            FailExport(BuildExportStatusWithOutput("Translator_AiTranslateFailed".Translate(reason),
+                exportResult.FilePath!));
             return;
         }
 
@@ -400,7 +382,7 @@ public class Window_TranslatorMain : Window {
                         UpdatedCount = runResult.UpdatedCount,
                         WrittenEntryCount = runResult.WrittenEntryCount,
                         WrittenFileCount = runResult.WrittenFileCount,
-                        Failures = runResult.Failures.ToList()
+                        Failures = [.. runResult.Failures]
                     };
                 }
 
@@ -417,29 +399,23 @@ public class Window_TranslatorMain : Window {
         _translateInProgress = false;
 
         if (!snapshot.ErrorMessage.NullOrEmpty()) {
-            _lastExportFailed = true;
-            _lastExportStatus = "Translator_AiTranslateFailed".Translate(snapshot.ErrorMessage);
-            Messages.Message(_lastExportStatus, MessageTypeDefOf.RejectInput);
+            ShowExportFailure("Translator_AiTranslateFailed".Translate(snapshot.ErrorMessage));
             return;
         }
 
         if (snapshot.ProcessedTargetCount == 0) {
-            _lastExportFailed = true;
-            _lastExportStatus = BuildExportStatusWithOutput(
+            ShowExportFailure(BuildExportStatusWithOutput(
                 "Translator_AiTranslateFailed".Translate("Translation job did not process any language targets."),
-                snapshot.OutputModPath);
-            Messages.Message(_lastExportStatus, MessageTypeDefOf.RejectInput);
+                snapshot.OutputModPath));
             return;
         }
 
         if (snapshot is { WrittenEntryCount: 0, UpdatedCount: 0 }) {
-            _lastExportFailed = true;
             var noOutputReason =
                 $"Translation completed with no output. {BuildRunSummary(snapshot.ProcessedTargetCount, snapshot.UpdatedCount, snapshot.WrittenEntryCount, snapshot.WrittenFileCount)}";
-            _lastExportStatus = BuildExportStatusWithOutput(
+            ShowExportFailure(BuildExportStatusWithOutput(
                 "Translator_AiTranslateFailed".Translate(noOutputReason),
-                snapshot.OutputModPath);
-            Messages.Message(_lastExportStatus, MessageTypeDefOf.RejectInput);
+                snapshot.OutputModPath));
             return;
         }
 
@@ -451,11 +427,20 @@ public class Window_TranslatorMain : Window {
         }
 
         var failureSummary = BuildFailureSummary(snapshot.Failures);
-        _lastExportFailed = true;
-        _lastExportStatus = BuildExportStatusWithOutput(
+        ShowExportFailure(BuildExportStatusWithOutput(
             "Translator_AiTranslatePartialFailedWithDetails".Translate(failureSummary),
-            snapshot.OutputModPath);
-        Messages.Message(_lastExportStatus, MessageTypeDefOf.RejectInput);
+            snapshot.OutputModPath));
+    }
+
+    private void FailExport(string status) {
+        _translateInProgress = false;
+        ShowExportFailure(status);
+    }
+
+    private void ShowExportFailure(string status) {
+        _lastExportFailed = true;
+        _lastExportStatus = status;
+        Messages.Message(status, MessageTypeDefOf.RejectInput);
     }
 
     private static string BuildExportStatusWithOutput(string title, string outputPath) {
@@ -517,9 +502,10 @@ public class Window_TranslatorMain : Window {
     }
 
     private List<LoadedLanguage> ResolveSelectedLanguages(IReadOnlyCollection<string> selectedLanguageFolders) {
-        return _exportLanguages
-            .Where(language => selectedLanguageFolders.Contains(language.folderName))
-            .ToList();
+        return [
+            .. _exportLanguages
+                .Where(language => selectedLanguageFolders.Contains(language.folderName))
+        ];
     }
 
     private sealed class AiTranslateRunResult {
