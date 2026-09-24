@@ -3,7 +3,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using Newtonsoft.Json;
-using Verse;
 
 namespace Translator.Services;
 
@@ -226,24 +225,6 @@ internal static class LlmTranslateService {
             return false;
         }
 
-        if (batchSize is < TranslatorSettings.MinBatchSize or > TranslatorSettings.MaxBatchSize) {
-            errorMessage =
-                $"Translator batch size is invalid. Configure a value between {TranslatorSettings.MinBatchSize} and {TranslatorSettings.MaxBatchSize} in Mod Settings.";
-            return false;
-        }
-
-        if (concurrency is < TranslatorSettings.MinConcurrency or > TranslatorSettings.MaxConcurrency) {
-            errorMessage =
-                $"Translator concurrency is invalid. Configure a value between {TranslatorSettings.MinConcurrency} and {TranslatorSettings.MaxConcurrency} in Mod Settings.";
-            return false;
-        }
-
-        if (retryCount is < TranslatorSettings.MinRetryCount or > TranslatorSettings.MaxRetryCount) {
-            errorMessage =
-                $"Translator retry count is invalid. Configure a value between {TranslatorSettings.MinRetryCount} and {TranslatorSettings.MaxRetryCount} in Mod Settings.";
-            return false;
-        }
-
         errorMessage = string.Empty;
         return true;
     }
@@ -425,15 +406,9 @@ internal static class LlmTranslateService {
             throw new InvalidOperationException("LLM response content is empty.");
         }
 
-        var normalizedJson = ExtractJsonObject(content);
-        if (!TryDeserializeBatchResponse(normalizedJson, out var translatedPayload, out var deserializeError)) {
-            var repairedJson = TryRepairBatchJsonWithLlm(apiUrl, apiKey, model, normalizedJson);
-            var repaired = !repairedJson.NullOrEmpty() &&
-                           TryDeserializeBatchResponse(repairedJson, out translatedPayload, out _);
-            if (!repaired) {
-                throw new InvalidOperationException(
-                    $"Invalid LLM translation payload: {deserializeError}");
-            }
+        if (!TryDeserializeBatchResponse(ExtractJsonObject(content), out var translatedPayload,
+                out var deserializeError)) {
+            throw new InvalidOperationException($"Invalid LLM translation payload: {deserializeError}");
         }
 
         var expectedIds = batch
@@ -453,9 +428,9 @@ internal static class LlmTranslateService {
                 continue;
             }
 
-            if (!matchedTranslations.TryAdd(item.Id, item.Translation ?? string.Empty)) {
+            if (!matchedTranslations.TryAdd(item.Id, item.Translation)) {
                 duplicateIdCount += 1;
-                matchedTranslations[item.Id] = item.Translation ?? string.Empty;
+                matchedTranslations[item.Id] = item.Translation;
             }
         }
 
@@ -506,7 +481,7 @@ internal static class LlmTranslateService {
             if (exceedCount || exceedChars) {
                 batches.Add(new BatchRequest {
                     BatchNo = batches.Count + 1,
-                    Items = currentItems.ToList()
+                    Items = [.. currentItems]
                 });
                 currentItems.Clear();
                 currentChars = 0;
@@ -549,49 +524,6 @@ internal static class LlmTranslateService {
             response = null!;
             error = ex.Message;
             return false;
-        }
-    }
-
-    private static string TryRepairBatchJsonWithLlm(string apiUrl, string apiKey, string model, string brokenJson) {
-        try {
-            var requestPayload = new {
-                model,
-                temperature = 0.0,
-                max_tokens = 4000,
-                response_format = new {
-                    type = "json_object"
-                },
-                messages = new object[] {
-                    new {
-                        role = "system",
-                        content =
-                            "You are a JSON repair tool. Return a valid JSON object and keep all ids and translations unchanged."
-                    },
-                    new {
-                        role = "user",
-                        content =
-                            "Please produce a JSON object with shape {\"translations\":[{\"id\":\"...\",\"translation\":\"...\"}]}. Include all original translation items and keep values unchanged.\n" +
-                            brokenJson
-                    }
-                }
-            };
-
-            var requestJson = JsonConvert.SerializeObject(requestPayload);
-            using var request = new HttpRequestMessage(HttpMethod.Post, apiUrl);
-            request.Content = new StringContent(requestJson, Encoding.UTF8, "application/json");
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-
-            using var response = HttpClient.SendAsync(request).GetAwaiter().GetResult();
-            var responseJson = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-            if (!response.IsSuccessStatusCode) {
-                return string.Empty;
-            }
-
-            var completion = JsonConvert.DeserializeObject<ChatCompletionResponse>(responseJson);
-            var content = completion?.Choices.FirstOrDefault()?.Message.Content ?? string.Empty;
-            return content.NullOrEmpty() ? string.Empty : ExtractJsonObject(content);
-        } catch {
-            return string.Empty;
         }
     }
 
@@ -641,6 +573,6 @@ internal static class LlmTranslateService {
         public string Id = string.Empty;
 
         [JsonProperty("translation")]
-        public string? Translation = string.Empty;
+        public string Translation = string.Empty;
     }
 }
