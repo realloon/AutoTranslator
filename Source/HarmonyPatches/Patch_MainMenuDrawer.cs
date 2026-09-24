@@ -24,7 +24,7 @@ public static class Patch_MainMenuDrawer {
         for (var i = 0; i < codes.Count; i++) {
             if (!codes[i].Calls(drawMethod)) continue;
 
-            if (i < 1 || !IsLoadLocalInstruction(codes[i - 1])) {
+            if (i < 1 || !codes[i - 1].IsLdloc()) {
                 Log.Error("[Translator] Could not inject main menu button: unexpected IL pattern.");
                 return codes;
             }
@@ -38,15 +38,6 @@ public static class Patch_MainMenuDrawer {
 
         Log.Error("[Translator] Could not inject main menu button: DrawOptionListing call was not found.");
         return codes;
-    }
-
-    private static bool IsLoadLocalInstruction(CodeInstruction instruction) {
-        return instruction.opcode == OpCodes.Ldloc
-               || instruction.opcode == OpCodes.Ldloc_0
-               || instruction.opcode == OpCodes.Ldloc_1
-               || instruction.opcode == OpCodes.Ldloc_2
-               || instruction.opcode == OpCodes.Ldloc_3
-               || instruction.opcode == OpCodes.Ldloc_S;
     }
 
     private static void TryAddTranslatorButton(List<ListableOption> options) {

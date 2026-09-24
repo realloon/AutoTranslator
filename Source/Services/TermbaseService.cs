@@ -39,10 +39,6 @@ internal static class TermbaseService {
             }
 
             var json = File.ReadAllText(filePath);
-            if (json.NullOrEmpty()) {
-                return [];
-            }
-
             var sourceTerms = JsonConvert.DeserializeObject<List<TermbaseSourceTerm>>(json, JsonSettings) ?? [];
             return [
                 .. sourceTerms
@@ -91,11 +87,7 @@ internal static class TermbaseService {
             var json = JsonConvert.SerializeObject(sourceTerms, JsonSettings);
 
             var filePath = GetTermbaseFilePath();
-            var directory = Path.GetDirectoryName(filePath);
-            if (!directory.NullOrEmpty()) {
-                Directory.CreateDirectory(directory!);
-            }
-
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
             File.WriteAllText(filePath, json);
             return new TermbaseStoreResult {
                 Success = true
@@ -110,10 +102,6 @@ internal static class TermbaseService {
     }
 
     public static IReadOnlyDictionary<string, string> GetGlossaryForLanguage(string targetLanguageFolder) {
-        if (targetLanguageFolder.NullOrEmpty()) {
-            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        }
-
         var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         foreach (var entry in LoadEntries()) {
             if (string.Equals(entry.TargetLanguageFolder, targetLanguageFolder, StringComparison.OrdinalIgnoreCase)) {

@@ -24,9 +24,7 @@ public class Window_ExportLanguagePicker : Window {
         OutputLocationMode defaultOutputLocationMode,
         Action<IReadOnlyCollection<string>, OutputLocationMode> onConfirm) {
         _languages = [
-            .. languages
-                .Where(language => !language.folderName.NullOrEmpty())
-                .OrderBy(language => language.folderName, StringComparer.OrdinalIgnoreCase)
+            .. languages.OrderBy(language => language.folderName, StringComparer.OrdinalIgnoreCase)
         ];
         _selectedLanguageFolders = new HashSet<string>(selectedLanguageFolders, StringComparer.OrdinalIgnoreCase);
         if (_selectedLanguageFolders.Count == 0 && LanguageDatabase.activeLanguage is not null) {
@@ -114,7 +112,8 @@ public class Window_ExportLanguagePicker : Window {
                 Widgets.DrawHighlight(rowRect);
             }
 
-            Widgets.CheckboxLabeled(contentRect, language.DisplayName, ref selected);
+            var label = language.DisplayName.NullOrEmpty() ? language.folderName : language.DisplayName;
+            Widgets.CheckboxLabeled(contentRect, label, ref selected);
             if (selected) {
                 _selectedLanguageFolders.Add(language.folderName);
             } else {

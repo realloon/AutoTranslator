@@ -116,9 +116,7 @@ internal static class LlmTranslateService {
             if (!TryGetActiveConfig(out var config, out var configError)) {
                 return new LlmTranslateResult {
                     Success = false,
-                    Message = configError,
-                    UpdatedCount = 0,
-                    PendingCount = 0
+                    Message = configError
                 };
             }
 
@@ -127,9 +125,7 @@ internal static class LlmTranslateService {
             if (pending.Count == 0) {
                 return new LlmTranslateResult {
                     Success = true,
-                    Message = "No pending entries.",
-                    UpdatedCount = 0,
-                    PendingCount = 0
+                    Message = "No pending entries."
                 };
             }
 
@@ -165,32 +161,24 @@ internal static class LlmTranslateService {
                 return new LlmTranslateResult {
                     Success = false,
                     Message = BuildBatchFailureMessage(failedBatches),
-                    UpdatedCount = 0,
                     PendingCount = pending.Count
                 };
             }
 
-            var updatedCount = 0;
             foreach (var item in pending) {
-                if (!translatedById.TryGetValue(item.Id, out var translated) || string.IsNullOrEmpty(translated)) {
-                    continue;
-                }
-
-                item.ApplyTranslation(translated);
-                updatedCount += 1;
+                item.ApplyTranslation(translatedById[item.Id]);
             }
 
             return new LlmTranslateResult {
                 Success = true,
                 Message = "OK",
-                UpdatedCount = updatedCount,
+                UpdatedCount = pending.Count,
                 PendingCount = pending.Count
             };
         } catch (Exception ex) {
             return new LlmTranslateResult {
                 Success = false,
                 Message = ex.Message,
-                UpdatedCount = 0,
                 PendingCount = pendingCount
             };
         }
@@ -267,8 +255,8 @@ internal static class LlmTranslateService {
             }
 
             var chatUrl = NormalizeApiUrl(uri);
-            modelsUrl = BuildModelsUrl(chatUrl);
-            apiUrl = protocol == LlmApiProtocol.Responses ? BuildResponsesUrl(chatUrl) : chatUrl;
+            modelsUrl = ReplaceEndpoint(chatUrl, "/models");
+            apiUrl = protocol == LlmApiProtocol.Responses ? ReplaceEndpoint(chatUrl, "/responses") : chatUrl;
         }
 
         if (string.IsNullOrWhiteSpace(apiKey)) {
@@ -313,10 +301,6 @@ internal static class LlmTranslateService {
                     ErrorMessage = string.Empty,
                     Translations = translations
                 };
-            } catch (TaskCanceledException ex) {
-                lastException = new TimeoutException(
-                    $"Request timed out or was canceled (timeout={RequestTimeoutSeconds}s, batchNo={batch.BatchNo}, entries={batch.Items.Count}, attempt={attempt + 1}/{config.RetryCount + 1}). Consider lowering Batch Size/Concurrency in Mod Settings.",
-                    ex);
             } catch (Exception ex) {
                 lastException = ex;
             }
@@ -341,14 +325,6 @@ internal static class LlmTranslateService {
         }
 
         return $"Some translation batches failed after retries: {message}";
-    }
-
-    private static string BuildModelsUrl(string chatCompletionsUrl) {
-        return ReplaceEndpoint(chatCompletionsUrl, "/models");
-    }
-
-    private static string BuildResponsesUrl(string chatCompletionsUrl) {
-        return ReplaceEndpoint(chatCompletionsUrl, "/responses");
     }
 
     private static string ReplaceEndpoint(string chatCompletionsUrl, string endpoint) {
@@ -535,9 +511,11 @@ internal static class LlmTranslateService {
             throw new InvalidOperationException("LLM response content is empty.");
         }
 
-        if (!TryDeserializeBatchResponse(ExtractJsonObject(content), out var translatedPayload,
-                out var deserializeError)) {
-            throw new InvalidOperationException($"Invalid LLM translation payload: {deserializeError}");
+        BatchTranslationResponse translatedPayload;
+        try {
+            translatedPayload = JsonConvert.DeserializeObject<BatchTranslationResponse>(ExtractJsonObject(content))!;
+        } catch (Exception ex) {
+            throw new InvalidOperationException($"Invalid LLM translation payload: {ex.Message}");
         }
 
         var expectedIds = batch
@@ -657,19 +635,6 @@ internal static class LlmTranslateService {
         var estimatedChars = batch.Sum(EstimateChars);
         var estimatedTokens = estimatedChars / 3;
         return Math.Clamp(estimatedTokens + 2000, 3000, 16000);
-    }
-
-    private static bool TryDeserializeBatchResponse(string json, out BatchTranslationResponse response,
-        out string error) {
-        try {
-            response = JsonConvert.DeserializeObject<BatchTranslationResponse>(json)!;
-            error = string.Empty;
-            return true;
-        } catch (Exception ex) {
-            response = null!;
-            error = ex.Message;
-            return false;
-        }
     }
 
     private sealed class PendingTranslationItem {

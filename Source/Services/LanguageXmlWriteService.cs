@@ -1,6 +1,7 @@
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
+using Translator.Helpers;
 using Verse;
 
 namespace Translator.Services;
@@ -15,21 +16,7 @@ internal sealed class LanguageXmlWriteResult {
 internal static class LanguageXmlWriteService {
     public static LanguageXmlWriteResult WriteFromWorkset(string outputModDir, LanguageWorksetFile workset) {
         try {
-            if (outputModDir.NullOrEmpty()) {
-                return new LanguageXmlWriteResult {
-                    Success = false,
-                    Message = "Output mod directory is empty."
-                };
-            }
-
             var languageFolderName = workset.LanguageFolderName;
-            if (languageFolderName.NullOrEmpty()) {
-                return new LanguageXmlWriteResult {
-                    Success = false,
-                    Message = "Language folder name is empty."
-                };
-            }
-
             var writtenEntryCount = 0;
             var writtenFileCount = 0;
 
@@ -98,9 +85,7 @@ internal static class LanguageXmlWriteService {
         } catch (Exception ex) {
             return new LanguageXmlWriteResult {
                 Success = false,
-                Message = ex.Message,
-                WrittenEntryCount = 0,
-                WrittenFileCount = 0
+                Message = ex.Message
             };
         }
     }
@@ -166,22 +151,7 @@ internal static class LanguageXmlWriteService {
     }
 
     private static string BuildOutputFileName(string parentFolderName) {
-        var safeName = SanitizeFileNamePart(parentFolderName);
-        return safeName + ".xml";
-    }
-
-    private static string SanitizeFileNamePart(string value) {
-        if (value.NullOrEmpty()) {
-            return "Translation";
-        }
-
-        var invalidChars = Path.GetInvalidFileNameChars();
-        var builder = new StringBuilder(value.Length);
-        foreach (var ch in value) {
-            builder.Append(invalidChars.Contains(ch) ? '_' : ch);
-        }
-
-        return builder.ToString();
+        return ModPathHelper.SanitizeFileNamePart(parentFolderName, "Translation") + ".xml";
     }
 
     private sealed class XmlEntry {

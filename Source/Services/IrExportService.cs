@@ -11,13 +11,6 @@ internal static class IrExportService {
         LoadedLanguage defaultLanguage,
         OutputLocationMode outputLocationMode) {
         try {
-            if (targetLanguages.Count == 0) {
-                return new TranslatorIrExportResult {
-                    Success = false,
-                    Message = "No language selected."
-                };
-            }
-
             defaultLanguage.LoadData();
             var exportedLanguageFolders = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var worksets = new List<LanguageWorksetFile>();
@@ -69,13 +62,8 @@ internal static class IrExportService {
         LoadedLanguage defaultLanguage) {
         var modRoot = ModPathHelper.Normalize(mod.RootDir.FullName);
         var entries = new List<LanguageWorksetKeyedItem>();
-        var seenKeys = new HashSet<string>(StringComparer.Ordinal);
 
         foreach (var (key, value) in defaultLanguage.keyedReplacements) {
-            if (!seenKeys.Add(key)) {
-                continue;
-            }
-
             var sourcePath = value.fileSourceFullPath;
             if (sourcePath.NullOrEmpty() || !ModPathHelper.IsPathUnderRoot(sourcePath, modRoot)) {
                 continue;
@@ -254,10 +242,6 @@ internal static class IrExportService {
     private static void BuildLanguageDirectoryStructure(string outputModDir,
         IReadOnlyList<LanguageWorksetFile> worksets) {
         foreach (var workset in worksets) {
-            if (workset.LanguageFolderName.NullOrEmpty()) {
-                continue;
-            }
-
             var hasKeyedEntries = workset.Keyed.Count > 0;
             var hasDefInjectedEntries = workset.DefInjected.Count > 0;
             if (!hasKeyedEntries && !hasDefInjectedEntries) {
@@ -297,7 +281,7 @@ internal static class IrExportService {
     }
 
     private static string BuildExportFolderName(ModMetaData mod, string exportToken) {
-        var safePackage = SanitizeFileNamePart(mod.PackageIdPlayerFacing);
+        var safePackage = ModPathHelper.SanitizeFileNamePart(mod.PackageIdPlayerFacing, "unknown");
         return $"TranslatorExport_{safePackage}_{exportToken}";
     }
 
@@ -309,29 +293,7 @@ internal static class IrExportService {
 
     private static string ResolveExportModDirectory(ModMetaData mod, string exportToken) {
         var folderName = BuildExportFolderName(mod, exportToken);
-        try {
-            var modsFolderPath = GenFilePaths.ModsFolderPath;
-            if (!modsFolderPath.NullOrEmpty()) {
-                return Path.Combine(modsFolderPath, folderName);
-            }
-        } catch (Exception ex) {
-            Log.Warning($"[Translator] Could not resolve mods export path, fallback to save data folder: {ex}");
-        }
-
-        return Path.Combine(GenFilePaths.SaveDataFolderPath, "Translator", "Exports", folderName);
-    }
-
-    private static string SanitizeFileNamePart(string value) {
-        if (value.NullOrEmpty()) return "unknown";
-
-        var invalidChars = Path.GetInvalidFileNameChars();
-        var builder = new StringBuilder(value.Length);
-
-        foreach (var ch in value) {
-            builder.Append(invalidChars.Contains(ch) ? '_' : ch);
-        }
-
-        return builder.ToString();
+        return Path.Combine(GenFilePaths.ModsFolderPath, folderName);
     }
 
     private static string SanitizePackageIdPart(string value) {

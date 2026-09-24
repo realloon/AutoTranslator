@@ -24,7 +24,6 @@ public class Window_TranslatorMain : Window {
     private string? _lastExportStatus;
     private bool _lastExportFailed;
     private string? _lastOutputPath;
-    private int _activeTranslateRunToken;
     private bool _translateInProgress;
 
     public Window_TranslatorMain() {
@@ -234,19 +233,18 @@ public class Window_TranslatorMain : Window {
             return;
         }
 
-        var runToken = ++_activeTranslateRunToken;
         _translateInProgress = true;
         _lastOutputPath = null;
 
         var configValidation = LlmTranslateService.ValidateCurrentConfig(testConnection: false);
         if (!configValidation.Success) {
-            FailExport("Translator_AiTranslateConfigInvalid".Translate(configValidation.Message));
+            ShowExportFailure("Translator_AiTranslateConfigInvalid".Translate(configValidation.Message));
             return;
         }
 
         var selectedLanguages = ResolveSelectedLanguages(selectedLanguageFolders);
         if (selectedLanguages.Count == 0) {
-            FailExport("Translator_ExportNoLanguageSelected".Translate());
+            ShowExportFailure("Translator_ExportNoLanguageSelected".Translate());
             return;
         }
 
@@ -257,89 +255,38 @@ public class Window_TranslatorMain : Window {
             outputLocationMode);
         if (!exportResult.Success || exportResult.FilePath.NullOrEmpty()) {
             var error = exportResult.Message.NullOrEmpty() ? "Export failed." : exportResult.Message;
-            FailExport("Translator_AiTranslateFailed".Translate(error));
+            ShowExportFailure("Translator_AiTranslateFailed".Translate(error));
             return;
         }
 
-        _lastOutputPath = exportResult.FilePath;
-
-        var worksets = exportResult.Worksets
-            .Where(workset => !workset.LanguageFolderName.NullOrEmpty())
-            .ToList();
-        if (worksets.Count == 0) {
-            FailExport("Translator_AiTranslateFailed".Translate("No worksets were generated."));
-            return;
-        }
-
-        var preflightCounts = worksets
-            .Select(workset => new LanguageWorksetSnapshot {
-                LanguageFolderName = workset.LanguageFolderName,
-                Counts = CountWorksetItems(workset)
-            })
-            .ToList();
-        var totalCollectedEntries = preflightCounts.Sum(item => item.Counts.TotalCount);
-        if (totalCollectedEntries == 0) {
-            var reason =
-                $"No translatable entries were collected for selected languages. {BuildSnapshotSummary(preflightCounts)}";
-            FailExport(BuildExportStatusWithOutput("Translator_AiTranslateFailed".Translate(reason),
-                exportResult.FilePath!));
-            return;
-        }
+        var outputModPath = exportResult.FilePath!;
+        _lastOutputPath = outputModPath;
 
         var targetLanguageByFolder = selectedLanguages.ToDictionary(
             language => language.folderName,
             language => language.DisplayName.NullOrEmpty() ? language.folderName : language.DisplayName,
             StringComparer.OrdinalIgnoreCase);
-        var targets = worksets.Select(workset => new AiTranslateTarget {
+        var targets = exportResult.Worksets.Select(workset => new AiTranslateTarget {
             Workset = workset,
             FolderName = workset.LanguageFolderName,
-            TargetLanguage = targetLanguageByFolder.TryGetValue(workset.LanguageFolderName, out var value)
-                ? value
-                : workset.LanguageFolderName
+            TargetLanguage = targetLanguageByFolder[workset.LanguageFolderName]
         }).ToList();
 
         _lastExportFailed = false;
         _lastExportStatus = "Translator_AiTranslateInProgress".Translate();
 
-        var runResult = new AiTranslateRunResult {
-            OutputModPath = exportResult.FilePath!
+        var runResult = new AiTranslateRun {
+            OutputModPath = outputModPath
         };
-        var runResultGate = new object();
         LongEventHandler.QueueLongEvent(() => {
             try {
                 foreach (var target in targets) {
-                    lock (runResultGate) {
-                        runResult.ProcessedTargetCount += 1;
-                    }
-
-                    var beforeCounts = CountWorksetItems(target.Workset);
                     var translateResult = LlmTranslateService.TranslateWorkset(
                         target.Workset,
                         target.FolderName,
                         target.TargetLanguage);
                     if (!translateResult.Success) {
-                        lock (runResultGate) {
-                            runResult.Failures.Add($"{target.FolderName}: {translateResult.Message}");
-                        }
-
-                        continue;
-                    }
-
-                    if (beforeCounts.PendingCount > 0 && translateResult.PendingCount == 0) {
-                        lock (runResultGate) {
-                            runResult.Failures.Add(
-                                $"{target.FolderName}: Pending count mismatch (beforePending={beforeCounts.PendingCount}, translatePending=0).");
-                        }
-
-                        continue;
-                    }
-
-                    if (translateResult is { PendingCount: > 0, UpdatedCount: 0 }) {
-                        lock (runResultGate) {
-                            runResult.Failures.Add(
-                                $"{target.FolderName}: LLM returned no usable translations (pending={translateResult.PendingCount}, updated=0).");
-                        }
-
+                        runResult.Failures.Add($"{target.FolderName}: {translateResult.Message}");
                         continue;
                     }
 
@@ -347,55 +294,37 @@ public class Window_TranslatorMain : Window {
                         runResult.OutputModPath,
                         target.Workset);
                     if (!xmlWriteResult.Success) {
-                        lock (runResultGate) {
-                            runResult.Failures.Add($"{target.FolderName}/XML: {xmlWriteResult.Message}");
-                        }
-
+                        runResult.Failures.Add($"{target.FolderName}/XML: {xmlWriteResult.Message}");
                         continue;
                     }
 
-                    var afterCounts = CountWorksetItems(target.Workset);
-                    lock (runResultGate) {
-                        runResult.UpdatedCount += translateResult.UpdatedCount;
-                        runResult.WrittenEntryCount += xmlWriteResult.WrittenEntryCount;
-                        runResult.WrittenFileCount += xmlWriteResult.WrittenFileCount;
-                    }
+                    runResult.UpdatedCount += translateResult.UpdatedCount;
+                    runResult.WrittenEntryCount += xmlWriteResult.WrittenEntryCount;
+                    runResult.WrittenFileCount += xmlWriteResult.WrittenFileCount;
 
-                    if (xmlWriteResult.WrittenEntryCount != 0) continue;
-
-                    lock (runResultGate) {
+                    if (xmlWriteResult.WrittenEntryCount == 0) {
                         runResult.Failures.Add(
-                            $"{target.FolderName}: No XML entries written (pending={translateResult.PendingCount}, updated={translateResult.UpdatedCount}, total={afterCounts.TotalCount}, translated={afterCounts.TranslatedCount}).");
+                            $"{target.FolderName}: No XML entries written (pending={translateResult.PendingCount}, updated={translateResult.UpdatedCount}).");
                     }
                 }
             } catch (Exception ex) {
-                lock (runResultGate) {
-                    runResult.ErrorMessage = ex.Message;
-                }
+                runResult.ErrorMessage = ex.Message;
             } finally {
-                AiTranslateRunSnapshot snapshot;
-                lock (runResultGate) {
-                    snapshot = new AiTranslateRunSnapshot {
-                        OutputModPath = runResult.OutputModPath,
-                        ErrorMessage = runResult.ErrorMessage,
-                        ProcessedTargetCount = runResult.ProcessedTargetCount,
-                        UpdatedCount = runResult.UpdatedCount,
-                        WrittenEntryCount = runResult.WrittenEntryCount,
-                        WrittenFileCount = runResult.WrittenFileCount,
-                        Failures = [.. runResult.Failures]
-                    };
-                }
+                var snapshot = new AiTranslateRun {
+                    OutputModPath = runResult.OutputModPath,
+                    ErrorMessage = runResult.ErrorMessage,
+                    UpdatedCount = runResult.UpdatedCount,
+                    WrittenEntryCount = runResult.WrittenEntryCount,
+                    WrittenFileCount = runResult.WrittenFileCount,
+                    Failures = [.. runResult.Failures]
+                };
 
-                LongEventHandler.ExecuteWhenFinished(() => ApplyRunResult(runToken, snapshot));
+                LongEventHandler.ExecuteWhenFinished(() => ApplyRunResult(snapshot));
             }
         }, "Translator_AiTranslateInProgress", doAsynchronously: true, null);
     }
 
-    private void ApplyRunResult(int runToken, AiTranslateRunSnapshot snapshot) {
-        if (runToken != _activeTranslateRunToken) {
-            return;
-        }
-
+    private void ApplyRunResult(AiTranslateRun snapshot) {
         _translateInProgress = false;
 
         if (!snapshot.ErrorMessage.NullOrEmpty()) {
@@ -403,16 +332,9 @@ public class Window_TranslatorMain : Window {
             return;
         }
 
-        if (snapshot.ProcessedTargetCount == 0) {
-            ShowExportFailure(BuildExportStatusWithOutput(
-                "Translator_AiTranslateFailed".Translate("Translation job did not process any language targets."),
-                snapshot.OutputModPath));
-            return;
-        }
-
         if (snapshot is { WrittenEntryCount: 0, UpdatedCount: 0 }) {
             var noOutputReason =
-                $"Translation completed with no output. {BuildRunSummary(snapshot.ProcessedTargetCount, snapshot.UpdatedCount, snapshot.WrittenEntryCount, snapshot.WrittenFileCount)}";
+                $"Translation completed with no output. {BuildRunSummary(snapshot.UpdatedCount, snapshot.WrittenEntryCount, snapshot.WrittenFileCount)}";
             ShowExportFailure(BuildExportStatusWithOutput(
                 "Translator_AiTranslateFailed".Translate(noOutputReason),
                 snapshot.OutputModPath));
@@ -432,12 +354,8 @@ public class Window_TranslatorMain : Window {
             snapshot.OutputModPath));
     }
 
-    private void FailExport(string status) {
-        _translateInProgress = false;
-        ShowExportFailure(status);
-    }
-
     private void ShowExportFailure(string status) {
+        _translateInProgress = false;
         _lastExportFailed = true;
         _lastExportStatus = status;
         Messages.Message(status, MessageTypeDefOf.RejectInput);
@@ -477,28 +395,8 @@ public class Window_TranslatorMain : Window {
         return summary;
     }
 
-    private static string BuildRunSummary(int processedTargetCount, int updatedCount, int writtenEntryCount,
-        int writtenFileCount) {
-        return
-            $"processedTargets={processedTargetCount}, updated={updatedCount}, writtenEntries={writtenEntryCount}, writtenFiles={writtenFileCount}";
-    }
-
-    private static WorksetItemCounts CountWorksetItems(LanguageWorksetFile workset) {
-        var keyedTotal = workset.Keyed.Count;
-        var keyedTranslated = workset.Keyed.Count(item => !item.Translation.NullOrEmpty());
-        var defTotal = workset.DefInjected.Count;
-        var defTranslated = workset.DefInjected.Count(item => !item.Translation.NullOrEmpty());
-        return new WorksetItemCounts {
-            KeyedTotal = keyedTotal,
-            KeyedTranslated = keyedTranslated,
-            DefTotal = defTotal,
-            DefTranslated = defTranslated
-        };
-    }
-
-    private static string BuildSnapshotSummary(IReadOnlyCollection<LanguageWorksetSnapshot> snapshots) {
-        return string.Join(" | ",
-            snapshots.Select(snapshot => $"{snapshot.LanguageFolderName}({snapshot.Counts.Summary})"));
+    private static string BuildRunSummary(int updatedCount, int writtenEntryCount, int writtenFileCount) {
+        return $"updated={updatedCount}, writtenEntries={writtenEntryCount}, writtenFiles={writtenFileCount}";
     }
 
     private List<LoadedLanguage> ResolveSelectedLanguages(IReadOnlyCollection<string> selectedLanguageFolders) {
@@ -508,21 +406,10 @@ public class Window_TranslatorMain : Window {
         ];
     }
 
-    private sealed class AiTranslateRunResult {
-        public string OutputModPath = string.Empty;
-        public string ErrorMessage = string.Empty;
-        public readonly List<string> Failures = [];
-        public int ProcessedTargetCount;
-        public int UpdatedCount;
-        public int WrittenEntryCount;
-        public int WrittenFileCount;
-    }
-
-    private sealed class AiTranslateRunSnapshot {
+    private sealed class AiTranslateRun {
         public string OutputModPath = string.Empty;
         public string ErrorMessage = string.Empty;
         public List<string> Failures = [];
-        public int ProcessedTargetCount;
         public int UpdatedCount;
         public int WrittenEntryCount;
         public int WrittenFileCount;
@@ -532,25 +419,6 @@ public class Window_TranslatorMain : Window {
         public LanguageWorksetFile Workset = new();
         public string FolderName = string.Empty;
         public string TargetLanguage = string.Empty;
-    }
-
-    private sealed class LanguageWorksetSnapshot {
-        public string LanguageFolderName = string.Empty;
-        public WorksetItemCounts Counts = new();
-    }
-
-    private sealed class WorksetItemCounts {
-        public int KeyedTotal;
-        public int KeyedTranslated;
-        public int DefTotal;
-        public int DefTranslated;
-
-        public int TotalCount => KeyedTotal + DefTotal;
-        public int TranslatedCount => KeyedTranslated + DefTranslated;
-        public int PendingCount => TotalCount - TranslatedCount;
-
-        public string Summary =>
-            $"total={TotalCount}, translated={TranslatedCount}, pending={PendingCount}, keyed={KeyedTotal}/{KeyedTranslated}, def={DefTotal}/{DefTranslated}";
     }
 
     private ModMetaData GetSelectedMod() {

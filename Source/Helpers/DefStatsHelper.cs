@@ -4,9 +4,6 @@ using Verse;
 namespace Translator.Helpers;
 
 internal static class DefStatsHelper {
-    private static readonly IReadOnlyDictionary<string, DefInjectionPackage.DefInjection> EmptyInjectionLookup =
-        new Dictionary<string, DefInjectionPackage.DefInjection>();
-
     public static DefTranslationStats BuildStats(ModMetaData mod, LoadedLanguage activeLanguage) {
         var stats = new DefTranslationStats();
         var packagesByDefType = activeLanguage.defInjections
@@ -61,11 +58,11 @@ internal static class DefStatsHelper {
 
     private static IReadOnlyDictionary<string, DefInjectionPackage.DefInjection> BuildNormalizedInjectionLookup(
         DefInjectionPackage? package) {
-        if (package is null || package.injections.Count == 0) {
-            return EmptyInjectionLookup;
+        var lookup = new Dictionary<string, DefInjectionPackage.DefInjection>();
+        if (package is null) {
+            return lookup;
         }
 
-        var lookup = new Dictionary<string, DefInjectionPackage.DefInjection>();
         foreach (var injection in package.injections) {
             var normalizedPath = injection.Value.normalizedPath;
             if (normalizedPath.NullOrEmpty() || lookup.ContainsKey(normalizedPath)) {
