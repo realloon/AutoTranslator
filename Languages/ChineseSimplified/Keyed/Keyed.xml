@@ -4,11 +4,9 @@
   <Translator_WindowTitle>Auto Translator</Translator_WindowTitle>
   <Translator_ModCount>显示模组 {0}/{1}</Translator_ModCount>
   <Translator_DefStatsTitle>来源于 Def</Translator_DefStatsTitle>
-  <Translator_DefStatsFields>可翻译注入项：{0}</Translator_DefStatsFields>
-  <Translator_DefStatsMissingDefInjection>当前语言缺失 Def-injection：{0}</Translator_DefStatsMissingDefInjection>
+  <Translator_TranslatableEntries>可翻译条目：{0}</Translator_TranslatableEntries>
+  <Translator_MissingEntries>当前语言缺失：{0}</Translator_MissingEntries>
   <Translator_StaticScanTitle>来源于 key</Translator_StaticScanTitle>
-  <Translator_StaticScanUniqueKeys>可翻译 Key：{0}</Translator_StaticScanUniqueKeys>
-  <Translator_StaticScanMissingKeys>当前语言缺失 keyed：{0}</Translator_StaticScanMissingKeys>
   <Translator_StatsComputing>正在统计…</Translator_StatsComputing>
   <Translator_ExportLanguageDialogTitle>选择翻译语言</Translator_ExportLanguageDialogTitle>
   <Translator_SelectAllLanguages>全选</Translator_SelectAllLanguages>

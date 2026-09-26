@@ -13,45 +13,45 @@ public sealed class TranslatorSettings : ModSettings {
     private const int DefaultBatchSize = 80;
     private const int DefaultConcurrency = 2;
     private const int DefaultRetryCount = 1;
+    private Dictionary<string, string> _apiKeys = [];
+    private Dictionary<string, string> _models = [];
+
     public const int MinBatchSize = 10;
     public const int MaxBatchSize = 400;
     public const int MinConcurrency = 1;
     public const int MaxConcurrency = 8;
     public const int MinRetryCount = 0;
     public const int MaxRetryCount = 5;
-
     public string ProviderId = LlmProviderPresets.DeepSeek.Id;
     public LlmApiProtocol CustomProtocol = LlmApiProtocol.ChatCompletions;
     public string ApiUrl = string.Empty;
-    public Dictionary<string, string> ApiKeys = [];
-    public Dictionary<string, string> Models = [];
     public int BatchSize = DefaultBatchSize;
     public int Concurrency = DefaultConcurrency;
     public int RetryCount = DefaultRetryCount;
     public OutputLocationMode DefaultOutputLocationMode = OutputLocationMode.GeneratedMod;
 
     public string GetApiKey(string providerId) {
-        return ApiKeys.TryGetValue(providerId, out var key) ? key : string.Empty;
+        return _apiKeys.TryGetValue(providerId, out var key) ? key : string.Empty;
     }
 
     public void SetApiKey(string providerId, string key) {
-        ApiKeys[providerId] = key;
+        _apiKeys[providerId] = key;
     }
 
     public string GetModel(string providerId) {
-        return Models.TryGetValue(providerId, out var model) ? model : string.Empty;
+        return _models.TryGetValue(providerId, out var model) ? model : string.Empty;
     }
 
     public void SetModel(string providerId, string model) {
-        Models[providerId] = model;
+        _models[providerId] = model;
     }
 
     public void ResetToDefaults() {
         ProviderId = LlmProviderPresets.DeepSeek.Id;
         CustomProtocol = LlmApiProtocol.ChatCompletions;
         ApiUrl = string.Empty;
-        ApiKeys.Clear();
-        Models.Clear();
+        _apiKeys.Clear();
+        _models.Clear();
         BatchSize = DefaultBatchSize;
         Concurrency = DefaultConcurrency;
         RetryCount = DefaultRetryCount;
@@ -68,12 +68,12 @@ public sealed class TranslatorSettings : ModSettings {
         }
 
         Scribe_Values.Look(ref ProviderId, "providerId", LlmProviderPresets.DeepSeek.Id);
-        Scribe_Values.Look(ref CustomProtocol, "customProtocol", LlmApiProtocol.ChatCompletions);
+        Scribe_Values.Look(ref CustomProtocol, "customProtocol");
         Scribe_Values.Look(ref ApiUrl, "apiUrl", string.Empty);
-        Scribe_Collections.Look(ref ApiKeys, "apiKeys", LookMode.Value, LookMode.Value);
-        ApiKeys ??= [];
-        Scribe_Collections.Look(ref Models, "models", LookMode.Value, LookMode.Value);
-        Models ??= [];
+        Scribe_Collections.Look(ref _apiKeys, "apiKeys", LookMode.Value, LookMode.Value);
+        _apiKeys ??= [];
+        Scribe_Collections.Look(ref _models, "models", LookMode.Value, LookMode.Value);
+        _models ??= [];
         Scribe_Values.Look(ref BatchSize, "batchSize", DefaultBatchSize);
         Scribe_Values.Look(ref Concurrency, "concurrency", DefaultConcurrency);
         Scribe_Values.Look(ref RetryCount, "retryCount", DefaultRetryCount);

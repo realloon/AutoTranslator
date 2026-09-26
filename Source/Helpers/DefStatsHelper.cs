@@ -4,8 +4,8 @@ using Verse;
 namespace Translator.Helpers;
 
 internal static class DefStatsHelper {
-    public static DefTranslationStats BuildStats(ModMetaData mod, LoadedLanguage activeLanguage) {
-        var stats = new DefTranslationStats();
+    public static TranslationSectionStats BuildStats(ModMetaData mod, LoadedLanguage activeLanguage) {
+        var stats = new TranslationSectionStats();
         var packagesByDefType = activeLanguage.defInjections
             .GroupBy(p => p.defType)
             .ToDictionary(g => g.Key, g => g.First());
@@ -21,9 +21,9 @@ internal static class DefStatsHelper {
                         if (!isCollection) {
                             if (!DefInjectionUtility.ShouldCheckMissingInjection(currentValue, fieldInfo, def)) return;
 
-                            stats.TranslatableInjectionItemCount += 1;
+                            stats.TranslatableCount += 1;
                             if (IsMissingSingleInjection(normalizedPath, injectionsByNormalizedPath)) {
-                                stats.MissingDefInjectionCount += 1;
+                                stats.MissingCount += 1;
                             }
 
                             return;
@@ -39,8 +39,8 @@ internal static class DefStatsHelper {
 
                         if (translatableIndexes.Count == 0) return;
 
-                        stats.TranslatableInjectionItemCount += translatableIndexes.Count;
-                        stats.MissingDefInjectionCount += CountMissingCollectionInjections(
+                        stats.TranslatableCount += translatableIndexes.Count;
+                        stats.MissingCount += CountMissingCollectionInjections(
                             normalizedPath,
                             translatableIndexes,
                             fullListTranslationAllowed,

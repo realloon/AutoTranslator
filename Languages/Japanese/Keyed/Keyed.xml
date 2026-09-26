@@ -4,11 +4,9 @@
   <Translator_WindowTitle>Auto Translator</Translator_WindowTitle>
   <Translator_ModCount>表示中のMod {0}/{1}</Translator_ModCount>
   <Translator_DefStatsTitle>From Def</Translator_DefStatsTitle>
-  <Translator_DefStatsFields>翻訳可能なdef-injections: {0}</Translator_DefStatsFields>
-  <Translator_DefStatsMissingDefInjection>現在の言語で不足しているdef-injections: {0}</Translator_DefStatsMissingDefInjection>
+  <Translator_TranslatableEntries>翻訳可能な項目: {0}</Translator_TranslatableEntries>
+  <Translator_MissingEntries>現在の言語で不足: {0}</Translator_MissingEntries>
   <Translator_StaticScanTitle>From Key</Translator_StaticScanTitle>
-  <Translator_StaticScanUniqueKeys>翻訳可能なKey: {0}</Translator_StaticScanUniqueKeys>
-  <Translator_StaticScanMissingKeys>現在の言語で不足しているkeyed: {0}</Translator_StaticScanMissingKeys>
   <Translator_StatsComputing>統計を計算中…</Translator_StatsComputing>
   <Translator_ExportLanguageDialogTitle>翻訳言語を選択</Translator_ExportLanguageDialogTitle>
   <Translator_SelectAllLanguages>すべて選択</Translator_SelectAllLanguages>

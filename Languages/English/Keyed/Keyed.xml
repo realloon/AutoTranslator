@@ -4,11 +4,9 @@
   <Translator_WindowTitle>Auto Translator</Translator_WindowTitle>
   <Translator_ModCount>Showing mods {0}/{1}</Translator_ModCount>
   <Translator_DefStatsTitle>From Def</Translator_DefStatsTitle>
-  <Translator_DefStatsFields>Translatable injection entries: {0}</Translator_DefStatsFields>
-  <Translator_DefStatsMissingDefInjection>Missing def-injections in current language: {0}</Translator_DefStatsMissingDefInjection>
+  <Translator_TranslatableEntries>Translatable entries: {0}</Translator_TranslatableEntries>
+  <Translator_MissingEntries>Missing in current language: {0}</Translator_MissingEntries>
   <Translator_StaticScanTitle>From key</Translator_StaticScanTitle>
-  <Translator_StaticScanUniqueKeys>Translatable keys: {0}</Translator_StaticScanUniqueKeys>
-  <Translator_StaticScanMissingKeys>Missing keyed in current language: {0}</Translator_StaticScanMissingKeys>
   <Translator_StatsComputing>Calculating statistics...</Translator_StatsComputing>
   <Translator_ExportLanguageDialogTitle>Select Translation Languages</Translator_ExportLanguageDialogTitle>
   <Translator_SelectAllLanguages>Select All</Translator_SelectAllLanguages>

@@ -10,22 +10,20 @@ public class Window_TranslatorMain : Window {
     private static readonly Color SectionDividerColor = new(1f, 1f, 1f, 0.2f);
     private static readonly Color ErrorColor = new(0.95f, 0.35f, 0.35f);
     private static readonly Color SuccessColor = new(0.35f, 0.95f, 0.35f);
-
-    public override Vector2 InitialSize => new(760f, 520f);
-
     private readonly List<ModMetaData> _allMods = [];
     private readonly Dictionary<string, ModMetaData> _allModsByPackageId = new(StringComparer.Ordinal);
     private readonly List<ModMetaData> _filteredMods = [];
     private readonly List<LoadedLanguage> _exportLanguages = [];
     private readonly HashSet<string> _selectedExportLanguageFolders = new(StringComparer.OrdinalIgnoreCase);
     private readonly QuickSearchWidget _quickSearchWidget = new();
-
     private Vector2 _modsScrollPos = Vector2.zero;
     private string? _selectedPackageId;
     private string? _lastExportStatus;
     private bool _lastExportFailed;
     private string? _lastOutputPath;
     private bool _translateInProgress;
+
+    public override Vector2 InitialSize => new(760f, 520f);
 
     public Window_TranslatorMain() {
         doCloseX = true;
@@ -124,30 +122,23 @@ public class Window_TranslatorMain : Window {
             GUI.color = Color.white;
             y += 24f;
         } else {
-            Widgets.Label(new Rect(rect.x, y, rect.width, 24f), "Translator_DefStatsTitle".Translate());
-            y += 24f;
+            void DrawLabel(string text, float spacing = 24f) {
+                Widgets.Label(new Rect(rect.x, y, rect.width, 24f), text);
+                y += spacing;
+            }
 
-            Widgets.Label(new Rect(rect.x, y, rect.width, 24f),
-                "Translator_DefStatsFields".Translate(stats.DefStats.TranslatableInjectionItemCount));
-            y += 24f;
+            void DrawSection(string titleKey, TranslationSectionStats section, float trailingSpacing) {
+                DrawLabel(titleKey.Translate());
+                DrawLabel("Translator_TranslatableEntries".Translate(section.TranslatableCount));
+                DrawLabel("Translator_MissingEntries".Translate(section.MissingCount), trailingSpacing);
+            }
 
-            Widgets.Label(new Rect(rect.x, y, rect.width, 24f),
-                "Translator_DefStatsMissingDefInjection".Translate(stats.DefStats.MissingDefInjectionCount));
-            y += 32f;
+            DrawSection("Translator_DefStatsTitle", stats.DefStats, 32f);
 
             Widgets.DrawLineHorizontal(rect.x, y, rect.width, SectionDividerColor);
             y += 12f;
 
-            Widgets.Label(new Rect(rect.x, y, rect.width, 24f), "Translator_StaticScanTitle".Translate());
-            y += 24f;
-
-            Widgets.Label(new Rect(rect.x, y, rect.width, 24f),
-                "Translator_StaticScanUniqueKeys".Translate(stats.KeyStats.UniqueLiteralKeyCount));
-            y += 24f;
-
-            Widgets.Label(new Rect(rect.x, y, rect.width, 24f),
-                "Translator_StaticScanMissingKeys".Translate(stats.KeyStats.MissingKeyCount));
-            y += 36f;
+            DrawSection("Translator_StaticScanTitle", stats.KeyStats, 36f);
         }
 
         var termbaseButtonLabel = "Translator_TermbaseButton".Translate();

@@ -4,11 +4,9 @@
   <Translator_WindowTitle>Auto Translator</Translator_WindowTitle>
   <Translator_ModCount>Показано модов {0}/{1}</Translator_ModCount>
   <Translator_DefStatsTitle>Из Def</Translator_DefStatsTitle>
-  <Translator_DefStatsFields>Переводимых def-injections: {0}</Translator_DefStatsFields>
-  <Translator_DefStatsMissingDefInjection>Отсутствует def-injections для текущего языка: {0}</Translator_DefStatsMissingDefInjection>
+  <Translator_TranslatableEntries>Переводимых записей: {0}</Translator_TranslatableEntries>
+  <Translator_MissingEntries>Отсутствует в текущем языке: {0}</Translator_MissingEntries>
   <Translator_StaticScanTitle>Из Key</Translator_StaticScanTitle>
-  <Translator_StaticScanUniqueKeys>Переводимых Key: {0}</Translator_StaticScanUniqueKeys>
-  <Translator_StaticScanMissingKeys>Отсутствует keyed для текущего языка: {0}</Translator_StaticScanMissingKeys>
   <Translator_StatsComputing>Подсчёт статистики…</Translator_StatsComputing>
   <Translator_ExportLanguageDialogTitle>Выберите языки перевода</Translator_ExportLanguageDialogTitle>
   <Translator_SelectAllLanguages>Выбрать все</Translator_SelectAllLanguages>

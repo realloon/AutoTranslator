@@ -4,14 +4,13 @@ using Verse;
 namespace Translator.Helpers;
 
 internal static class KeyStatsHelper {
-    public static StaticTranslateStats BuildStats(ModMetaData mod, LoadedLanguage activeLanguage,
+    public static TranslationSectionStats BuildStats(ModMetaData mod, LoadedLanguage activeLanguage,
         LoadedLanguage defaultLanguage) {
         var defaultKeys = CollectDefaultKeyedKeysForMod(mod, defaultLanguage);
-        var stats = new StaticTranslateStats {
-            UniqueLiteralKeyCount = defaultKeys.Count,
-            MissingKeyCount = CountMissingKeys(activeLanguage, defaultLanguage, defaultKeys)
+        return new TranslationSectionStats {
+            TranslatableCount = defaultKeys.Count,
+            MissingCount = CountMissingKeys(activeLanguage, defaultLanguage, defaultKeys)
         };
-        return stats;
     }
 
     private static int CountMissingKeys(LoadedLanguage activeLanguage, LoadedLanguage defaultLanguage,

@@ -4,11 +4,9 @@
   <Translator_WindowTitle>Auto Translator</Translator_WindowTitle>
   <Translator_ModCount>모드 표시 {0}/{1}</Translator_ModCount>
   <Translator_DefStatsTitle>From Def</Translator_DefStatsTitle>
-  <Translator_DefStatsFields>번역 가능한 def-injections: {0}</Translator_DefStatsFields>
-  <Translator_DefStatsMissingDefInjection>현재 언어에서 누락된 def-injections: {0}</Translator_DefStatsMissingDefInjection>
+  <Translator_TranslatableEntries>번역 가능한 항목: {0}</Translator_TranslatableEntries>
+  <Translator_MissingEntries>현재 언어에서 누락: {0}</Translator_MissingEntries>
   <Translator_StaticScanTitle>From Key</Translator_StaticScanTitle>
-  <Translator_StaticScanUniqueKeys>번역 가능한 Key: {0}</Translator_StaticScanUniqueKeys>
-  <Translator_StaticScanMissingKeys>현재 언어에서 누락된 keyed: {0}</Translator_StaticScanMissingKeys>
   <Translator_StatsComputing>통계 계산 중…</Translator_StatsComputing>
   <Translator_ExportLanguageDialogTitle>번역 언어 선택</Translator_ExportLanguageDialogTitle>
   <Translator_SelectAllLanguages>전체 선택</Translator_SelectAllLanguages>

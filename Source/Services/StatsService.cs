@@ -3,19 +3,14 @@ using Verse;
 
 namespace Translator.Services;
 
-internal sealed class DefTranslationStats {
-    public int TranslatableInjectionItemCount;
-    public int MissingDefInjectionCount;
-}
-
-internal sealed class StaticTranslateStats {
-    public int UniqueLiteralKeyCount;
-    public int MissingKeyCount;
+internal sealed class TranslationSectionStats {
+    public int TranslatableCount;
+    public int MissingCount;
 }
 
 internal sealed class StatsSnapshot {
-    public DefTranslationStats DefStats = new();
-    public StaticTranslateStats KeyStats = new();
+    public TranslationSectionStats DefStats = new();
+    public TranslationSectionStats KeyStats = new();
 }
 
 internal static class StatsService {
