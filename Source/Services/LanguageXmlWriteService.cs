@@ -13,7 +13,33 @@ internal sealed class LanguageXmlWriteResult {
 }
 
 internal static class LanguageXmlWriteService {
-    public static LanguageXmlWriteResult WriteFromWorkset(string outputModDir, LanguageWorksetFile workset) {
+    public static List<LanguageWorksetFile> ReadWorksets(string outputModDir,
+        IReadOnlyCollection<string> languageFolders) {
+        var result = new List<LanguageWorksetFile>();
+        foreach (var languageFolder in languageFolders.Distinct(StringComparer.OrdinalIgnoreCase)) {
+            var root = Path.Combine(outputModDir, "Languages", languageFolder);
+            if (!Directory.Exists(root)) continue;
+
+            var workset = new LanguageWorksetFile { LanguageFolderName = languageFolder };
+            foreach (var file in Directory.EnumerateFiles(root, "*.xml", SearchOption.AllDirectories)) {
+                var relative = Path.GetRelativePath(root, file).Split(Path.DirectorySeparatorChar);
+                if (relative.Length >= 2 && relative[0].Equals(LoadedLanguage.KeyedTranslationsFolderName,
+                        StringComparison.OrdinalIgnoreCase)) {
+                    ReadEntries(file, workset.Keyed, null);
+                } else if (relative.Length >= 3 && relative[0].Equals(LoadedLanguage.DefInjectionsFolderName,
+                               StringComparison.OrdinalIgnoreCase)) {
+                    ReadEntries(file, workset.DefInjected, relative[1]);
+                }
+            }
+
+            result.Add(workset);
+        }
+
+        return result;
+    }
+
+    public static LanguageXmlWriteResult WriteFromWorkset(string outputModDir, LanguageWorksetFile workset,
+        bool includePlaceholders = false) {
         try {
             var languageFolderName = workset.LanguageFolderName;
             var writtenEntryCount = 0;
@@ -27,12 +53,13 @@ internal static class LanguageXmlWriteService {
                 BuildOutputFileName(LoadedLanguage.KeyedTranslationsFolderName));
 
             var keyedEntries = workset.Keyed
-                .Where(item => !item.Tag.NullOrEmpty() && !item.Translation.NullOrEmpty())
+                .Where(item => !item.Tag.NullOrEmpty() &&
+                               (includePlaceholders || !item.Translation.NullOrEmpty()))
                 .OrderBy(item => item.Tag, StringComparer.Ordinal)
                 .Select(item => new XmlEntry {
                     Tag = item.Tag,
                     Original = item.Original,
-                    Translation = item.Translation
+                    Translation = item.Translation.NullOrEmpty() ? LoadedLanguage.PlaceholderText : item.Translation
                 })
                 .ToList();
 
@@ -46,7 +73,7 @@ internal static class LanguageXmlWriteService {
                 .Where(item =>
                     !item.DefType.NullOrEmpty() &&
                     !item.Tag.NullOrEmpty() &&
-                    !item.Translation.NullOrEmpty())
+                    (includePlaceholders || !item.Translation.NullOrEmpty()))
                 .GroupBy(item => item.DefType, StringComparer.Ordinal);
 
             foreach (var group in defGroups) {
@@ -64,7 +91,7 @@ internal static class LanguageXmlWriteService {
                     .Select(item => new XmlEntry {
                         Tag = item.Tag,
                         Original = item.Original,
-                        Translation = item.Translation
+                        Translation = item.Translation.NullOrEmpty() ? LoadedLanguage.PlaceholderText : item.Translation
                     })
                     .ToList();
 
@@ -126,6 +153,38 @@ internal static class LanguageXmlWriteService {
             new XDeclaration("1.0", "UTF-8", null),
             root).Save(outputFilePath);
         return writtenCount;
+    }
+
+    private static void ReadEntries<T>(string path, ICollection<T> destination, string? defType) {
+        var document = XDocument.Load(path);
+        string original = string.Empty;
+        foreach (var node in document.Root?.Nodes() ?? []) {
+            if (node is XComment comment && comment.Value.TrimStart().StartsWith("EN:", StringComparison.OrdinalIgnoreCase)) {
+                original = comment.Value.Trim().Length > 3 ? comment.Value.Trim()[3..].Trim() : string.Empty;
+                original = original.Replace("\\n", "\n");
+                continue;
+            }
+
+            if (node is not XElement element) continue;
+            var translation = element.Value == LoadedLanguage.PlaceholderText ? string.Empty : element.Value;
+            if (defType is null) {
+                ((ICollection<LanguageWorksetKeyedItem>)destination).Add(new LanguageWorksetKeyedItem {
+                    Tag = element.Name.LocalName,
+                    Original = original,
+                    Translation = translation
+                });
+            } else {
+                ((ICollection<LanguageWorksetDefInjectedItem>)destination).Add(new LanguageWorksetDefInjectedItem {
+                    Tag = element.Name.LocalName,
+                    Original = original,
+                    Translation = translation,
+                    DefType = defType,
+                    IsCollectionItem = element.Name.LocalName.LastIndexOf('.') >= 0
+                });
+            }
+
+            original = string.Empty;
+        }
     }
 
     private static bool TryCreateElement(string tag, string translation, out XElement element) {

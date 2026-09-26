@@ -27,6 +27,8 @@
   <Translator_TermbaseEntryCount>Entries: {0}</Translator_TermbaseEntryCount>
   <Translator_TermbaseSave>Save</Translator_TermbaseSave>
   <Translator_TermbaseSaveFailed>Failed to save termbase: {0}</Translator_TermbaseSaveFailed>
+  <Translator_ExtractButton>Extract &amp; Export</Translator_ExtractButton>
+  <Translator_TranslateExportButton>Translate Export</Translator_TranslateExportButton>
   <Translator_ExportIrButton>Translate &amp; Export</Translator_ExportIrButton>
   <Translator_AiTranslateInProgress>Translating. This may take a while.</Translator_AiTranslateInProgress>
   <Translator_AiTranslateSuccess>Translated mod exported.</Translator_AiTranslateSuccess>

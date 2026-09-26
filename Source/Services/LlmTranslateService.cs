@@ -110,7 +110,8 @@ internal static class LlmTranslateService {
 
     public static LlmTranslateResult TranslateWorkset(LanguageWorksetFile workset,
         string targetLanguageFolder,
-        string targetLanguageDisplayName) {
+        string targetLanguageDisplayName,
+        Action? saveProgress = null) {
         var pendingCount = 0;
         try {
             if (!TryGetActiveConfig(out var config, out var configError)) {
@@ -129,7 +130,7 @@ internal static class LlmTranslateService {
                 };
             }
 
-            var translatedById = new Dictionary<string, string>(StringComparer.Ordinal);
+            var pendingById = pending.ToDictionary(item => item.Id, StringComparer.Ordinal);
             var termbaseGlossary = TermbaseService.GetGlossaryForLanguage(targetLanguageFolder);
             var batches = BuildBatches(pending, config.BatchSize, MaxEstimatedCharsPerBatch);
 
@@ -155,8 +156,9 @@ internal static class LlmTranslateService {
                     }
 
                     foreach (var (id, translation) in batchResult.Translations) {
-                        translatedById[id] = translation;
+                        pendingById[id].ApplyTranslation(translation);
                     }
+                    saveProgress?.Invoke();
                 }
             }
 
@@ -166,10 +168,6 @@ internal static class LlmTranslateService {
                     Message = BuildBatchFailureMessage(failedBatches),
                     PendingCount = pending.Count
                 };
-            }
-
-            foreach (var item in pending) {
-                item.ApplyTranslation(translatedById[item.Id]);
             }
 
             return new LlmTranslateResult {

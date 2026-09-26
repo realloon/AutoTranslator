@@ -2,6 +2,7 @@ using UnityEngine;
 using RimWorld;
 using Verse;
 using Translator.Services;
+using Translator.Helpers;
 
 namespace Translator.Windows;
 
@@ -142,26 +143,33 @@ public class Window_TranslatorMain : Window {
         }
 
         var termbaseButtonLabel = "Translator_TermbaseButton".Translate();
-        var exportButtonLabel = "Translator_ExportIrButton".Translate();
+        var exportButtonLabel = "Translator_ExtractButton".Translate();
+        var translateButtonLabel = "Translator_TranslateExportButton".Translate();
         const float buttonGap = 8f;
         const float buttonHeight = 30f;
         var termbaseButtonWidth = Mathf.Max(130f, Text.CalcSize(termbaseButtonLabel).x + 8f);
-        var exportButtonWidth = Mathf.Max(210f, Text.CalcSize(exportButtonLabel).x + 8f);
-        if (termbaseButtonWidth + buttonGap + exportButtonWidth > rect.width) {
-            var halfWidth = (rect.width - buttonGap) / 2f;
-            termbaseButtonWidth = halfWidth;
-            exportButtonWidth = halfWidth;
+        var exportButtonWidth = Mathf.Max(150f, Text.CalcSize(exportButtonLabel).x + 8f);
+        var translateButtonWidth = Mathf.Max(170f, Text.CalcSize(translateButtonLabel).x + 8f);
+        if (termbaseButtonWidth + buttonGap + exportButtonWidth + buttonGap + translateButtonWidth > rect.width) {
+            var thirdWidth = (rect.width - buttonGap * 2f) / 3f;
+            termbaseButtonWidth = thirdWidth;
+            exportButtonWidth = thirdWidth;
+            translateButtonWidth = thirdWidth;
         }
 
         var buttonY = rect.yMax - buttonHeight;
         var termbaseButtonRect = new Rect(rect.x, buttonY, termbaseButtonWidth, buttonHeight);
         var exportButtonRect = new Rect(termbaseButtonRect.xMax + buttonGap, buttonY, exportButtonWidth, buttonHeight);
+        var translateButtonRect = new Rect(exportButtonRect.xMax + buttonGap, buttonY, translateButtonWidth, buttonHeight);
         if (Widgets.ButtonText(termbaseButtonRect, termbaseButtonLabel)) {
             OpenTermbaseWindow();
         }
 
         if (Widgets.ButtonText(exportButtonRect, exportButtonLabel)) {
-            OpenExportLanguagePicker(selectedMod);
+            OpenExportLanguagePicker(selectedMod, ExtractOnly);
+        }
+        if (Widgets.ButtonText(translateButtonRect, translateButtonLabel)) {
+            OpenExportLanguagePicker(selectedMod, TranslateLatestExport);
         }
 
         if (_lastExportStatus.NullOrEmpty()) return;
@@ -210,8 +218,80 @@ public class Window_TranslatorMain : Window {
         }
     }
 
-    private void OpenExportLanguagePicker(ModMetaData selectedMod) {
-        OpenLanguagePicker(selectedMod, TryExportAndAiTranslate);
+    private void OpenExportLanguagePicker(ModMetaData selectedMod,
+        Action<ModMetaData, IReadOnlyCollection<string>, OutputLocationMode> action) {
+        OpenLanguagePicker(selectedMod, action);
+    }
+
+    private void ExtractOnly(ModMetaData selectedMod, IReadOnlyCollection<string> selectedLanguageFolders,
+        OutputLocationMode outputLocationMode) {
+        if (_translateInProgress) return;
+        var selectedLanguages = ResolveSelectedLanguages(selectedLanguageFolders);
+        var result = IrExportService.Export(selectedMod, selectedLanguages, LanguageDatabase.defaultLanguage, outputLocationMode);
+        if (!result.Success || result.FilePath.NullOrEmpty()) {
+            ShowExportFailure(result.Message);
+            return;
+        }
+
+        var written = 0;
+        foreach (var workset in result.Worksets) {
+            var write = LanguageXmlWriteService.WriteFromWorkset(result.FilePath!, workset, includePlaceholders: true);
+            if (!write.Success) {
+                ShowExportFailure(write.Message);
+                return;
+            }
+            written += write.WrittenEntryCount;
+        }
+
+        _lastOutputPath = result.FilePath;
+        _lastExportFailed = false;
+        _lastExportStatus = $"Extracted {written} entries.\n{"Translator_OutputDirectory".Translate(result.FilePath)}";
+    }
+
+    private void TranslateLatestExport(ModMetaData selectedMod, IReadOnlyCollection<string> selectedLanguageFolders,
+        OutputLocationMode outputLocationMode) {
+        var prefix = $"TranslatorExport_{ModPathHelper.SanitizeFileNamePart(selectedMod.PackageIdPlayerFacing, "unknown")}_";
+        var output = !string.IsNullOrEmpty(_lastOutputPath) && Directory.Exists(_lastOutputPath)
+            ? _lastOutputPath
+            : Directory.Exists(GenFilePaths.ModsFolderPath)
+            ? Directory.GetDirectories(GenFilePaths.ModsFolderPath, prefix + "*", SearchOption.TopDirectoryOnly)
+                .OrderByDescending(Directory.GetCreationTimeUtc).FirstOrDefault()
+            : null;
+        if (output.NullOrEmpty()) {
+            ShowExportFailure("No extracted translation export found.");
+            return;
+        }
+
+        TryTranslateExport(output!, selectedLanguageFolders);
+    }
+
+    private void TryTranslateExport(string outputModPath, IReadOnlyCollection<string> selectedLanguageFolders) {
+        if (_translateInProgress) return;
+        var configValidation = LlmTranslateService.ValidateCurrentConfig(testConnection: false);
+        if (!configValidation.Success) { ShowExportFailure(configValidation.Message); return; }
+        var worksets = LanguageXmlWriteService.ReadWorksets(outputModPath, selectedLanguageFolders);
+        var targetNames = ResolveSelectedLanguages(selectedLanguageFolders).ToDictionary(x => x.folderName,
+            x => x.DisplayName.NullOrEmpty() ? x.folderName : x.DisplayName, StringComparer.OrdinalIgnoreCase);
+        _translateInProgress = true;
+        _lastOutputPath = outputModPath;
+        LongEventHandler.QueueLongEvent(() => {
+            var failures = new List<string>();
+            try {
+                foreach (var workset in worksets) {
+                    if (!targetNames.TryGetValue(workset.LanguageFolderName, out var targetName)) continue;
+                    var translated = LlmTranslateService.TranslateWorkset(workset, workset.LanguageFolderName, targetName,
+                        () => LanguageXmlWriteService.WriteFromWorkset(outputModPath, workset, includePlaceholders: true));
+                    var write = LanguageXmlWriteService.WriteFromWorkset(outputModPath, workset, includePlaceholders: true);
+                    if (!write.Success) failures.Add($"{workset.LanguageFolderName}: {write.Message}");
+                    if (!translated.Success) failures.Add($"{workset.LanguageFolderName}: {translated.Message}");
+                }
+            } catch (Exception ex) { failures.Add(ex.Message); }
+            LongEventHandler.ExecuteWhenFinished(() => {
+                _translateInProgress = false;
+                if (failures.Count == 0) { _lastExportFailed = false; _lastExportStatus = "Translated exported files."; }
+                else ShowExportFailure(BuildFailureSummary(failures));
+            });
+        }, "Translator_AiTranslateInProgress", true, null);
     }
 
     private static void OpenTermbaseWindow() {
