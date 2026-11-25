@@ -8,6 +8,7 @@
   <Translator_MissingEntries>Missing in current language: {0}</Translator_MissingEntries>
   <Translator_StaticScanTitle>From key</Translator_StaticScanTitle>
   <Translator_StatsComputing>Calculating statistics...</Translator_StatsComputing>
+  <Translator_NoModsFound>No translatable mods found.</Translator_NoModsFound>
   <Translator_ExportLanguageDialogTitle>Select Translation Languages</Translator_ExportLanguageDialogTitle>
   <Translator_SelectAllLanguages>Select All</Translator_SelectAllLanguages>
   <Translator_ClearLanguageSelection>Clear</Translator_ClearLanguageSelection>
@@ -40,7 +41,7 @@
   <Translator_OpenOutputFolderFailed>Failed to open output folder: {0}</Translator_OpenOutputFolderFailed>
   <Translator_AiTranslateConfigInvalid>AI configuration is invalid: {0}</Translator_AiTranslateConfigInvalid>
   <Translator_AiTranslateFailed>AI translation failed: {0}</Translator_AiTranslateFailed>
-  <Translator_ModSettingsCategory>Auto Translator</Translator_ModSettingsCategory>
+  <Translator_AutoTranslator>Auto Translator</Translator_AutoTranslator>
   <Translator_ModSettingsTabConnection>Connection</Translator_ModSettingsTabConnection>
   <Translator_ModSettingsTabAdvanced>Advanced</Translator_ModSettingsTabAdvanced>
   <Translator_ModSettingProtocol>API Protocol</Translator_ModSettingProtocol>
@@ -71,5 +72,4 @@
   <Translator_ModSettingsValidationSuccess>Validation succeeded, configuration saved.</Translator_ModSettingsValidationSuccess>
   <Translator_ModSettingsValidationFailed>Configuration validation failed: {0}</Translator_ModSettingsValidationFailed>
   <Translator_ModSettingsResetDefaults>Reset to defaults</Translator_ModSettingsResetDefaults>
-  <Translator_ModSettingsResetNotice>Auto Translator settings were reset for the new provider configuration. Please set your API key again in Mod Settings.</Translator_ModSettingsResetNotice>
 </LanguageData>

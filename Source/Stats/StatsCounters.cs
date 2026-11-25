@@ -1,29 +1,39 @@
-using Translator.Services;
+using Translator.Utilities;
 using Verse;
 
-namespace Translator.Helpers;
+namespace Translator.Stats;
 
-internal static class DefStatsHelper {
-    public static TranslationSectionStats BuildStats(ModMetaData mod, LoadedLanguage activeLanguage) {
-        var stats = new TranslationSectionStats();
-        var packagesByDefType = activeLanguage.defInjections
-            .GroupBy(p => p.defType)
-            .ToDictionary(g => g.Key, g => g.First());
+internal static class DefStatsCounter {
+    public static TranslationSectionStats Count(ModMetaData mod, LoadedLanguage activeLanguage) {
+        var translatableCount = 0;
+        var missingCount = 0;
+
+        var packagesByDefType = new Dictionary<Type, DefInjectionPackage>();
+        foreach (var package in activeLanguage.defInjections) {
+            packagesByDefType.TryAdd(package.defType, package);
+        }
 
         foreach (var defType in GenDefDatabase.AllDefTypesWithDatabases()) {
             try {
                 packagesByDefType.TryGetValue(defType, out var package);
                 var injectionsByNormalizedPath = BuildNormalizedInjectionLookup(package);
-                DefInjectionUtility.ForEachPossibleDefInjection(defType, (_, normalizedPath, isCollection, currentValue,
-                        currentValueCollection, translationAllowed, fullListTranslationAllowed, fieldInfo, def) => {
-                        if (!translationAllowed) return;
+
+                DefInjectionUtility.ForEachPossibleDefInjection(
+                    defType,
+                    (_, normalizedPath, isCollection, currentValue, currentValueCollection, translationAllowed,
+                        fullListTranslationAllowed, fieldInfo, def) => {
+                        if (!translationAllowed) {
+                            return;
+                        }
 
                         if (!isCollection) {
-                            if (!DefInjectionUtility.ShouldCheckMissingInjection(currentValue, fieldInfo, def)) return;
+                            if (!DefInjectionUtility.ShouldCheckMissingInjection(currentValue, fieldInfo, def)) {
+                                return;
+                            }
 
-                            stats.TranslatableCount += 1;
+                            translatableCount++;
                             if (IsMissingSingleInjection(normalizedPath, injectionsByNormalizedPath)) {
-                                stats.MissingCount += 1;
+                                missingCount++;
                             }
 
                             return;
@@ -37,10 +47,12 @@ internal static class DefStatsHelper {
                             }
                         }
 
-                        if (translatableIndexes.Count == 0) return;
+                        if (translatableIndexes.Count == 0) {
+                            return;
+                        }
 
-                        stats.TranslatableCount += translatableIndexes.Count;
-                        stats.MissingCount += CountMissingCollectionInjections(
+                        translatableCount += translatableIndexes.Count;
+                        missingCount += CountMissingCollectionInjections(
                             normalizedPath,
                             translatableIndexes,
                             fullListTranslationAllowed,
@@ -53,29 +65,30 @@ internal static class DefStatsHelper {
             }
         }
 
-        return stats;
+        return new(translatableCount, missingCount);
     }
 
     private static IReadOnlyDictionary<string, DefInjectionPackage.DefInjection> BuildNormalizedInjectionLookup(
         DefInjectionPackage? package) {
-        var lookup = new Dictionary<string, DefInjectionPackage.DefInjection>();
+        var lookup = new Dictionary<string, DefInjectionPackage.DefInjection>(StringComparer.Ordinal);
         if (package is null) {
             return lookup;
         }
 
-        foreach (var injection in package.injections) {
-            var normalizedPath = injection.Value.normalizedPath;
+        foreach (var (_, injection) in package.injections) {
+            var normalizedPath = injection.normalizedPath;
             if (normalizedPath.NullOrEmpty() || lookup.ContainsKey(normalizedPath)) {
                 continue;
             }
 
-            lookup.Add(normalizedPath, injection.Value);
+            lookup.Add(normalizedPath, injection);
         }
 
         return lookup;
     }
 
-    private static bool IsMissingSingleInjection(string normalizedPath,
+    private static bool IsMissingSingleInjection(
+        string normalizedPath,
         IReadOnlyDictionary<string, DefInjectionPackage.DefInjection> injectionsByNormalizedPath) {
         if (!injectionsByNormalizedPath.TryGetValue(normalizedPath, out var existingInjection)) {
             return true;
@@ -84,8 +97,11 @@ internal static class DefStatsHelper {
         return existingInjection.IsFullListInjection || existingInjection.isPlaceholder;
     }
 
-    private static int CountMissingCollectionInjections(string normalizedPath, IReadOnlyList<int> translatableIndexes,
-        bool fullListTranslationAllowed, Def def,
+    private static int CountMissingCollectionInjections(
+        string normalizedPath,
+        IReadOnlyList<int> translatableIndexes,
+        bool fullListTranslationAllowed,
+        Def def,
         IReadOnlyDictionary<string, DefInjectionPackage.DefInjection> injectionsByNormalizedPath) {
         if (!injectionsByNormalizedPath.TryGetValue(normalizedPath, out var listInjection) ||
             !listInjection.IsFullListInjection) {
@@ -95,7 +111,7 @@ internal static class DefStatsHelper {
                 if (!injectionsByNormalizedPath.TryGetValue(itemPath, out var itemInjection) ||
                     itemInjection.IsFullListInjection ||
                     itemInjection.isPlaceholder) {
-                    count += 1;
+                    count++;
                 }
             }
 
@@ -106,10 +122,25 @@ internal static class DefStatsHelper {
             return 0;
         }
 
-        if (listInjection.isPlaceholder && !def.generated) {
-            return translatableIndexes.Count;
-        }
-
-        return 0;
+        return listInjection.isPlaceholder && !def.generated ? translatableIndexes.Count : 0;
     }
+}
+
+internal static class KeyStatsCounter {
+    public static TranslationSectionStats Count(
+        ModMetaData mod,
+        LoadedLanguage activeLanguage,
+        LoadedLanguage defaultLanguage) {
+        var defaultKeys = CollectDefaultKeyedKeysForMod(mod, defaultLanguage);
+        var missingCount = activeLanguage != defaultLanguage
+            ? defaultKeys.Count(key => !activeLanguage.HaveTextForKey(key))
+            : 0;
+
+        return new(defaultKeys.Count, missingCount);
+    }
+
+    private static HashSet<string> CollectDefaultKeyedKeysForMod(
+        ModMetaData mod,
+        LoadedLanguage defaultLanguage) =>
+        ModKeyedTexts.Of(mod, defaultLanguage).Select(entry => entry.Key).ToHashSet(StringComparer.Ordinal);
 }

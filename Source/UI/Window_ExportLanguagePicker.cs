@@ -1,32 +1,29 @@
 using RimWorld;
+using Translator.Export;
 using UnityEngine;
 using Verse;
-using Translator.Services;
 
-namespace Translator.Windows;
+namespace Translator.UI;
 
 // ReSharper disable once InconsistentNaming
 public class Window_ExportLanguagePicker : Window {
-    private static readonly Color ListBackgroundColor = new ColorInt(42, 43, 44).ToColor;
-    private static readonly Color ListBorderColor = new(0.78f, 0.78f, 0.78f, 0.2f);
-
     private readonly List<LoadedLanguage> _languages;
     private readonly HashSet<string> _selectedLanguageFolders;
     private readonly Action<IReadOnlyCollection<string>, OutputLocationMode> _onConfirm;
     private OutputLocationMode _outputLocationMode;
-
-    private Vector2 _scrollPos = Vector2.zero;
+    private Vector2 _scrollPos;
 
     public override Vector2 InitialSize => new(540f, 580f);
 
-    public Window_ExportLanguagePicker(IEnumerable<LoadedLanguage> languages,
+    public Window_ExportLanguagePicker(
+        IEnumerable<LoadedLanguage> languages,
         IEnumerable<string> selectedLanguageFolders,
         OutputLocationMode defaultOutputLocationMode,
         Action<IReadOnlyCollection<string>, OutputLocationMode> onConfirm) {
-        _languages = [
-            .. languages.OrderBy(language => language.folderName, StringComparer.OrdinalIgnoreCase)
-        ];
-        _selectedLanguageFolders = new HashSet<string>(selectedLanguageFolders, StringComparer.OrdinalIgnoreCase);
+        _languages = [.. languages.OrderBy(language => language.folderName, StringComparer.OrdinalIgnoreCase)];
+        _selectedLanguageFolders =
+            new HashSet<string>(selectedLanguageFolders, StringComparer.OrdinalIgnoreCase);
+
         if (_selectedLanguageFolders.Count == 0 && LanguageDatabase.activeLanguage is not null) {
             _selectedLanguageFolders.Add(LanguageDatabase.activeLanguage.folderName);
         }
@@ -44,9 +41,8 @@ public class Window_ExportLanguagePicker : Window {
 
         Text.Font = GameFont.Medium;
         Widgets.Label(new Rect(0f, y, inRect.width, 34f), "Translator_ExportLanguageDialogTitle".Translate());
-        y += 40f;
+        y += 44f;
         Text.Font = GameFont.Small;
-        y += 4f;
 
         DrawHeaderActions(new Rect(0f, y, inRect.width, 30f));
         y += 36f;
@@ -56,8 +52,7 @@ public class Window_ExportLanguagePicker : Window {
         var listRect = new Rect(0f, y, inRect.width, inRect.height - y - footerHeight - footerGap);
         DrawLanguageList(listRect);
 
-        var footerRect = new Rect(0f, inRect.height - footerHeight, inRect.width, footerHeight);
-        DrawFooter(footerRect);
+        DrawFooter(new Rect(0f, inRect.height - footerHeight, inRect.width, footerHeight));
     }
 
     private void DrawHeaderActions(Rect rect) {
@@ -75,36 +70,40 @@ public class Window_ExportLanguagePicker : Window {
             _selectedLanguageFolders.Clear();
         }
 
-        var countRect = new Rect(clearRect.xMax + 10f, rect.y + 4f, rect.width - clearRect.xMax - 10f, rect.height);
+        var countRect = new Rect(clearRect.xMax + 10f, rect.y + 4f,
+            rect.width - clearRect.xMax - 10f, rect.height);
         Widgets.Label(countRect,
-            "Translator_ExportLanguageSelectedCount".Translate(_selectedLanguageFolders.Count, _languages.Count));
+            "Translator_ExportLanguageSelectedCount".Translate(
+                _selectedLanguageFolders.Count, _languages.Count));
     }
 
     private void DrawLanguageList(Rect rect) {
         const float contentPaddingVertical = 8f;
         const float contentPaddingRight = 8f;
         const float rowContentHorizontalPadding = 8f;
-        Widgets.DrawBoxSolidWithOutline(rect, ListBackgroundColor, ListBorderColor);
+        const float rowHeight = 24f;
+
+        Widgets.DrawBoxSolidWithOutline(rect, UiTheme.ListBackgroundColor, UiTheme.ListBorderColor);
+
         var scrollRect = new Rect(
             rect.x,
             rect.y + contentPaddingVertical,
             Mathf.Max(0f, rect.width - contentPaddingRight),
             Mathf.Max(0f, rect.height - contentPaddingVertical * 2f));
-        var viewRect = new Rect(0f, 0f, Mathf.Max(0f, scrollRect.width - 16f), _languages.Count * 24f + 2f);
+        var viewRect = new Rect(
+            0f, 0f, Mathf.Max(0f, scrollRect.width - 16f), _languages.Count * rowHeight + 2f);
+
         Widgets.BeginScrollView(scrollRect, ref _scrollPos, viewRect);
 
         for (var i = 0; i < _languages.Count; i++) {
             var language = _languages[i];
-            var rowRect = new Rect(
-                0f,
-                i * 24f,
-                viewRect.width,
-                24f);
+            var rowRect = new Rect(0f, i * rowHeight, viewRect.width, rowHeight);
             var contentRect = new Rect(
                 rowRect.x + rowContentHorizontalPadding,
                 rowRect.y,
                 Mathf.Max(0f, rowRect.width - rowContentHorizontalPadding * 2f),
                 rowRect.height);
+
             var selected = _selectedLanguageFolders.Contains(language.folderName);
             if (selected) {
                 Widgets.DrawHighlightSelected(rowRect);
@@ -114,6 +113,7 @@ public class Window_ExportLanguagePicker : Window {
 
             var label = language.DisplayName.NullOrEmpty() ? language.folderName : language.DisplayName;
             Widgets.CheckboxLabeled(contentRect, label, ref selected);
+
             if (selected) {
                 _selectedLanguageFolders.Add(language.folderName);
             } else {
@@ -131,12 +131,13 @@ public class Window_ExportLanguagePicker : Window {
         }
 
         TooltipHandler.TipRegion(modeButtonRect,
-            "Translator_OutputModeButtonTip".Translate(GetOutputModeLabel(_outputLocationMode)));
+            "Translator_OutputModeButtonTip".Translate(OutputModeText.Of(_outputLocationMode)));
 
         var confirmLabel = "Translator_ExportLanguageConfirm".Translate();
         var cancelLabel = "Cancel".Translate();
         var confirmWidth = Mathf.Max(120f, Text.CalcSize(confirmLabel).x + 24f);
         var cancelWidth = Mathf.Max(120f, Text.CalcSize(cancelLabel).x + 24f);
+
         var confirmRect = new Rect(rect.xMax - confirmWidth, rect.y, confirmWidth, rect.height);
         if (Widgets.ButtonText(confirmRect, confirmLabel)) {
             ConfirmAndClose();
@@ -150,7 +151,8 @@ public class Window_ExportLanguagePicker : Window {
 
     private void ConfirmAndClose() {
         if (_selectedLanguageFolders.Count == 0) {
-            Messages.Message("Translator_ExportNoLanguageSelected".Translate(), MessageTypeDefOf.RejectInput);
+            Messages.Message("Translator_ExportNoLanguageSelected".Translate(),
+                MessageTypeDefOf.RejectInput);
             return;
         }
 
@@ -160,15 +162,11 @@ public class Window_ExportLanguagePicker : Window {
 
     private void OpenOutputModeMenu() {
         var options = new List<FloatMenuOption> {
-            new("Translator_OutputModeGeneratedMod".Translate(),
-                () => { _outputLocationMode = OutputLocationMode.GeneratedMod; }),
-            new("Translator_OutputModeOriginalMod".Translate(),
-                () => { _outputLocationMode = OutputLocationMode.OriginalMod; })
+            new(OutputModeText.Of(OutputLocationMode.GeneratedMod),
+                () => _outputLocationMode = OutputLocationMode.GeneratedMod),
+            new(OutputModeText.Of(OutputLocationMode.OriginalMod),
+                () => _outputLocationMode = OutputLocationMode.OriginalMod)
         };
         Find.WindowStack.Add(new FloatMenu(options));
     }
-
-    private static string GetOutputModeLabel(OutputLocationMode mode) => mode == OutputLocationMode.OriginalMod
-        ? "Translator_OutputModeOriginalMod".Translate()
-        : "Translator_OutputModeGeneratedMod".Translate();
 }

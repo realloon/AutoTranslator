@@ -1,55 +1,53 @@
-using JetBrains.Annotations;
 using System.Reflection.Emit;
 using HarmonyLib;
+using JetBrains.Annotations;
 using RimWorld;
+using Translator.UI;
 using Verse;
-using Translator.Windows;
 
 namespace Translator.HarmonyPatches;
 
 [HarmonyPatch(typeof(MainMenuDrawer), nameof(MainMenuDrawer.DoMainMenuControls))]
-// ReSharper disable once InconsistentNaming
-public static class Patch_MainMenuDrawer {
+internal static class Patch_MainMenuDrawer {
     private const string ButtonHighlightTag = "MenuButton-Translator";
 
     [UsedImplicitly]
     [HarmonyTranspiler]
-    private static IEnumerable<CodeInstruction>
-        DoMainMenuControlsTranspiler(IEnumerable<CodeInstruction> instructions) {
-        var codes = new List<CodeInstruction>(instructions);
-        var drawMethod = AccessTools.Method(typeof(OptionListingUtility),
-            nameof(OptionListingUtility.DrawOptionListing));
-        var addButtonMethod = AccessTools.Method(typeof(Patch_MainMenuDrawer), nameof(TryAddTranslatorButton));
+    private static IEnumerable<CodeInstruction> AddTranslatorButton(
+        IEnumerable<CodeInstruction> instructions) {
+        var drawOptionListing = AccessTools.Method(
+            typeof(OptionListingUtility), nameof(OptionListingUtility.DrawOptionListing));
+        var addButton = AccessTools.Method(
+            typeof(Patch_MainMenuDrawer), nameof(TryAddTranslatorButton));
 
-        for (var i = 0; i < codes.Count; i++) {
-            if (!codes[i].Calls(drawMethod)) continue;
+        var matcher = new CodeMatcher(instructions)
+            .MatchStartForward(new CodeMatch(OpCodes.Call, drawOptionListing));
 
-            if (i < 1 || !codes[i - 1].IsLdloc()) {
-                Log.Error("[Translator] Could not inject main menu button: unexpected IL pattern.");
-                return codes;
-            }
-
-            // Insert one instruction before DrawOptionListing: TryAddTranslatorButton(list).
-            // We reuse the existing list-local load opcode to avoid assumptions about local index layout.
-            codes.Insert(i - 1, new CodeInstruction(codes[i - 1]));
-            codes.Insert(i, new CodeInstruction(OpCodes.Call, addButtonMethod));
-            return codes;
+        if (matcher.IsInvalid) {
+            Log.Error("[Translator] Could not inject main menu button: DrawOptionListing call was not found.");
+            return matcher.InstructionEnumeration();
         }
 
-        Log.Error("[Translator] Could not inject main menu button: DrawOptionListing call was not found.");
-        return codes;
+        // The list is on top of the stack right before DrawOptionListing(rect, list).
+        // Duplicating it lets us pass the same list to TryAddTranslatorButton without
+        // making assumptions about local variable indexes.
+        return matcher
+            .InsertAndAdvance(
+                new CodeInstruction(OpCodes.Dup),
+                new CodeInstruction(OpCodes.Call, addButton))
+            .InstructionEnumeration();
     }
 
     private static void TryAddTranslatorButton(List<ListableOption> options) {
-        if (Current.ProgramState != ProgramState.Entry) return;
+        if (Current.ProgramState != ProgramState.Entry) {
+            return;
+        }
 
         var insertIndex = Math.Max(0, options.Count - 1);
-        options.Insert(insertIndex, new ListableOption("Translator_MainMenuButton".Translate(),
-            OnTranslatorButtonClicked,
-            ButtonHighlightTag));
+        options.Insert(insertIndex, new ListableOption(
+            "Translator_MainMenuButton".Translate(), OnTranslatorButtonClicked, ButtonHighlightTag));
     }
 
-    private static void OnTranslatorButtonClicked() {
+    private static void OnTranslatorButtonClicked() =>
         Find.WindowStack.Add(new Window_TranslatorMain());
-    }
 }

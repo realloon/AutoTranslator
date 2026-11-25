@@ -1,4 +1,4 @@
-﻿using JetBrains.Annotations;
+using JetBrains.Annotations;
 using HarmonyLib;
 using UnityEngine;
 using Verse;
@@ -8,11 +8,10 @@ namespace Translator;
 [UsedImplicitly]
 [StaticConstructorOnStartup]
 public static class Translator {
-    public static readonly Texture2D GeneralIcon;
+    public static Texture2D GeneralIcon { get; }
 
     static Translator() {
-        var harmony = new Harmony("Vortex.AutoTranslator");
-        harmony.PatchAll();
+        new Harmony("Vortex.AutoTranslator").PatchAll(typeof(Translator).Assembly);
 
         GeneralIcon = ContentFinder<Texture2D>.Get("UI/Icons/Options/OptionsGeneral");
     }

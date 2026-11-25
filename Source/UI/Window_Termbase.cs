@@ -1,20 +1,16 @@
-using UnityEngine;
 using RimWorld;
+using Translator.Termbase;
+using UnityEngine;
 using Verse;
-using Translator.Services;
 
-namespace Translator.Windows;
+namespace Translator.UI;
 
 // ReSharper disable once InconsistentNaming
 public class Window_Termbase : Window {
-    private static readonly Color ListBackgroundColor = new ColorInt(42, 43, 44).ToColor;
-    private static readonly Color ListBorderColor = new(0.78f, 0.78f, 0.78f, 0.2f);
-    private static readonly Color HeaderColor = new(1f, 1f, 1f, 0.6f);
-
-    private Vector2 _scrollPos = Vector2.zero;
     private readonly List<TermbaseEntry> _entries = [];
     private readonly List<LoadedLanguage> _languages = [];
-    private string _selectedLanguageFolder;
+    private string _selectedLanguageFolder = string.Empty;
+    private Vector2 _scrollPos;
 
     public override Vector2 InitialSize => new(600f, 560f);
 
@@ -48,12 +44,10 @@ public class Window_Termbase : Window {
 
         const float footerHeight = 34f;
         const float footerGap = 10f;
-        var selectedIndexes = GetSelectedLanguageEntryIndexes();
         var listRect = new Rect(0f, y, inRect.width, inRect.height - y - footerHeight - footerGap);
-        DrawEntriesList(listRect, selectedIndexes);
+        DrawEntriesList(listRect);
 
-        var footerRect = new Rect(0f, inRect.height - footerHeight, inRect.width, footerHeight);
-        DrawFooter(footerRect, selectedIndexes.Count);
+        DrawFooter(new Rect(0f, inRect.height - footerHeight, inRect.width, footerHeight));
     }
 
     private float DrawHeaderActions(Rect rect) {
@@ -68,6 +62,7 @@ public class Window_Termbase : Window {
         var addWidth = Mathf.Clamp(Text.CalcSize(addLabel).x + 24f, minButtonWidth, 160f);
         var clearWidth = Mathf.Clamp(Text.CalcSize(clearLabel).x + 24f, minButtonWidth, 200f);
         var saveWidth = Mathf.Clamp(Text.CalcSize(saveLabel).x + 24f, minButtonWidth, 160f);
+
         var availableButtonsWidth = Mathf.Max(0f, rect.width - rowGap * 2f);
         var requestedButtonsWidth = addWidth + clearWidth + saveWidth;
         if (requestedButtonsWidth > availableButtonsWidth && requestedButtonsWidth > 0f) {
@@ -78,110 +73,119 @@ public class Window_Termbase : Window {
         }
 
         var addRect = new Rect(rect.x, rect.y, addWidth, rowHeight);
-        if (Widgets.ButtonText(addRect, "Translator_TermbaseAddRow".Translate())) {
+        if (Widgets.ButtonText(addRect, addLabel)) {
             if (_selectedLanguageFolder.NullOrEmpty()) {
                 return rowHeight;
             }
 
-            _entries.Add(new TermbaseEntry {
-                TargetLanguageFolder = _selectedLanguageFolder
-            });
+            _entries.Add(new TermbaseEntry { TargetLanguageFolder = _selectedLanguageFolder });
         }
 
         var clearRect = new Rect(addRect.xMax + rowGap, rect.y, clearWidth, rowHeight);
-        if (Widgets.ButtonText(clearRect, "Translator_TermbaseClearAll".Translate())) {
-            _entries.RemoveAll(entry => string.Equals(entry.TargetLanguageFolder, _selectedLanguageFolder,
-                StringComparison.OrdinalIgnoreCase));
+        if (Widgets.ButtonText(clearRect, clearLabel)) {
+            _entries.RemoveAll(entry => string.Equals(
+                entry.TargetLanguageFolder, _selectedLanguageFolder, StringComparison.OrdinalIgnoreCase));
         }
 
         var saveRect = new Rect(clearRect.xMax + rowGap, rect.y, saveWidth, rowHeight);
         if (Widgets.ButtonText(saveRect, saveLabel)) {
-            SaveOnly();
+            Save();
         }
 
         return rowHeight;
     }
 
-    private void DrawEntriesList(Rect rect, List<int> selectedIndexes) {
+    private void DrawEntriesList(Rect rect) {
         const float contentPadding = 8f;
         const float rowHeight = 32f;
         const float rowGap = 6f;
         const float removeButtonWidth = 34f;
         const float arrowWidth = 24f;
         const float fieldGap = 8f;
+        const float headerHeight = 30f;
+
         var currentEvent = Event.current;
-        Widgets.DrawBoxSolidWithOutline(rect, ListBackgroundColor, ListBorderColor);
+        var selectedEntries = GetSelectedEntries();
+
+        Widgets.DrawBoxSolidWithOutline(rect, UiTheme.ListBackgroundColor, UiTheme.ListBorderColor);
 
         var scrollRect = new Rect(
             rect.x + contentPadding,
             rect.y + contentPadding,
             Mathf.Max(0f, rect.width - contentPadding * 2f),
             Mathf.Max(0f, rect.height - contentPadding * 2f));
-        var rowCount = Mathf.Max(1, selectedIndexes.Count);
-        var contentHeight = 30f + rowCount * (rowHeight + rowGap);
-        var viewRect = new Rect(0f, 0f, scrollRect.width - 16f, Mathf.Max(scrollRect.height, contentHeight));
+        var contentHeight = headerHeight + Mathf.Max(1, selectedEntries.Count) * (rowHeight + rowGap);
+        var viewRect = new Rect(
+            0f, 0f, scrollRect.width - 16f, Mathf.Max(scrollRect.height, contentHeight));
 
         Widgets.BeginScrollView(scrollRect, ref _scrollPos, viewRect);
 
-        GUI.color = HeaderColor;
-        Widgets.Label(new Rect(fieldGap, 0f, viewRect.width - fieldGap, 24f), BuildColumnHeaderLabel());
-        GUI.color = Color.white;
+        using (GuiColorScope.Using(UiTheme.HeaderColor)) {
+            Widgets.Label(new Rect(fieldGap, 0f, viewRect.width - fieldGap, 24f),
+                BuildColumnHeaderLabel());
+        }
 
-        if (selectedIndexes.Count == 0) {
+        if (selectedEntries.Count == 0) {
             Widgets.Label(new Rect(0f, 38f, viewRect.width, 60f), "Translator_TermbaseEmpty".Translate());
             Widgets.EndScrollView();
             return;
         }
 
-        for (var i = 0; i < selectedIndexes.Count; i++) {
-            var entryIndex = selectedIndexes[i];
-            var entry = _entries[entryIndex];
+        for (var i = 0; i < selectedEntries.Count; i++) {
+            var entry = selectedEntries[i];
             var rowY = 32f + i * (rowHeight + rowGap);
             var rowRect = new Rect(0f, rowY, viewRect.width, rowHeight);
 
             var fieldWidth = Mathf.Max(
-                80f,
-                (rowRect.width - removeButtonWidth - arrowWidth - fieldGap * 4f) / 2f);
-            var sourceRect = new Rect(rowRect.x + fieldGap, rowRect.y + 2f, fieldWidth, rowRect.height - 4f);
-            var arrowRect = new Rect(sourceRect.xMax + fieldGap, rowRect.y + 4f, arrowWidth, rowRect.height - 8f);
-            var targetRect = new Rect(arrowRect.xMax + fieldGap, rowRect.y + 2f, fieldWidth, rowRect.height - 4f);
-            var removeRect = new Rect(targetRect.xMax + fieldGap, rowRect.y + 2f, removeButtonWidth,
-                rowRect.height - 4f);
+                80f, (rowRect.width - removeButtonWidth - arrowWidth - fieldGap * 4f) / 2f);
+            var sourceRect = new Rect(
+                rowRect.x + fieldGap, rowRect.y + 2f, fieldWidth, rowRect.height - 4f);
+            var arrowRect = new Rect(
+                sourceRect.xMax + fieldGap, rowRect.y + 4f, arrowWidth, rowRect.height - 8f);
+            var targetRect = new Rect(
+                arrowRect.xMax + fieldGap, rowRect.y + 2f, fieldWidth, rowRect.height - 4f);
+            var removeRect = new Rect(
+                targetRect.xMax + fieldGap, rowRect.y + 2f, removeButtonWidth, rowRect.height - 4f);
 
+            var entryIndex = _entries.IndexOf(entry);
             var sourceControlName = $"Translator_Termbase_Source_{entryIndex}";
             var targetControlName = $"Translator_Termbase_Target_{entryIndex}";
 
             GUI.SetNextControlName(sourceControlName);
             entry.Source = Widgets.TextField(sourceRect, entry.Source);
-            var shouldFocusTarget = currentEvent.type == EventType.KeyDown
-                                    && currentEvent is { keyCode: KeyCode.Tab, shift: false }
-                                    && GUI.GetNameOfFocusedControl() == sourceControlName;
+
+            var shouldFocusTarget =
+                currentEvent.type == EventType.KeyDown &&
+                currentEvent is { keyCode: KeyCode.Tab, shift: false } &&
+                GUI.GetNameOfFocusedControl() == sourceControlName;
             if (shouldFocusTarget) {
                 currentEvent.Use();
                 GUI.FocusControl(targetControlName);
             }
 
             Widgets.Label(arrowRect, "->");
+
             GUI.SetNextControlName(targetControlName);
             entry.Target = Widgets.TextField(targetRect, entry.Target);
 
-            if (!Widgets.ButtonText(removeRect, "X")) continue;
+            if (!Widgets.ButtonText(removeRect, "X")) {
+                continue;
+            }
 
-            _entries.RemoveAt(entryIndex);
-            i -= 1;
-            selectedIndexes = GetSelectedLanguageEntryIndexes();
+            _entries.Remove(entry);
+            break;
         }
 
         Widgets.EndScrollView();
     }
 
-    private void DrawFooter(Rect rect, int entryCount) {
+    private void DrawFooter(Rect rect) {
         var closeLabel = "Close".Translate();
         var closeWidth = Mathf.Max(120f, Text.CalcSize(closeLabel).x + 24f);
-        var langAndCountLabel = $"{GetSelectedLanguageDisplayName()} ({entryCount})";
+        var langAndCountLabel = $"{GetSelectedLanguageDisplayName()} ({GetSelectedEntries().Count})";
         var langButtonWidth = Mathf.Max(180f, Text.CalcSize(langAndCountLabel).x + 24f);
-        var maxLangButtonWidth = Mathf.Max(120f, rect.width - closeWidth - 12f);
-        langButtonWidth = Mathf.Min(langButtonWidth, maxLangButtonWidth);
+        langButtonWidth = Mathf.Min(langButtonWidth, Mathf.Max(120f, rect.width - closeWidth - 12f));
+
         var langButtonRect = new Rect(rect.x, rect.y, langButtonWidth, rect.height);
         if (Widgets.ButtonText(langButtonRect, langAndCountLabel)) {
             OpenLanguageMenu();
@@ -193,68 +197,59 @@ public class Window_Termbase : Window {
         }
     }
 
-    private void SaveOnly() {
+    private void Save() {
         var result = TermbaseService.SaveEntries(_entries);
-        if (result.Success) return;
+        if (result.Success) {
+            return;
+        }
 
-        var errorText = "Translator_TermbaseSaveFailed".Translate(result.Message.NullOrEmpty()
-            ? "unknown error"
-            : result.Message);
-
+        var errorText = "Translator_TermbaseSaveFailed".Translate(
+            result.Message.NullOrEmpty() ? "unknown error" : result.Message);
         Messages.Message(errorText, MessageTypeDefOf.RejectInput);
     }
 
     private string GetSelectedLanguageDisplayName() {
         if (_selectedLanguageFolder.NullOrEmpty()) {
-            return "Translator_TermbaseNoLanguage".Translate().ToString();
+            return "Translator_TermbaseNoLanguage".Translate();
         }
 
-        var language = _languages.FirstOrDefault(item => item.folderName
-            .Equals(_selectedLanguageFolder, StringComparison.OrdinalIgnoreCase));
+        var language = _languages.FirstOrDefault(item => item.folderName.Equals(
+            _selectedLanguageFolder, StringComparison.OrdinalIgnoreCase));
         return language is null ? _selectedLanguageFolder : DisplayNameOf(language);
     }
 
-    private List<int> GetSelectedLanguageEntryIndexes() {
-        var indexes = new List<int>();
-        for (var i = 0; i < _entries.Count; i++) {
-            if (string.Equals(_entries[i].TargetLanguageFolder, _selectedLanguageFolder,
-                    StringComparison.OrdinalIgnoreCase)) {
-                indexes.Add(i);
-            }
-        }
-
-        return indexes;
-    }
+    private List<TermbaseEntry> GetSelectedEntries() => _entries
+        .Where(entry => string.Equals(entry.TargetLanguageFolder, _selectedLanguageFolder,
+            StringComparison.OrdinalIgnoreCase))
+        .ToList();
 
     private void OpenLanguageMenu() {
         if (_languages.Count == 0) {
-            Messages.Message("Translator_TermbaseNoLanguage".Translate(), MessageTypeDefOf.RejectInput);
+            Messages.Message("Translator_TermbaseNoLanguage".Translate(),
+                MessageTypeDefOf.RejectInput);
             return;
         }
 
-        var options = new List<FloatMenuOption>();
-
-        // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
-        foreach (var language in _languages) {
-            var folder = language.folderName;
-            options.Add(new FloatMenuOption(DisplayNameOf(language), () => { _selectedLanguageFolder = folder; }));
-        }
-
+        var options = _languages
+            .Select(language => {
+                var folder = language.folderName;
+                return new FloatMenuOption(
+                    DisplayNameOf(language), () => _selectedLanguageFolder = folder);
+            })
+            .ToList();
         Find.WindowStack.Add(new FloatMenu(options));
     }
 
-    private string BuildColumnHeaderLabel() {
-        return $"{GetSourceLanguageDisplayName()} -> {GetSelectedLanguageDisplayName()}";
-    }
+    private string BuildColumnHeaderLabel() =>
+        $"{GetSourceLanguageDisplayName()} -> {GetSelectedLanguageDisplayName()}";
 
     private static string GetSourceLanguageDisplayName() {
         var sourceLanguage = LanguageDatabase.defaultLanguage ?? LanguageDatabase.activeLanguage;
         return sourceLanguage is null
-            ? "Translator_TermbaseNoLanguage".Translate().ToString()
+            ? "Translator_TermbaseNoLanguage".Translate()
             : DisplayNameOf(sourceLanguage);
     }
 
-    private static string DisplayNameOf(LoadedLanguage language) {
-        return language.DisplayName.NullOrEmpty() ? language.folderName : language.DisplayName;
-    }
+    private static string DisplayNameOf(LoadedLanguage language) =>
+        language.DisplayName.NullOrEmpty() ? language.folderName : language.DisplayName;
 }
