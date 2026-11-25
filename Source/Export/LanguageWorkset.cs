@@ -40,9 +40,7 @@ public static class LanguageWorksetExtensions {
 
         for (var i = 0; i < workset.Keyed.Count; i++) {
             var item = workset.Keyed[i];
-            if (!string.IsNullOrEmpty(item.Translation)) {
-                continue;
-            }
+            if (!string.IsNullOrEmpty(item.Translation)) continue;
 
             var index = i;
             pending.Add(new PendingTranslation(
@@ -52,9 +50,7 @@ public static class LanguageWorksetExtensions {
 
         for (var i = 0; i < workset.DefInjected.Count; i++) {
             var item = workset.DefInjected[i];
-            if (!string.IsNullOrEmpty(item.Translation)) {
-                continue;
-            }
+            if (!string.IsNullOrEmpty(item.Translation)) continue;
 
             var index = i;
             pending.Add(new PendingTranslation(

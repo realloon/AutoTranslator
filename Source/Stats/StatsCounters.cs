@@ -65,10 +65,10 @@ internal static class DefStatsCounter {
             }
         }
 
-        return new(translatableCount, missingCount);
+        return new TranslationSectionStats(translatableCount, missingCount);
     }
 
-    private static IReadOnlyDictionary<string, DefInjectionPackage.DefInjection> BuildNormalizedInjectionLookup(
+    private static Dictionary<string, DefInjectionPackage.DefInjection> BuildNormalizedInjectionLookup(
         DefInjectionPackage? package) {
         var lookup = new Dictionary<string, DefInjectionPackage.DefInjection>(StringComparer.Ordinal);
         if (package is null) {
@@ -77,11 +77,9 @@ internal static class DefStatsCounter {
 
         foreach (var (_, injection) in package.injections) {
             var normalizedPath = injection.normalizedPath;
-            if (normalizedPath.NullOrEmpty() || lookup.ContainsKey(normalizedPath)) {
-                continue;
-            }
+            if (normalizedPath.NullOrEmpty()) continue;
 
-            lookup.Add(normalizedPath, injection);
+            lookup.TryAdd(normalizedPath, injection);
         }
 
         return lookup;
@@ -89,7 +87,7 @@ internal static class DefStatsCounter {
 
     private static bool IsMissingSingleInjection(
         string normalizedPath,
-        IReadOnlyDictionary<string, DefInjectionPackage.DefInjection> injectionsByNormalizedPath) {
+        Dictionary<string, DefInjectionPackage.DefInjection> injectionsByNormalizedPath) {
         if (!injectionsByNormalizedPath.TryGetValue(normalizedPath, out var existingInjection)) {
             return true;
         }
@@ -99,10 +97,10 @@ internal static class DefStatsCounter {
 
     private static int CountMissingCollectionInjections(
         string normalizedPath,
-        IReadOnlyList<int> translatableIndexes,
+        List<int> translatableIndexes,
         bool fullListTranslationAllowed,
         Def def,
-        IReadOnlyDictionary<string, DefInjectionPackage.DefInjection> injectionsByNormalizedPath) {
+        Dictionary<string, DefInjectionPackage.DefInjection> injectionsByNormalizedPath) {
         if (!injectionsByNormalizedPath.TryGetValue(normalizedPath, out var listInjection) ||
             !listInjection.IsFullListInjection) {
             var count = 0;
@@ -127,16 +125,14 @@ internal static class DefStatsCounter {
 }
 
 internal static class KeyStatsCounter {
-    public static TranslationSectionStats Count(
-        ModMetaData mod,
-        LoadedLanguage activeLanguage,
+    public static TranslationSectionStats Count(ModMetaData mod, LoadedLanguage activeLanguage,
         LoadedLanguage defaultLanguage) {
         var defaultKeys = CollectDefaultKeyedKeysForMod(mod, defaultLanguage);
         var missingCount = activeLanguage != defaultLanguage
             ? defaultKeys.Count(key => !activeLanguage.HaveTextForKey(key))
             : 0;
 
-        return new(defaultKeys.Count, missingCount);
+        return new TranslationSectionStats(defaultKeys.Count, missingCount);
     }
 
     private static HashSet<string> CollectDefaultKeyedKeysForMod(

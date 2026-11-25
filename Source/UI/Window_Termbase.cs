@@ -9,7 +9,7 @@ namespace Translator.UI;
 public class Window_Termbase : Window {
     private readonly List<TermbaseEntry> _entries = [];
     private readonly List<LoadedLanguage> _languages = [];
-    private string _selectedLanguageFolder = string.Empty;
+    private string _selectedLanguageFolder;
     private Vector2 _scrollPos;
 
     public override Vector2 InitialSize => new(600f, 560f);
@@ -21,9 +21,8 @@ public class Window_Termbase : Window {
 
         _languages.AddRange(LanguageDatabase.AllLoadedLanguages
             .OrderBy(language => language.folderName, StringComparer.OrdinalIgnoreCase));
-        _selectedLanguageFolder = LanguageDatabase.activeLanguage?.folderName
-                                  ?? _languages.FirstOrDefault()?.folderName
-                                  ?? string.Empty;
+        _selectedLanguageFolder = LanguageDatabase.activeLanguage?.folderName ??
+                                  _languages.FirstOrDefault()?.folderName ?? string.Empty;
 
         _entries.AddRange(TermbaseService.LoadEntries());
     }
@@ -218,10 +217,11 @@ public class Window_Termbase : Window {
         return language is null ? _selectedLanguageFolder : DisplayNameOf(language);
     }
 
-    private List<TermbaseEntry> GetSelectedEntries() => _entries
-        .Where(entry => string.Equals(entry.TargetLanguageFolder, _selectedLanguageFolder,
-            StringComparison.OrdinalIgnoreCase))
-        .ToList();
+    private List<TermbaseEntry> GetSelectedEntries() => [
+        .. _entries
+            .Where(entry => string.Equals(entry.TargetLanguageFolder, _selectedLanguageFolder,
+                StringComparison.OrdinalIgnoreCase))
+    ];
 
     private void OpenLanguageMenu() {
         if (_languages.Count == 0) {

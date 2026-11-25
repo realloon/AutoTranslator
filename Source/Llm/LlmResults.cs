@@ -18,4 +18,4 @@ internal sealed record BatchTranslationResult(
         new(false, batchNumber, new Dictionary<string, string>(StringComparer.Ordinal), errorMessage);
 }
 
-internal sealed record TranslationOutcome(bool Success, string Message, int UpdatedCount, int PendingCount);
+internal sealed record TranslationOutcome(bool Success, string Message);

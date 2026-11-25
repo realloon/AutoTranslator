@@ -13,11 +13,10 @@ internal static class UiTheme {
     public static readonly Color HeaderColor = new(1f, 1f, 1f, 0.6f);
 }
 
-/// <summary>Scoped <see cref="GUI.color"/> override; restores the previous color on dispose.</summary>
 internal readonly struct GuiColorScope : IDisposable {
     private readonly Color _previous;
 
-    public GuiColorScope(Color color) {
+    private GuiColorScope(Color color) {
         _previous = GUI.color;
         GUI.color = color;
     }

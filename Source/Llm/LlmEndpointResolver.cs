@@ -1,19 +1,14 @@
 namespace Translator.Llm;
 
 public sealed record LlmEndpoints(Uri ChatCompletions, Uri Responses, Uri Models) {
-    public Uri For(LlmApiProtocol protocol) =>
-        protocol == LlmApiProtocol.Responses ? Responses : ChatCompletions;
+    public Uri For(LlmApiProtocol protocol) => protocol == LlmApiProtocol.Responses ? Responses : ChatCompletions;
 }
 
-/// <summary>Turns provider presets or user-entered URLs into concrete endpoints.</summary>
 public static class LlmEndpointResolver {
     private const string ChatCompletionsSuffix = "/chat/completions";
     private const string V1Suffix = "/v1";
 
-    public static bool TryResolve(
-        LlmProviderPreset? preset,
-        string customApiUrl,
-        out LlmEndpoints endpoints,
+    public static bool TryResolve(LlmProviderPreset? preset, string customApiUrl, out LlmEndpoints endpoints,
         out string error) {
         endpoints = null!;
         error = string.Empty;
@@ -47,7 +42,7 @@ public static class LlmEndpointResolver {
         return true;
     }
 
-    public static Uri NormalizeChatCompletionsUri(Uri uri) {
+    private static Uri NormalizeChatCompletionsUri(Uri uri) {
         var builder = new UriBuilder(uri) {
             Query = string.Empty,
             Fragment = string.Empty
@@ -64,7 +59,7 @@ public static class LlmEndpointResolver {
         return builder.Uri;
     }
 
-    public static Uri ReplaceEndpoint(Uri chatCompletionsUri, string endpoint) {
+    private static Uri ReplaceEndpoint(Uri chatCompletionsUri, string endpoint) {
         var currentPath = chatCompletionsUri.AbsolutePath;
         var path = currentPath.EndsWith(ChatCompletionsSuffix, StringComparison.OrdinalIgnoreCase)
             ? currentPath[..^ChatCompletionsSuffix.Length] + endpoint

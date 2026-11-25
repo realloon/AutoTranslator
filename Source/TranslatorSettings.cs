@@ -5,20 +5,18 @@ using Verse;
 namespace Translator;
 
 public sealed class TranslatorSettings : ModSettings {
+    private const int DefaultBatchSize = 80;
+    private const int DefaultConcurrency = 2;
+    private const int DefaultRetryCount = 1;
+    private Dictionary<string, string> _apiKeys = [];
+    private Dictionary<string, string> _models = [];
+
     public const int MinBatchSize = 10;
     public const int MaxBatchSize = 400;
     public const int MinConcurrency = 1;
     public const int MaxConcurrency = 8;
     public const int MinRetryCount = 0;
     public const int MaxRetryCount = 5;
-
-    private const int DefaultBatchSize = 80;
-    private const int DefaultConcurrency = 2;
-    private const int DefaultRetryCount = 1;
-
-    private Dictionary<string, string> _apiKeys = [];
-    private Dictionary<string, string> _models = [];
-
     public string ProviderId = LlmProviderPresets.DeepSeek.Id;
     public LlmApiProtocol CustomProtocol = LlmApiProtocol.ChatCompletions;
     public string ApiUrl = string.Empty;
@@ -28,11 +26,8 @@ public sealed class TranslatorSettings : ModSettings {
     public OutputLocationMode DefaultOutputLocationMode = OutputLocationMode.GeneratedMod;
 
     public string GetApiKey(string providerId) => _apiKeys.GetValueOrDefault(providerId, string.Empty);
-
     public void SetApiKey(string providerId, string key) => _apiKeys[providerId] = key;
-
     public string GetModel(string providerId) => _models.GetValueOrDefault(providerId, string.Empty);
-
     public void SetModel(string providerId, string model) => _models[providerId] = model;
 
     public void ResetToDefaults() {

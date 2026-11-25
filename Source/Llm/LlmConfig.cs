@@ -11,10 +11,7 @@ internal sealed record LlmSessionConfig(
     int RetryCount);
 
 internal static class LlmConfigResolver {
-    public static bool TryCreate(
-        TranslatorSettings settings,
-        out LlmSessionConfig config,
-        out string error,
+    public static bool TryCreate(TranslatorSettings settings, out LlmSessionConfig config, out string error,
         bool requireModel = true) {
         config = null!;
         error = string.Empty;
@@ -38,7 +35,7 @@ internal static class LlmConfigResolver {
             return false;
         }
 
-        config = new(
+        config = new LlmSessionConfig(
             protocol,
             preset?.DisableThinking ?? false,
             apiKey,
@@ -47,6 +44,7 @@ internal static class LlmConfigResolver {
             settings.BatchSize,
             settings.Concurrency,
             settings.RetryCount);
+
         return true;
     }
 }

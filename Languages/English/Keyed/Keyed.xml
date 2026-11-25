@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LanguageData>
-  <Translator_MainMenuButton>Auto Translator</Translator_MainMenuButton>
-  <Translator_WindowTitle>Auto Translator</Translator_WindowTitle>
   <Translator_ModCount>Showing mods {0}/{1}</Translator_ModCount>
   <Translator_DefStatsTitle>From Def</Translator_DefStatsTitle>
   <Translator_TranslatableEntries>Translatable entries: {0}</Translator_TranslatableEntries>

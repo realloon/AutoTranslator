@@ -6,10 +6,6 @@ namespace Translator.Termbase;
 
 internal sealed record TermbaseStoreResult(bool Success, string Message);
 
-/// <summary>
-/// Termbase persistence. The document transform itself lives in
-/// <see cref="TermbaseDocument"/> so it can be tested without RimWorld.
-/// </summary>
 internal static class TermbaseService {
     private static readonly Lock Gate = new();
     private static IReadOnlyList<TermbaseEntry>? _cachedEntries;

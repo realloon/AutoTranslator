@@ -11,15 +11,12 @@ namespace Translator.UI;
 // ReSharper disable once InconsistentNaming
 public class Window_TranslatorMain : Window {
     private const float RowHeight = 42f;
-
     private readonly List<ModMetaData> _allMods = [];
     private readonly Dictionary<string, ModMetaData> _allModsByPackageId;
     private readonly List<ModMetaData> _filteredMods = [];
     private readonly List<LoadedLanguage> _exportLanguages = [];
-    private readonly HashSet<string> _selectedExportLanguageFolders =
-        new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> _selectedExportLanguageFolders = new(StringComparer.OrdinalIgnoreCase);
     private readonly QuickSearchWidget _quickSearchWidget = new();
-
     private Vector2 _modsScrollPos;
     private string? _selectedPackageId;
     private string? _lastExportStatus;
@@ -44,7 +41,7 @@ public class Window_TranslatorMain : Window {
         var y = 0f;
 
         Text.Font = GameFont.Medium;
-        Widgets.Label(new Rect(0f, y, inRect.width, 36f), "Translator_WindowTitle".Translate());
+        Widgets.Label(new Rect(0f, y, inRect.width, 36f), "Translator_AutoTranslator".Translate());
         y += 42f;
         Text.Font = GameFont.Small;
 

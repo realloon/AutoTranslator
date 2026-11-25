@@ -6,12 +6,9 @@ namespace Translator.Llm;
 
 public sealed record TranslationPrompt(string SystemPrompt, string UserPrompt);
 
-/// <summary>
-/// Builds the system/user prompts. The request item DTO is separate from
-/// <see cref="TranslationItem"/> so the wire shape stays stable.
-/// </summary>
+/// <summary>Request and glossary entries are anonymous payloads: they are serialized, not read.</summary>
 public static class PromptBuilder {
-    public const int MaxGlossaryItems = 200;
+    private const int MaxGlossaryItems = 200;
 
     private const string SystemPromptPrefix =
         "You are a professional RimWorld localization translator. " +
@@ -25,43 +22,35 @@ public static class PromptBuilder {
         "Return a JSON object with shape {\"translations\":[{\"id\":\"...\",\"translation\":\"...\"}]}, " +
         "and provide each id exactly once.";
 
-    public static TranslationPrompt Build(
-        string targetLanguage,
-        IReadOnlyList<TranslationItem> batch,
+    public static TranslationPrompt Build(string targetLanguage, IReadOnlyList<TranslationItem> batch,
         IReadOnlyDictionary<string, string> glossary) {
         var hasGlossary = glossary.Count > 0;
-        var systemPrompt = SystemPromptPrefix +
-                           (hasGlossary ? SystemPromptGlossaryHint : string.Empty) +
+        var systemPrompt = SystemPromptPrefix + (hasGlossary ? SystemPromptGlossaryHint : string.Empty) +
                            SystemPromptSuffix;
 
-        var userPrompt = new StringBuilder()
-            .Append("Target language: ").Append(targetLanguage).Append('\n');
+        var userPrompt = new StringBuilder().Append("Target language: ").Append(targetLanguage).Append('\n');
 
         if (hasGlossary) {
-            var glossaryItems = BuildGlossaryItems(glossary);
             userPrompt
                 .Append("Termbase rules (source -> target, mandatory):\n")
-                .Append(JsonSerializer.Serialize(glossaryItems, TranslatorJson.Prompt))
+                .Append(JsonSerializer.Serialize(
+                    glossary.Take(MaxGlossaryItems).Select(pair => new { source = pair.Key, target = pair.Value }),
+                    TranslatorJson.Prompt))
                 .Append('\n');
         }
 
         userPrompt
             .Append("Entries:\n")
-            .Append(JsonSerializer.Serialize(BuildRequestItems(batch), TranslatorJson.Prompt));
+            .Append(JsonSerializer.Serialize(
+                batch.Select(item => new {
+                    id = item.Id,
+                    tag = item.Tag,
+                    original = item.Original,
+                    defType = item.DefType,
+                    isCollectionItem = item.IsCollectionItem
+                }),
+                TranslatorJson.Prompt));
 
         return new TranslationPrompt(systemPrompt, userPrompt.ToString());
     }
-
-    private static List<PromptGlossaryItem> BuildGlossaryItems(IReadOnlyDictionary<string, string> glossary) =>
-        glossary.Take(MaxGlossaryItems)
-            .Select(pair => new PromptGlossaryItem(pair.Key, pair.Value))
-            .ToList();
-
-    private static PromptItem[] BuildRequestItems(IReadOnlyList<TranslationItem> batch) =>
-        batch.Select(item => new PromptItem(item.Id, item.Tag, item.Original, item.DefType,
-            item.IsCollectionItem)).ToArray();
-
-    private sealed record PromptItem(string Id, string Tag, string Original, string? DefType, bool? IsCollectionItem);
-
-    private sealed record PromptGlossaryItem(string Source, string Target);
 }

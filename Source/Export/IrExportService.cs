@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
@@ -18,11 +19,8 @@ internal sealed record TranslatorIrExportResult(
 /// scaffolding of a standalone translation mod.
 /// </summary>
 internal static class IrExportService {
-    public static TranslatorIrExportResult Export(
-        ModMetaData mod,
-        IReadOnlyList<LoadedLanguage> targetLanguages,
-        LoadedLanguage defaultLanguage,
-        OutputLocationMode outputLocationMode) {
+    public static TranslatorIrExportResult Export(ModMetaData mod, IReadOnlyList<LoadedLanguage> targetLanguages,
+        LoadedLanguage defaultLanguage, OutputLocationMode outputLocationMode) {
         try {
             defaultLanguage.LoadData();
             var exportedLanguageFolders = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -46,7 +44,7 @@ internal static class IrExportService {
             }
 
             var inOriginalMod = outputLocationMode == OutputLocationMode.OriginalMod;
-            var exportToken = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
+            var exportToken = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
             var outputModDir = inOriginalMod
                 ? mod.RootDir.FullName
                 : ResolveExportModDirectory(mod, exportToken);
@@ -64,9 +62,7 @@ internal static class IrExportService {
         }
     }
 
-    private static List<LanguageWorksetKeyedItem> BuildKeyedEntries(
-        ModMetaData mod,
-        LoadedLanguage activeLanguage,
+    private static List<LanguageWorksetKeyedItem> BuildKeyedEntries(ModMetaData mod, LoadedLanguage activeLanguage,
         LoadedLanguage defaultLanguage) {
         var entries = new List<LanguageWorksetKeyedItem>();
 
@@ -85,8 +81,7 @@ internal static class IrExportService {
         return entries;
     }
 
-    private static List<LanguageWorksetDefInjectedItem> BuildDefInjectedEntries(
-        ModMetaData mod,
+    private static List<LanguageWorksetDefInjectedItem> BuildDefInjectedEntries(ModMetaData mod,
         LoadedLanguage activeLanguage) {
         var injectionsByType = BuildDefInjectionLookup(activeLanguage, mod);
         var entries = new List<LanguageWorksetDefInjectedItem>();
@@ -144,15 +139,9 @@ internal static class IrExportService {
         return entries;
     }
 
-    private static void AddSingleDefInjection(
-        List<LanguageWorksetDefInjectedItem> entries,
-        IReadOnlyDictionary<string, DefInjectionPackage.DefInjection> injectionsByNormalizedPath,
-        Type defType,
-        string suggestedPath,
-        string normalizedPath,
-        string? currentValue,
-        FieldInfo? fieldInfo,
-        Def def) {
+    private static void AddSingleDefInjection(List<LanguageWorksetDefInjectedItem> entries,
+        Dictionary<string, DefInjectionPackage.DefInjection> injectionsByNormalizedPath, Type defType,
+        string suggestedPath, string normalizedPath, string? currentValue, FieldInfo? fieldInfo, Def def) {
         var requiresTranslation =
             DefInjectionUtility.ShouldCheckMissingInjection(currentValue, fieldInfo, def);
         injectionsByNormalizedPath.TryGetValue(normalizedPath, out var singleInjection);
@@ -175,14 +164,9 @@ internal static class IrExportService {
         });
     }
 
-    private static void AddCollectionDefInjections(
-        List<LanguageWorksetDefInjectedItem> entries,
-        IReadOnlyDictionary<string, DefInjectionPackage.DefInjection> injectionsByNormalizedPath,
-        Type defType,
-        string suggestedPath,
-        string normalizedPath,
-        IEnumerable<string> currentValueCollection,
-        FieldInfo? fieldInfo,
+    private static void AddCollectionDefInjections(List<LanguageWorksetDefInjectedItem> entries,
+        Dictionary<string, DefInjectionPackage.DefInjection> injectionsByNormalizedPath, Type defType,
+        string suggestedPath, string normalizedPath, IEnumerable<string> currentValueCollection, FieldInfo? fieldInfo,
         Def def) {
         var listValues = currentValueCollection.ToList();
         if (!injectionsByNormalizedPath.TryGetValue(normalizedPath, out var listInjection) ||
@@ -191,7 +175,7 @@ internal static class IrExportService {
         }
 
         for (var i = 0; i < listValues.Count; i++) {
-            var itemValue = listValues[i] ?? string.Empty;
+            var itemValue = listValues[i];
             var requiresTranslation =
                 DefInjectionUtility.ShouldCheckMissingInjection(itemValue, fieldInfo, def);
             var itemNormalizedPath = normalizedPath + "." + i;
@@ -223,9 +207,7 @@ internal static class IrExportService {
                 currentText = listInjection.fullListInjection[i] ?? string.Empty;
             }
 
-            if (!requiresTranslation && !hasTranslation) {
-                continue;
-            }
+            if (!requiresTranslation && !hasTranslation) continue;
 
             entries.Add(new LanguageWorksetDefInjectedItem {
                 Tag = itemSuggestedPath,
@@ -237,21 +219,17 @@ internal static class IrExportService {
         }
     }
 
-    private static Dictionary<Type, Dictionary<string, DefInjectionPackage.DefInjection>>
-        BuildDefInjectionLookup(LoadedLanguage activeLanguage, ModMetaData mod) {
+    private static Dictionary<Type, Dictionary<string, DefInjectionPackage.DefInjection>> BuildDefInjectionLookup(
+        LoadedLanguage activeLanguage, ModMetaData mod) {
         var result = new Dictionary<Type, Dictionary<string, DefInjectionPackage.DefInjection>>();
 
         foreach (var package in activeLanguage.defInjections) {
             var defType = package.defType;
-            if (result.ContainsKey(defType)) {
-                continue;
-            }
+            if (result.ContainsKey(defType)) continue;
 
             var lookup = new Dictionary<string, DefInjectionPackage.DefInjection>(StringComparer.Ordinal);
             foreach (var (key, injection) in package.injections) {
-                if (!injection.ModifiesDefFromModOrNullCore(mod, defType)) {
-                    continue;
-                }
+                if (!injection.ModifiesDefFromModOrNullCore(mod, defType)) continue;
 
                 var normalizedPath = injection.normalizedPath;
                 if (normalizedPath.NullOrEmpty()) {
@@ -270,8 +248,7 @@ internal static class IrExportService {
     }
 
     private static string TryGetExistingKeyedTranslation(LoadedLanguage activeLanguage, string key) {
-        if (!activeLanguage.keyedReplacements.TryGetValue(key, out var replacement) ||
-            replacement.isPlaceholder) {
+        if (!activeLanguage.keyedReplacements.TryGetValue(key, out var replacement) || replacement.isPlaceholder) {
             return string.Empty;
         }
 
@@ -292,20 +269,16 @@ internal static class IrExportService {
         foreach (var workset in worksets) {
             var hasKeyedEntries = workset.Keyed.Count > 0;
             var hasDefInjectedEntries = workset.DefInjected.Count > 0;
-            if (!hasKeyedEntries && !hasDefInjectedEntries) {
-                continue;
-            }
+            if (!hasKeyedEntries && !hasDefInjectedEntries) continue;
 
             var languageRoot = Path.Combine(outputModDir, "Languages", workset.LanguageFolderName);
             Directory.CreateDirectory(languageRoot);
             if (hasKeyedEntries) {
-                Directory.CreateDirectory(
-                    Path.Combine(languageRoot, LoadedLanguage.KeyedTranslationsFolderName));
+                Directory.CreateDirectory(Path.Combine(languageRoot, LoadedLanguage.KeyedTranslationsFolderName));
             }
 
             if (hasDefInjectedEntries) {
-                Directory.CreateDirectory(
-                    Path.Combine(languageRoot, LoadedLanguage.DefInjectionsFolderName));
+                Directory.CreateDirectory(Path.Combine(languageRoot, LoadedLanguage.DefInjectionsFolderName));
             }
         }
     }

@@ -43,10 +43,7 @@ internal static class StatsService {
         return null;
     }
 
-    private static void Build(
-        string packageId,
-        ModMetaData mod,
-        LoadedLanguage activeLanguage,
+    private static void Build(string packageId, ModMetaData mod, LoadedLanguage activeLanguage,
         LoadedLanguage defaultLanguage) {
         StatsSnapshot snapshot;
 

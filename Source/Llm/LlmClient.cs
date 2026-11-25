@@ -6,31 +6,20 @@ using Translator.Utilities;
 
 namespace Translator.Llm;
 
-internal sealed class LlmRequestException : Exception {
-    public LlmRequestException(
-        string message,
-        bool isTransient,
-        TimeSpan? retryAfter = null) : base(message) {
-        IsTransient = isTransient;
-        RetryAfter = retryAfter;
-    }
-
-    public bool IsTransient { get; }
-    public TimeSpan? RetryAfter { get; }
+internal sealed class LlmRequestException(string message, bool isTransient, TimeSpan? retryAfter = null)
+    : Exception(message) {
+    public bool IsTransient { get; } = isTransient;
+    public TimeSpan? RetryAfter { get; } = retryAfter;
 }
 
-/// <summary>
-/// Single owner of the HTTP connection. All calls are asynchronous and use a per-request
-/// timeout so a slow endpoint cannot stall the game indefinitely.
-/// </summary>
+/// <summary>Every call uses a per-request timeout so a slow endpoint cannot stall the game indefinitely.</summary>
 internal static class LlmClient {
     private const int RequestTimeoutSeconds = 600;
     private static readonly TimeSpan MaxRetryDelay = TimeSpan.FromSeconds(15);
 
     private static readonly HttpClient Http = CreateHttpClient();
 
-    public static async Task<LlmConfigValidationResult> ValidateAsync(
-        CancellationToken cancellationToken = default) {
+    public static async Task<LlmConfigValidationResult> ValidateAsync(CancellationToken cancellationToken = default) {
         if (!LlmConfigResolver.TryCreate(TranslatorMod.Settings, out var config, out var error)) {
             return new LlmConfigValidationResult(false, error);
         }
@@ -38,8 +27,8 @@ internal static class LlmClient {
         try {
             var payload = LlmRequestBuilder.CreateValidationRequest(
                 config.Model, config.Protocol, config.DisableThinking);
-            using var request = CreateRequest(
-                HttpMethod.Post, config.Endpoints.For(config.Protocol), config.ApiKey, payload);
+            using var request = CreateRequest(HttpMethod.Post, config.Endpoints.For(config.Protocol), config.ApiKey,
+                payload);
             await SendAsync(request, "Config validation", cancellationToken).ConfigureAwait(false);
             return new LlmConfigValidationResult(true, "OK");
         } catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) {
@@ -49,10 +38,8 @@ internal static class LlmClient {
         }
     }
 
-    public static async Task<LlmModelListResult> FetchModelsAsync(
-        CancellationToken cancellationToken = default) {
-        if (!LlmConfigResolver.TryCreate(TranslatorMod.Settings, out var config, out var error,
-                requireModel: false)) {
+    public static async Task<LlmModelListResult> FetchModelsAsync(CancellationToken cancellationToken = default) {
+        if (!LlmConfigResolver.TryCreate(TranslatorMod.Settings, out var config, out var error, requireModel: false)) {
             return LlmModelListResult.Failure(error);
         }
 
@@ -67,18 +54,15 @@ internal static class LlmClient {
         }
     }
 
-    public static async Task<BatchTranslationResult> TranslateBatchAsync(
-        LlmSessionConfig config,
-        TranslationBatch batch,
-        string targetLanguage,
-        IReadOnlyDictionary<string, string> glossary,
+    public static async Task<BatchTranslationResult> TranslateBatchAsync(LlmSessionConfig config,
+        TranslationBatch batch, string targetLanguage, IReadOnlyDictionary<string, string> glossary,
         CancellationToken cancellationToken = default) {
         var prompt = PromptBuilder.Build(targetLanguage, batch.Items, glossary);
         var payload = LlmRequestBuilder.CreateTranslationRequest(
             config.Model, config.Protocol, config.DisableThinking, prompt,
             BatchPlanner.EstimateMaxTokens(batch.Items));
 
-        for (var attempt = 0; ; attempt++) {
+        for (var attempt = 0;; attempt++) {
             try {
                 using var request = CreateRequest(
                     HttpMethod.Post, config.Endpoints.For(config.Protocol), config.ApiKey, payload);
@@ -88,12 +72,10 @@ internal static class LlmClient {
                     throw new LlmRequestException("LLM response content is empty.", isTransient: true);
                 }
 
-                if (!TranslationResponseParser.TryParse(content, batch.Items, out var translations,
-                        out var parseError)) {
-                    throw new LlmRequestException(parseError, isTransient: true);
-                }
-
-                return BatchTranslationResult.Ok(batch.Number, translations);
+                return !TranslationResponseParser.TryParse(content, batch.Items, out var translations,
+                    out var parseError)
+                    ? throw new LlmRequestException(parseError, isTransient: true)
+                    : BatchTranslationResult.Ok(batch.Number, translations);
             } catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) {
                 // Let the orchestrator turn this into a cancellation outcome instead of a batch failure.
                 throw;
@@ -106,10 +88,7 @@ internal static class LlmClient {
         }
     }
 
-    private static HttpRequestMessage CreateRequest(
-        HttpMethod method,
-        Uri uri,
-        string apiKey,
+    private static HttpRequestMessage CreateRequest(HttpMethod method, Uri uri, string apiKey,
         JsonObject? payload = null) {
         var request = new HttpRequestMessage(method, uri);
         if (payload is not null) {
@@ -121,9 +100,7 @@ internal static class LlmClient {
         return request;
     }
 
-    private static async Task<string> SendAsync(
-        HttpRequestMessage request,
-        string operation,
+    private static async Task<string> SendAsync(HttpRequestMessage request, string operation,
         CancellationToken cancellationToken) {
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeout.CancelAfter(TimeSpan.FromSeconds(RequestTimeoutSeconds));

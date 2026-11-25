@@ -15,10 +15,8 @@ public class Window_ExportLanguagePicker : Window {
 
     public override Vector2 InitialSize => new(540f, 580f);
 
-    public Window_ExportLanguagePicker(
-        IEnumerable<LoadedLanguage> languages,
-        IEnumerable<string> selectedLanguageFolders,
-        OutputLocationMode defaultOutputLocationMode,
+    public Window_ExportLanguagePicker(IEnumerable<LoadedLanguage> languages,
+        IEnumerable<string> selectedLanguageFolders, OutputLocationMode defaultOutputLocationMode,
         Action<IReadOnlyCollection<string>, OutputLocationMode> onConfirm) {
         _languages = [.. languages.OrderBy(language => language.folderName, StringComparer.OrdinalIgnoreCase)];
         _selectedLanguageFolders =

@@ -14,9 +14,6 @@ public sealed record LlmProviderPreset(
     LlmApiProtocol Protocol,
     bool DisableThinking = false);
 
-/// <summary>
-/// Static provider catalog. Data-only so it can be resolved without touching the game.
-/// </summary>
 public static class LlmProviderPresets {
     public const string CustomId = "custom";
     public const string CustomLabelKey = "Translator_ModSettingProviderCustom";

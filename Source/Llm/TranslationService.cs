@@ -4,9 +4,8 @@ using Translator.Termbase;
 namespace Translator.Llm;
 
 /// <summary>
-/// Orchestrates batches for one language workset. Batches run in waves of
-/// <see cref="LlmSessionConfig.Concurrency"/>; translations are applied and persisted serially
-/// between waves, matching the previous progress reporting semantics.
+/// Runs batches in waves of <see cref="LlmSessionConfig.Concurrency"/>; translations are applied
+/// and persisted serially between waves.
 /// </summary>
 internal static class TranslationService {
     public static async Task<TranslationOutcome> TranslateAsync(
@@ -15,17 +14,14 @@ internal static class TranslationService {
         string targetLanguageDisplayName,
         Action? saveProgress = null,
         CancellationToken cancellationToken = default) {
-        var pendingCount = 0;
-
         try {
             if (!LlmConfigResolver.TryCreate(TranslatorMod.Settings, out var config, out var error)) {
-                return new(false, error, 0, 0);
+                return new TranslationOutcome(false, error);
             }
 
             var pending = workset.CollectPending();
-            pendingCount = pending.Count;
-            if (pendingCount == 0) {
-                return new(true, "No pending entries.", 0, 0);
+            if (pending.Count == 0) {
+                return new TranslationOutcome(true, "No pending entries.");
             }
 
             var pendingById = pending.ToDictionary(entry => entry.Id, StringComparer.Ordinal);
@@ -58,12 +54,12 @@ internal static class TranslationService {
             }
 
             return failures.Count > 0
-                ? new(false, BuildBatchFailureMessage(failures), 0, pendingCount)
-                : new(true, "OK", pendingCount, pendingCount);
+                ? new TranslationOutcome(false, BuildBatchFailureMessage(failures))
+                : new TranslationOutcome(true, "OK");
         } catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) {
-            return new(false, "Translation cancelled.", 0, pendingCount);
+            return new TranslationOutcome(false, "Translation cancelled.");
         } catch (Exception ex) {
-            return new(false, ex.Message, 0, pendingCount);
+            return new TranslationOutcome(false, ex.Message);
         }
     }
 

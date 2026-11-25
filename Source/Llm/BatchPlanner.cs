@@ -9,19 +9,13 @@ public sealed record TranslationItem(
 
 public sealed record TranslationBatch(int Number, IReadOnlyList<TranslationItem> Items);
 
-/// <summary>
-/// Splits pending entries into request-sized batches using the same heuristics as before:
-/// a hard entry cap, a soft character cap and a minimum estimated size per entry.
-/// </summary>
 public static class BatchPlanner {
-    public const int DefaultMaxEstimatedCharsPerBatch = 18_000;
-    public const int MinEstimatedCharsPerItem = 64;
-    public const int MinMaxTokens = 3_000;
-    public const int MaxMaxTokens = 16_000;
+    private const int DefaultMaxEstimatedCharsPerBatch = 18_000;
+    private const int MinEstimatedCharsPerItem = 64;
+    private const int MinMaxTokens = 3_000;
+    private const int MaxMaxTokens = 16_000;
 
-    public static List<TranslationBatch> Plan(
-        IReadOnlyList<TranslationItem> items,
-        int maxItemsPerBatch,
+    public static List<TranslationBatch> Plan(IReadOnlyList<TranslationItem> items, int maxItemsPerBatch,
         int maxEstimatedCharsPerBatch = DefaultMaxEstimatedCharsPerBatch) {
         ArgumentOutOfRangeException.ThrowIfLessThan(maxItemsPerBatch, 1);
         ArgumentOutOfRangeException.ThrowIfLessThan(maxEstimatedCharsPerBatch, 1);
@@ -52,10 +46,10 @@ public static class BatchPlanner {
         return batches;
     }
 
-    public static int EstimateChars(TranslationItem item) => Math.Max(
-        MinEstimatedCharsPerItem,
-        item.Tag.Length + item.Original.Length + (item.DefType?.Length ?? 0) + 32);
-
     public static int EstimateMaxTokens(IReadOnlyList<TranslationItem> batch) =>
         Math.Clamp(batch.Sum(EstimateChars) / 3 + 2_000, MinMaxTokens, MaxMaxTokens);
+
+    private static int EstimateChars(TranslationItem item) => Math.Max(
+        MinEstimatedCharsPerItem,
+        item.Tag.Length + item.Original.Length + (item.DefType?.Length ?? 0) + 32);
 }

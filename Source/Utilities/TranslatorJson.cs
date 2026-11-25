@@ -10,7 +10,7 @@ namespace Translator.Utilities;
 public static class TranslatorJson {
     private static readonly JavaScriptEncoder Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
 
-    /// <summary>Reading responses from remote APIs. Property names are matched case-insensitively.</summary>
+    /// <summary>Reading responses from remote APIs.</summary>
     public static JsonSerializerOptions Api { get; } = new() {
         PropertyNameCaseInsensitive = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -18,7 +18,7 @@ public static class TranslatorJson {
         ReadCommentHandling = JsonCommentHandling.Skip
     };
 
-    /// <summary>Prompts embedded in request payloads. Mirrors the previous Newtonsoft output.</summary>
+    /// <summary>Prompts embedded in request payloads.</summary>
     public static JsonSerializerOptions Prompt { get; } = new() {
         WriteIndented = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,

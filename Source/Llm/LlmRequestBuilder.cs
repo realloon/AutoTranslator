@@ -2,17 +2,10 @@ using System.Text.Json.Nodes;
 
 namespace Translator.Llm;
 
-/// <summary>
-/// Builds OpenAI-compatible request payloads. <see cref="JsonObject"/> is used instead of
-/// many nearly-identical DTOs: the payload is data, not a type.
-/// </summary>
+/// <summary><see cref="JsonObject"/> is used instead of DTOs: the payload is data, not a type.</summary>
 public static class LlmRequestBuilder {
-    public static JsonObject CreateTranslationRequest(
-        string model,
-        LlmApiProtocol protocol,
-        bool disableThinking,
-        TranslationPrompt prompt,
-        int maxOutputTokens) {
+    public static JsonObject CreateTranslationRequest(string model, LlmApiProtocol protocol, bool disableThinking,
+        TranslationPrompt prompt, int maxOutputTokens) {
         var payload = protocol == LlmApiProtocol.Responses
             ? CreateResponsesPayload(model, prompt, maxOutputTokens, store: false, jsonResponse: true,
                 includeTemperature: true)
@@ -23,10 +16,7 @@ public static class LlmRequestBuilder {
     }
 
     /// <summary>Minimal request used to verify credentials/endpoint reachability.</summary>
-    public static JsonObject CreateValidationRequest(
-        string model,
-        LlmApiProtocol protocol,
-        bool disableThinking) {
+    public static JsonObject CreateValidationRequest(string model, LlmApiProtocol protocol, bool disableThinking) {
         var prompt = new TranslationPrompt("Health check.", "Reply with OK.");
         var payload = protocol == LlmApiProtocol.Responses
             ? CreateResponsesPayload(model, prompt, maxOutputTokens: 1, store: false, jsonResponse: false,
@@ -37,10 +27,7 @@ public static class LlmRequestBuilder {
         return payload;
     }
 
-    private static JsonObject CreateChatPayload(
-        string model,
-        TranslationPrompt prompt,
-        int maxOutputTokens,
+    private static JsonObject CreateChatPayload(string model, TranslationPrompt prompt, int maxOutputTokens,
         bool jsonResponse) {
         var payload = new JsonObject {
             ["model"] = model,
@@ -68,13 +55,8 @@ public static class LlmRequestBuilder {
         return payload;
     }
 
-    private static JsonObject CreateResponsesPayload(
-        string model,
-        TranslationPrompt prompt,
-        int maxOutputTokens,
-        bool store,
-        bool jsonResponse,
-        bool includeTemperature) {
+    private static JsonObject CreateResponsesPayload(string model, TranslationPrompt prompt, int maxOutputTokens,
+        bool store, bool jsonResponse, bool includeTemperature) {
         var payload = new JsonObject {
             ["model"] = model,
             ["instructions"] = prompt.SystemPrompt,
@@ -103,13 +85,8 @@ public static class LlmRequestBuilder {
         return payload;
     }
 
-    private static void ApplyProviderOptions(
-        JsonObject payload,
-        LlmApiProtocol protocol,
-        bool disableThinking) {
-        if (!disableThinking) {
-            return;
-        }
+    private static void ApplyProviderOptions(JsonObject payload, LlmApiProtocol protocol, bool disableThinking) {
+        if (!disableThinking) return;
 
         if (protocol == LlmApiProtocol.Responses) {
             payload["reasoning"] = new JsonObject {

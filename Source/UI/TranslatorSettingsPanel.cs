@@ -6,8 +6,7 @@ using Verse;
 
 namespace Translator.UI;
 
-/// <summary>Contents of the mod settings dialog; lifecycle stays in <see cref="TranslatorMod"/>.</summary>
-internal sealed class TranslatorSettingsPanel {
+internal sealed class TranslatorSettingsPanel(Action writeSettings) {
     private const float Grid = 8f;
     private const float TabsAreaHeight = Grid * 5f;
 
@@ -16,7 +15,6 @@ internal sealed class TranslatorSettingsPanel {
         "Translator_ModSettingsTabAdvanced"
     ];
 
-    private readonly Action _writeSettings;
     private readonly AsyncOperation<LlmConfigValidationResult> _validation = new();
     private readonly AsyncOperation<LlmModelListResult> _modelFetch = new();
     private readonly List<string> _availableModels = [];
@@ -26,8 +24,6 @@ internal sealed class TranslatorSettingsPanel {
     private string _validationStatus = string.Empty;
     private bool _validationFailed;
     private int _activeTab;
-
-    public TranslatorSettingsPanel(Action writeSettings) => _writeSettings = writeSettings;
 
     public void Draw(Rect inRect) {
         ConsumeValidationResult();
@@ -158,7 +154,7 @@ internal sealed class TranslatorSettingsPanel {
         }
     }
 
-    private void DrawAdvancedSettings(Listing_Standard listing) {
+    private static void DrawAdvancedSettings(Listing_Standard listing) {
         var settings = TranslatorMod.Settings;
 
         listing.Label($"{"Translator_ModSettingBatchSize".Translate()}: {settings.BatchSize}");
@@ -216,20 +212,16 @@ internal sealed class TranslatorSettingsPanel {
     }
 
     private void BeginValidation() {
-        if (_validation.IsRunning) {
-            return;
-        }
+        if (_validation.IsRunning) return;
 
-        _writeSettings();
+        writeSettings();
         _validationStatus = string.Empty;
         _validationFailed = false;
-        _validation.Start(token => LlmClient.ValidateAsync(token));
+        _validation.Start(LlmClient.ValidateAsync);
     }
 
     private void ConsumeValidationResult() {
-        if (!_validation.TryTakeResult(out var result, out var error)) {
-            return;
-        }
+        if (!_validation.TryTakeResult(out var result, out var error)) return;
 
         if (error is not null) {
             _validationFailed = true;
@@ -237,9 +229,7 @@ internal sealed class TranslatorSettingsPanel {
             return;
         }
 
-        if (result is null) {
-            return;
-        }
+        if (result is null) return;
 
         _validationFailed = !result.Success;
         _validationStatus = result.Success
@@ -302,18 +292,14 @@ internal sealed class TranslatorSettingsPanel {
     }
 
     private void StartModelFetch() {
-        if (_modelFetch.IsRunning) {
-            return;
-        }
+        if (_modelFetch.IsRunning) return;
 
         _availableModels.Clear();
-        _modelFetch.Start(token => LlmClient.FetchModelsAsync(token));
+        _modelFetch.Start(LlmClient.FetchModelsAsync);
     }
 
     private void ConsumeModelFetchResult() {
-        if (!_modelFetch.TryTakeResult(out var result, out var error)) {
-            return;
-        }
+        if (!_modelFetch.TryTakeResult(out var result, out var error)) return;
 
         if (error is not null) {
             Messages.Message("Translator_ModSettingModelsFailed".Translate(error.Message),
@@ -321,9 +307,7 @@ internal sealed class TranslatorSettingsPanel {
             return;
         }
 
-        if (result is null) {
-            return;
-        }
+        if (result is null) return;
 
         if (!result.Success) {
             Messages.Message("Translator_ModSettingModelsFailed".Translate(result.Message),
@@ -335,10 +319,9 @@ internal sealed class TranslatorSettingsPanel {
         _availableModels.AddRange(result.Models);
     }
 
-    private static string GetProtocolLabel(LlmApiProtocol protocol) =>
-        protocol == LlmApiProtocol.Responses
-            ? "Translator_ModSettingProtocolResponses".Translate()
-            : "Translator_ModSettingProtocolChat".Translate();
+    private static string GetProtocolLabel(LlmApiProtocol protocol) => protocol == LlmApiProtocol.Responses
+        ? "Translator_ModSettingProtocolResponses".Translate()
+        : "Translator_ModSettingProtocolChat".Translate();
 
     private static string GetProviderLabel(string providerId) =>
         LlmProviderPresets.Find(providerId)?.Label ?? LlmProviderPresets.CustomLabelKey.Translate();

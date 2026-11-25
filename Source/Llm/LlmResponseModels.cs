@@ -1,6 +1,5 @@
 namespace Translator.Llm;
 
-/// <summary>Response shapes for the two supported APIs plus model discovery.</summary>
 internal sealed class ChatCompletionResponse {
     public List<ChatChoice> Choices { get; init; } = [];
 }

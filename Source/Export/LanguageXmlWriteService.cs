@@ -5,13 +5,8 @@ using Verse;
 
 namespace Translator.Export;
 
-internal sealed record LanguageXmlWriteResult(
-    bool Success,
-    string Message,
-    int WrittenEntryCount,
-    int WrittenFileCount);
+internal sealed record LanguageXmlWriteResult(bool Success, string Message, int WrittenEntryCount);
 
-/// <summary>Reads and writes RimWorld language XML for an exported translation mod.</summary>
 internal static class LanguageXmlWriteService {
     public static List<LanguageWorksetFile> ReadWorksets(
         string outputModDir,
@@ -29,27 +24,34 @@ internal static class LanguageXmlWriteService {
             foreach (var file in Directory.EnumerateFiles(root, "*.xml", SearchOption.AllDirectories)) {
                 var relative = Path.GetRelativePath(root, file).Split(Path.DirectorySeparatorChar);
 
-                if (relative.Length >= 2 &&
-                    relative[0].Equals(LoadedLanguage.KeyedTranslationsFolderName,
-                        StringComparison.OrdinalIgnoreCase)) {
-                    foreach (var entry in ReadEntries(file)) {
-                        workset.Keyed.Add(new LanguageWorksetKeyedItem {
-                            Tag = entry.Tag,
-                            Original = entry.Original,
-                            Translation = entry.Translation
-                        });
+                switch (relative.Length) {
+                    case >= 2 when
+                        relative[0].Equals(LoadedLanguage.KeyedTranslationsFolderName,
+                            StringComparison.OrdinalIgnoreCase): {
+                        foreach (var entry in ReadEntries(file)) {
+                            workset.Keyed.Add(new LanguageWorksetKeyedItem {
+                                Tag = entry.Tag,
+                                Original = entry.Original,
+                                Translation = entry.Translation
+                            });
+                        }
+
+                        break;
                     }
-                } else if (relative.Length >= 3 &&
-                           relative[0].Equals(LoadedLanguage.DefInjectionsFolderName,
-                               StringComparison.OrdinalIgnoreCase)) {
-                    foreach (var entry in ReadEntries(file)) {
-                        workset.DefInjected.Add(new LanguageWorksetDefInjectedItem {
-                            Tag = entry.Tag,
-                            Original = entry.Original,
-                            Translation = entry.Translation,
-                            DefType = relative[1],
-                            IsCollectionItem = entry.Tag.LastIndexOf('.') >= 0
-                        });
+                    case >= 3 when
+                        relative[0].Equals(LoadedLanguage.DefInjectionsFolderName,
+                            StringComparison.OrdinalIgnoreCase): {
+                        foreach (var entry in ReadEntries(file)) {
+                            workset.DefInjected.Add(new LanguageWorksetDefInjectedItem {
+                                Tag = entry.Tag,
+                                Original = entry.Original,
+                                Translation = entry.Translation,
+                                DefType = relative[1],
+                                IsCollectionItem = entry.Tag.LastIndexOf('.') >= 0
+                            });
+                        }
+
+                        break;
                     }
                 }
             }
@@ -67,7 +69,6 @@ internal static class LanguageXmlWriteService {
         try {
             var languageFolderName = workset.LanguageFolderName;
             var writtenEntryCount = 0;
-            var writtenFileCount = 0;
 
             var keyedOutputPath = LanguagePath(
                 outputModDir, languageFolderName,
@@ -79,7 +80,6 @@ internal static class LanguageXmlWriteService {
             var keyedWrittenCount = WriteLanguageDataFile(keyedOutputPath, keyedEntries, languageFolderName);
             if (keyedWrittenCount > 0) {
                 writtenEntryCount += keyedWrittenCount;
-                writtenFileCount++;
             }
 
             var defGroups = workset.DefInjected
@@ -102,25 +102,21 @@ internal static class LanguageXmlWriteService {
                 }
 
                 writtenEntryCount += writtenCount;
-                writtenFileCount++;
             }
 
-            return new LanguageXmlWriteResult(true, "OK", writtenEntryCount, writtenFileCount);
+            return new LanguageXmlWriteResult(true, "OK", writtenEntryCount);
         } catch (Exception ex) {
-            return new LanguageXmlWriteResult(false, ex.Message, 0, 0);
+            return new LanguageXmlWriteResult(false, ex.Message, 0);
         }
     }
 
-    private static List<XmlEntry> ToXmlEntries(IEnumerable<WorksetTextItem> items, bool includePlaceholders) =>
-        items
-            .Where(item => !item.Tag.NullOrEmpty() &&
-                           (includePlaceholders || !item.Translation.NullOrEmpty()))
+    private static List<XmlEntry> ToXmlEntries(IEnumerable<WorksetTextItem> items, bool includePlaceholders) => [
+        .. items
+            .Where(item => !item.Tag.NullOrEmpty() && (includePlaceholders || !item.Translation.NullOrEmpty()))
             .OrderBy(item => item.Tag, StringComparer.Ordinal)
-            .Select(item => new XmlEntry(
-                item.Tag,
-                item.Original,
+            .Select(item => new XmlEntry(item.Tag, item.Original,
                 item.Translation.NullOrEmpty() ? LoadedLanguage.PlaceholderText : item.Translation))
-            .ToList();
+    ];
 
     private static int WriteLanguageDataFile(
         string outputFilePath,
@@ -142,8 +138,7 @@ internal static class LanguageXmlWriteService {
 
             if (!entry.Original.NullOrEmpty()) {
                 // Vanilla translation files carry the source text as an " EN: ... " comment before each entry.
-                root.Add(new XComment(
-                    SanitizeComment($" EN: {entry.Original.Replace("\n", "\\n")} ")));
+                root.Add(new XComment(SanitizeComment($" EN: {entry.Original.Replace("\n", "\\n")} ")));
             }
 
             root.Add(element);
@@ -157,9 +152,7 @@ internal static class LanguageXmlWriteService {
         var directory = Path.GetDirectoryName(outputFilePath)!;
         Directory.CreateDirectory(directory);
 
-        new XDocument(
-            new XDeclaration("1.0", "UTF-8", null),
-            root).Save(outputFilePath);
+        new XDocument(new XDeclaration("1.0", "UTF-8", null), root).Save(outputFilePath);
         return writtenCount;
     }
 
@@ -176,9 +169,7 @@ internal static class LanguageXmlWriteService {
                 continue;
             }
 
-            if (node is not XElement element) {
-                continue;
-            }
+            if (node is not XElement element) continue;
 
             var translation = element.Value == LoadedLanguage.PlaceholderText ? string.Empty : element.Value;
             yield return new XmlEntry(element.Name.LocalName, original, translation);

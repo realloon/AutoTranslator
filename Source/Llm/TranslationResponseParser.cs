@@ -3,16 +3,9 @@ using Translator.Utilities;
 
 namespace Translator.Llm;
 
-/// <summary>
-/// Validates a model translation payload against the batch that was sent.
-/// Kept separate from the HTTP layer so the strictness rules can be unit-tested.
-/// </summary>
 public static class TranslationResponseParser {
-    public static bool TryParse(
-        string content,
-        IReadOnlyList<TranslationItem> batch,
-        out Dictionary<string, string> translations,
-        out string error) {
+    public static bool TryParse(string content, IReadOnlyList<TranslationItem> batch,
+        out Dictionary<string, string> translations, out string error) {
         translations = new Dictionary<string, string>(StringComparer.Ordinal);
         error = string.Empty;
 
@@ -47,10 +40,10 @@ public static class TranslationResponseParser {
             }
 
             var value = entry.Translation;
-            if (!matched.TryAdd(entry.Id, value)) {
-                duplicateCount++;
-                matched[entry.Id] = value;
-            }
+            if (matched.TryAdd(entry.Id, value)) continue;
+
+            duplicateCount++;
+            matched[entry.Id] = value;
         }
 
         var emptyTranslationCount = matched.Count(pair => string.IsNullOrWhiteSpace(pair.Value));
