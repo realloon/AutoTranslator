@@ -106,7 +106,7 @@ public class Window_Termbase : Window {
         var currentEvent = Event.current;
         var selectedEntries = GetSelectedEntries();
 
-        Widgets.DrawBoxSolidWithOutline(rect, UiTheme.ListBackgroundColor, UiTheme.ListBorderColor);
+        Widgets.DrawBoxSolidWithOutline(rect, UiTheme.DarkGray, UiTheme.White20);
 
         var scrollRect = new Rect(
             rect.x + contentPadding,
@@ -119,7 +119,7 @@ public class Window_Termbase : Window {
 
         Widgets.BeginScrollView(scrollRect, ref _scrollPos, viewRect);
 
-        using (GuiColorScope.Using(UiTheme.HeaderColor)) {
+        using (GuiColorScope.Using(UiTheme.White60)) {
             Widgets.Label(new Rect(fieldGap, 0f, viewRect.width - fieldGap, 24f),
                 BuildColumnHeaderLabel());
         }

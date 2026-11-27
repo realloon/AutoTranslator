@@ -22,5 +22,7 @@ internal static class Patch_MainMenuDrawer {
             new ListableOption("Translator_AutoTranslator".Translate(), OnTranslatorButtonClicked, ButtonHighlightTag));
     }
 
-    private static void OnTranslatorButtonClicked() => Find.WindowStack.Add(new Window_TranslatorMain());
+    private static void OnTranslatorButtonClicked() {
+        Find.WindowStack.Add(new Window_TranslatorMain());
+    }
 }

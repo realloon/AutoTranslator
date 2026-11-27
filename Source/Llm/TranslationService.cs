@@ -16,12 +16,12 @@ internal static class TranslationService {
         CancellationToken cancellationToken = default) {
         try {
             if (!LlmConfigResolver.TryCreate(TranslatorMod.Settings, out var config, out var error)) {
-                return new TranslationOutcome(false, error);
+                return new TranslationOutcome(false, error, []);
             }
 
             var pending = workset.CollectPending();
             if (pending.Count == 0) {
-                return new TranslationOutcome(true, "No pending entries.");
+                return new TranslationOutcome(true, "No pending entries.", []);
             }
 
             var pendingById = pending.ToDictionary(entry => entry.Id, StringComparer.Ordinal);
@@ -29,7 +29,7 @@ internal static class TranslationService {
 
             var glossary = TermbaseService.GetGlossaryForLanguage(targetLanguageFolder);
             var batches = BatchPlanner.Plan(items, config.BatchSize);
-            var failures = new List<string>();
+            var failures = new List<BatchFailure>();
 
             foreach (var wave in batches.Chunk(config.Concurrency)) {
                 var tasks = new Task<BatchTranslationResult>[wave.Length];
@@ -41,7 +41,7 @@ internal static class TranslationService {
                 var results = await Task.WhenAll(tasks).ConfigureAwait(false);
                 foreach (var result in results) {
                     if (!result.Success) {
-                        failures.Add($"batch#{result.BatchNumber}: {result.ErrorMessage}");
+                        failures.Add(new BatchFailure(result.BatchNumber, result.Error!));
                         continue;
                     }
 
@@ -54,25 +54,12 @@ internal static class TranslationService {
             }
 
             return failures.Count > 0
-                ? new TranslationOutcome(false, BuildBatchFailureMessage(failures))
-                : new TranslationOutcome(true, "OK");
+                ? new TranslationOutcome(false, string.Empty, failures)
+                : new TranslationOutcome(true, "OK", []);
         } catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) {
-            return new TranslationOutcome(false, "Translation cancelled.");
+            return new TranslationOutcome(false, "Translation cancelled.", []);
         } catch (Exception ex) {
-            return new TranslationOutcome(false, ex.Message);
+            return new TranslationOutcome(false, ex.Message, []);
         }
-    }
-
-    private static string BuildBatchFailureMessage(IReadOnlyList<string> failedBatches) {
-        const int maxErrors = 3;
-        var shown = failedBatches
-            .Take(maxErrors)
-            .Select(error => error.Length > 180 ? $"{error[..180]}..." : error);
-        var message = string.Join(" | ", shown);
-        if (failedBatches.Count > maxErrors) {
-            message += $" (+{failedBatches.Count - maxErrors} more)";
-        }
-
-        return $"Some translation batches failed after retries: {message}";
     }
 }

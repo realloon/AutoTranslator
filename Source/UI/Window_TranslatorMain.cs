@@ -141,7 +141,7 @@ public class Window_TranslatorMain : Window {
 
             DrawSection("Translator_FromDef", stats.DefStats, 32f);
 
-            Widgets.DrawLineHorizontal(rect.x, y, rect.width, UiTheme.SectionDividerColor);
+            Widgets.DrawLineHorizontal(rect.x, y, rect.width, UiTheme.White20);
             y += 12f;
 
             DrawSection("Translator_FromKey", stats.KeyStats, 36f);
@@ -199,7 +199,7 @@ public class Window_TranslatorMain : Window {
         var title = separator < 0 ? statusText : statusText[..separator];
         var titleHeight = Mathf.Max(22f, Text.CalcHeight(title, rect.width));
 
-        using (GuiColorScope.Using(_lastExportFailed ? UiTheme.ErrorColor : UiTheme.SuccessColor)) {
+        using (GuiColorScope.Using(_lastExportFailed ? UiTheme.SoftRed : UiTheme.SoftGreen)) {
             Widgets.Label(new Rect(rect.x, y, rect.width, titleHeight), title);
         }
 
@@ -336,6 +336,7 @@ public class Window_TranslatorMain : Window {
 
         LongEventHandler.QueueLongEvent(() => {
             var failures = new List<string>();
+            var batchFailures = new List<(string Language, BatchFailure Failure)>();
 
             try {
                 foreach (var workset in worksets) {
@@ -359,7 +360,12 @@ public class Window_TranslatorMain : Window {
                     }
 
                     if (!translated.Success) {
-                        failures.Add($"{workset.LanguageFolderName}: {translated.Message}");
+                        if (translated.Failures.Count == 0) {
+                            failures.Add($"{workset.LanguageFolderName}: {translated.Message}");
+                        } else {
+                            batchFailures.AddRange(translated.Failures.Select(failure =>
+                                (workset.LanguageFolderName, failure)));
+                        }
                     }
                 }
             } catch (Exception ex) {
@@ -367,6 +373,8 @@ public class Window_TranslatorMain : Window {
             }
 
             LongEventHandler.ExecuteWhenFinished(() => {
+                failures.AddRange(batchFailures.Select(item =>
+                    $"{item.Language}: batch#{item.Failure.BatchNumber}: {LlmErrorText.Format(item.Failure.Error)}"));
                 _translateInProgress = false;
                 if (failures.Count == 0) {
                     _lastExportFailed = false;

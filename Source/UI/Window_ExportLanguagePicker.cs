@@ -81,7 +81,7 @@ public class Window_ExportLanguagePicker : Window {
         const float rowContentHorizontalPadding = 8f;
         const float rowHeight = 24f;
 
-        Widgets.DrawBoxSolidWithOutline(rect, UiTheme.ListBackgroundColor, UiTheme.ListBorderColor);
+        Widgets.DrawBoxSolidWithOutline(rect, UiTheme.DarkGray, UiTheme.White20);
 
         var scrollRect = new Rect(
             rect.x,

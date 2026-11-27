@@ -7,16 +7,18 @@ namespace Translator;
 
 [UsedImplicitly]
 public sealed class TranslatorMod : Mod {
-    private readonly TranslatorSettingsPanel _settingsPanel;
+    private readonly SettingsPanel _settingsPanel;
 
     public static TranslatorSettings Settings { get; private set; } = null!;
 
     public TranslatorMod(ModContentPack content) : base(content) {
         Settings = GetSettings<TranslatorSettings>();
-        _settingsPanel = new TranslatorSettingsPanel(WriteSettings);
+        _settingsPanel = new SettingsPanel(WriteSettings);
     }
 
     public override string SettingsCategory() => "Translator_AutoTranslator".Translate();
 
-    public override void DoSettingsWindowContents(Rect inRect) => _settingsPanel.Draw(inRect);
+    public override void DoSettingsWindowContents(Rect inRect) {
+        _settingsPanel.Draw(inRect);
+    }
 }

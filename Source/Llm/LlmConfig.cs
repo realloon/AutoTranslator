@@ -18,8 +18,8 @@ internal static class LlmConfigResolver {
 
         var preset = LlmProviderPresets.Find(settings.ProviderId);
         var protocol = preset?.Protocol ?? settings.CustomProtocol;
-        var apiKey = settings.GetApiKey(settings.ProviderId).Trim();
-        var model = settings.GetModel(settings.ProviderId).Trim();
+        var apiKey = settings.GetApiKey(settings.ProviderId);
+        var model = settings.GetModel(settings.ProviderId);
 
         if (!LlmEndpointResolver.TryResolve(preset, settings.ApiUrl, out var endpoints, out error)) {
             return false;

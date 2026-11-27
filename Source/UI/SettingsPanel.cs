@@ -6,9 +6,11 @@ using Verse;
 
 namespace Translator.UI;
 
-internal sealed class TranslatorSettingsPanel(Action writeSettings) {
+internal sealed class SettingsPanel(Action writeSettings) {
     private const float Grid = 8f;
     private const float TabsAreaHeight = Grid * 5f;
+    private const string ApiKeyControlName = "ApiKeyField";
+    private const int ApiKeyVisiblePrefixLength = 8;
 
     private static readonly string[] TabKeys = [
         "Translator_Connection",
@@ -20,9 +22,10 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
     private readonly List<string> _availableModels = [];
     private readonly HashSet<string> _customModelProviders = new(StringComparer.Ordinal);
 
-    private string _modelsFetchedProvider = string.Empty;
     private string _validationStatus = string.Empty;
-    private bool _validationFailed;
+    private string _validationDetails = string.Empty;
+    private string _validatingConfig = string.Empty;
+    private bool _validationSucceeded;
     private int _activeTab;
 
     public void Draw(Rect inRect) {
@@ -32,10 +35,10 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
         var y = inRect.y;
         DrawTabs(new Rect(inRect.x, y, inRect.width, Grid * 4f));
 
-        var contentRect = new Rect(
-            inRect.x, y + TabsAreaHeight, inRect.width, inRect.height - TabsAreaHeight);
+        var contentRect = new Rect(inRect.x, y + TabsAreaHeight, inRect.width, inRect.height - TabsAreaHeight);
         var listing = new Listing_Standard();
         listing.Begin(contentRect);
+
         if (_activeTab == 0) {
             DrawConnectionSettings(listing);
         } else {
@@ -53,9 +56,7 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
             var tabRect = new Rect(rect.x + i * (tabWidth + Grid), rect.y, tabWidth, tabHeight);
             var selected = _activeTab == i;
 
-            Widgets.DrawBoxSolid(tabRect, selected
-                ? new Color(1f, 1f, 1f, 0.12f)
-                : new Color(1f, 1f, 1f, 0.035f));
+            Widgets.DrawBoxSolid(tabRect, selected ? UiTheme.White12 : UiTheme.White04);
 
             if (selected) {
                 Widgets.DrawHighlightSelected(tabRect);
@@ -102,18 +103,14 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
 
         listing.Label("Translator_ApiKey".Translate());
         var apiKey = settings.GetApiKey(settings.ProviderId);
-        var newApiKey = listing.TextEntry(apiKey);
-        if (newApiKey != apiKey) {
+        GUI.SetNextControlName(ApiKeyControlName);
+        var apiKeyFocused = GUI.GetNameOfFocusedControl() == ApiKeyControlName;
+        var newApiKey = listing.TextEntry(apiKeyFocused ? apiKey : MaskApiKey(apiKey));
+        if (apiKeyFocused && newApiKey != apiKey) {
             settings.SetApiKey(settings.ProviderId, newApiKey);
         }
 
         listing.Gap(6f);
-
-        if (preset is not null && !settings.GetApiKey(settings.ProviderId).NullOrEmpty() &&
-            _modelsFetchedProvider != settings.ProviderId) {
-            _modelsFetchedProvider = settings.ProviderId;
-            StartModelFetch();
-        }
 
         listing.Label("Translator_Model".Translate());
         var model = settings.GetModel(settings.ProviderId);
@@ -123,9 +120,7 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
                 settings.SetModel(settings.ProviderId, newModel);
             }
         } else {
-            if (listing.ButtonText(model.NullOrEmpty()
-                    ? "Translator_SelectModel".Translate()
-                    : model)) {
+            if (listing.ButtonText(model.NullOrEmpty() ? "Translator_SelectModel".Translate() : model)) {
                 OpenModelMenu();
             }
 
@@ -137,20 +132,36 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
             }
         }
 
+        if (!_validation.IsRunning && _validatingConfig.Length > 0 &&
+            _validatingConfig != ConnectionFingerprint()) {
+            ClearValidationState();
+        }
+
         listing.Gap(6f);
 
+        var previousEnabled = GUI.enabled;
+        GUI.enabled = !_validation.IsRunning;
         if (listing.ButtonText("Translator_Validate".Translate())) {
             BeginValidation();
         }
 
+        GUI.enabled = previousEnabled;
+
         if (_validation.IsRunning) {
-            using var color = GuiColorScope.Using(Color.yellow);
+            using var color = GuiColorScope.Using(UiTheme.SoftYellow);
             listing.Label("Translator_ValidatingConfiguration".Translate());
         } else if (!_validationStatus.NullOrEmpty()) {
-            using var color = GuiColorScope.Using(_validationFailed
-                ? UiTheme.ErrorColor
-                : UiTheme.SuccessColor);
-            listing.Label(_validationStatus);
+            using (GuiColorScope.Using(_validationSucceeded
+                ? UiTheme.SoftGreen
+                : UiTheme.SoftRed)) {
+                listing.Label(_validationStatus);
+            }
+
+            if (!_validationDetails.NullOrEmpty()) {
+                using (GuiColorScope.Using(ColoredText.SubtleGrayColor)) {
+                    listing.Label(_validationDetails);
+                }
+            }
         }
     }
 
@@ -192,10 +203,9 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
 
         listing.Label("Translator_DefaultOutputLocation".Translate());
         if (listing.ButtonText(GetOutputLocationLabel(settings.DefaultOutputLocationMode))) {
-            settings.DefaultOutputLocationMode =
-                settings.DefaultOutputLocationMode == OutputLocationMode.GeneratedMod
-                    ? OutputLocationMode.OriginalMod
-                    : OutputLocationMode.GeneratedMod;
+            settings.DefaultOutputLocationMode = settings.DefaultOutputLocationMode == OutputLocationMode.GeneratedMod
+                ? OutputLocationMode.OriginalMod
+                : OutputLocationMode.GeneratedMod;
         }
 
         using (GuiColorScope.Using(ColoredText.SubtleGrayColor)) {
@@ -207,34 +217,86 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
         listing.Gap(6f);
 
         if (listing.ButtonText("Translator_ResetToDefaults".Translate())) {
-            settings.ResetToDefaults();
+            settings.ResetAdvancedSettings();
         }
     }
 
+    private static string MaskApiKey(string apiKey) {
+        if (apiKey.Length <= ApiKeyVisiblePrefixLength) {
+            return apiKey;
+        }
+
+        return apiKey[..ApiKeyVisiblePrefixLength] +
+               new string('*', apiKey.Length - ApiKeyVisiblePrefixLength);
+    }
+
+    private static string ConnectionFingerprint() {
+        var settings = TranslatorMod.Settings;
+        return string.Join('\n', settings.ProviderId, settings.CustomProtocol, settings.ApiUrl,
+            settings.GetApiKey(settings.ProviderId), settings.GetModel(settings.ProviderId));
+    }
+
+    private static bool HasApiKey =>
+        TranslatorMod.Settings.GetApiKey(TranslatorMod.Settings.ProviderId).Length > 0;
+
+    private static bool HasModel =>
+        TranslatorMod.Settings.GetModel(TranslatorMod.Settings.ProviderId).Length > 0;
+
+    private static void ShowMissing(string key) {
+        Messages.Message(key.Translate(), MessageTypeDefOf.RejectInput);
+    }
+
+    private void ClearValidationState() {
+        _validationStatus = string.Empty;
+        _validationDetails = string.Empty;
+        _validationSucceeded = false;
+        _validatingConfig = string.Empty;
+    }
+
     private void BeginValidation() {
-        if (_validation.IsRunning) return;
+        if (!HasApiKey) {
+            ShowMissing("Translator_ApiKeyNotConfigured");
+            return;
+        }
+
+        if (!HasModel) {
+            ShowMissing("Translator_ModelNotConfigured");
+            return;
+        }
 
         writeSettings();
-        _validationStatus = string.Empty;
-        _validationFailed = false;
+        ClearValidationState();
+        _validatingConfig = ConnectionFingerprint();
         _validation.Start(LlmClient.ValidateAsync);
     }
 
     private void ConsumeValidationResult() {
         if (!_validation.TryTakeResult(out var result, out var error)) return;
 
-        if (error is not null) {
-            _validationFailed = true;
-            _validationStatus = "Translator_ValidationFailed".Translate(error.Message);
+        if (_validatingConfig != ConnectionFingerprint()) {
+            ClearValidationState();
             return;
         }
 
-        if (result is null) return;
+        if (error is not null) {
+            _validationSucceeded = false;
+            _validationStatus = "Translator_ValidationFailed".Translate();
+            _validationDetails = error.Message;
+            return;
+        }
 
-        _validationFailed = !result.Success;
-        _validationStatus = result.Success
-            ? "Translator_ValidationSucceeded".Translate()
-            : "Translator_ValidationFailed".Translate(result.Message);
+        if (result.Success) {
+            _validationSucceeded = true;
+            _validationStatus = "Translator_ValidationSucceeded".Translate();
+            _validationDetails = string.Empty;
+        } else {
+            var errorInfo = result.Error!;
+            _validationSucceeded = false;
+            _validationDetails = errorInfo.Details;
+            _validationStatus = errorInfo is { ReasonKey.Length: > 0 } info
+                ? "Translator_ValidationFailedWithReason".Translate(LlmErrorText.Reason(info))
+                : "Translator_ValidationFailed".Translate();
+        }
     }
 
     private void OpenProviderMenu() {
@@ -250,26 +312,28 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
     private void SelectProvider(string providerId) {
         TranslatorMod.Settings.ProviderId = providerId;
         _availableModels.Clear();
-        _modelsFetchedProvider = string.Empty;
         _validation.Cancel();
         _modelFetch.Cancel();
-        _validationStatus = string.Empty;
-        _validationFailed = false;
+        ClearValidationState();
     }
 
     private void OpenModelMenu() {
+        if (!HasApiKey) {
+            ShowMissing("Translator_ApiKeyNotConfigured");
+            return;
+        }
+
         ConsumeModelFetchResult();
 
         if (_availableModels.Count == 0 && !_modelFetch.IsRunning) {
             StartModelFetch();
         }
 
-        var options = new List<FloatMenuOption>();
+        var options = _availableModels
+            .Select(model => new FloatMenuOption(model, () => SelectModel(model)))
+            .ToList();
         if (_modelFetch.IsRunning) {
             options.Add(new FloatMenuOption("Translator_LoadingModels".Translate(), null));
-        } else {
-            options.AddRange(_availableModels.Select(model =>
-                new FloatMenuOption(model, () => SelectModel(model))));
         }
 
         options.Add(new FloatMenuOption(
@@ -292,26 +356,24 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
     }
 
     private void StartModelFetch() {
-        if (_modelFetch.IsRunning) return;
-
         _availableModels.Clear();
         _modelFetch.Start(LlmClient.FetchModelsAsync);
+    }
+
+    private static void ShowModelFetchFailure(string message) {
+        Messages.Message("Translator_LoadModelsFailed".Translate(message), MessageTypeDefOf.SilentInput);
     }
 
     private void ConsumeModelFetchResult() {
         if (!_modelFetch.TryTakeResult(out var result, out var error)) return;
 
         if (error is not null) {
-            Messages.Message("Translator_LoadModelsFailed".Translate(error.Message),
-                MessageTypeDefOf.SilentInput);
+            ShowModelFetchFailure(error.Message);
             return;
         }
 
-        if (result is null) return;
-
         if (!result.Success) {
-            Messages.Message("Translator_LoadModelsFailed".Translate(result.Message),
-                MessageTypeDefOf.SilentInput);
+            ShowModelFetchFailure(LlmErrorText.Format(result.Error!));
             return;
         }
 

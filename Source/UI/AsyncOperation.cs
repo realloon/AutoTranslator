@@ -34,8 +34,8 @@ internal sealed class AsyncOperation<T> where T : class {
         DisposeCancellation();
     }
 
-    public bool TryTakeResult(out T? result, out Exception? error) {
-        result = null;
+    public bool TryTakeResult(out T result, out Exception? error) {
+        result = null!;
         error = null;
 
         if (_startError is not null) {

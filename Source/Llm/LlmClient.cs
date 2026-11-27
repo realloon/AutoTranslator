@@ -6,10 +6,11 @@ using Translator.Utilities;
 
 namespace Translator.Llm;
 
-internal sealed class LlmRequestException(string message, bool isTransient, TimeSpan? retryAfter = null)
-    : Exception(message) {
+internal sealed class LlmRequestException(string message, bool isTransient, TimeSpan? retryAfter = null,
+    HttpStatusCode? statusCode = null) : Exception(message) {
     public bool IsTransient { get; } = isTransient;
     public TimeSpan? RetryAfter { get; } = retryAfter;
+    public HttpStatusCode? StatusCode { get; } = statusCode;
 }
 
 /// <summary>Every call uses a per-request timeout so a slow endpoint cannot stall the game indefinitely.</summary>
@@ -21,7 +22,7 @@ internal static class LlmClient {
 
     public static async Task<LlmConfigValidationResult> ValidateAsync(CancellationToken cancellationToken = default) {
         if (!LlmConfigResolver.TryCreate(TranslatorMod.Settings, out var config, out var error)) {
-            return new LlmConfigValidationResult(false, error);
+            return new LlmConfigValidationResult(false, new LlmError(string.Empty, error));
         }
 
         try {
@@ -30,27 +31,27 @@ internal static class LlmClient {
             using var request = CreateRequest(HttpMethod.Post, config.Endpoints.For(config.Protocol), config.ApiKey,
                 payload);
             await SendAsync(request, "Config validation", cancellationToken).ConfigureAwait(false);
-            return new LlmConfigValidationResult(true, "OK");
+            return new LlmConfigValidationResult(true);
         } catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) {
-            return new LlmConfigValidationResult(false, "Cancelled.");
+            return new LlmConfigValidationResult(false, new LlmError(string.Empty, "Cancelled."));
         } catch (Exception ex) {
-            return new LlmConfigValidationResult(false, ex.Message);
+            return new LlmConfigValidationResult(false, DescribeError(ex));
         }
     }
 
     public static async Task<LlmModelListResult> FetchModelsAsync(CancellationToken cancellationToken = default) {
         if (!LlmConfigResolver.TryCreate(TranslatorMod.Settings, out var config, out var error, requireModel: false)) {
-            return LlmModelListResult.Failure(error);
+            return LlmModelListResult.Failure(new LlmError(string.Empty, error));
         }
 
         try {
             using var request = CreateRequest(HttpMethod.Get, config.Endpoints.Models, config.ApiKey);
             var body = await SendAsync(request, "Model discovery", cancellationToken).ConfigureAwait(false);
-            return new LlmModelListResult(true, "OK", LlmResponseReader.ParseModelIds(body));
+            return new LlmModelListResult(true, null, LlmResponseReader.ParseModelIds(body));
         } catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) {
-            return LlmModelListResult.Failure("Cancelled.");
+            return LlmModelListResult.Failure(new LlmError(string.Empty, "Cancelled."));
         } catch (Exception ex) {
-            return LlmModelListResult.Failure(ex.Message);
+            return LlmModelListResult.Failure(DescribeError(ex));
         }
     }
 
@@ -83,9 +84,28 @@ internal static class LlmClient {
                 await Task.Delay(GetRetryDelay(attempt, ex.RetryAfter), cancellationToken)
                     .ConfigureAwait(false);
             } catch (Exception ex) {
-                return BatchTranslationResult.Failed(batch.Number, ex.Message);
+                return BatchTranslationResult.Failed(batch.Number, DescribeError(ex));
             }
         }
+    }
+
+    private static LlmError DescribeError(Exception exception) {
+        if (exception is LlmRequestException { StatusCode: { } statusCode }) {
+            var key = statusCode switch {
+                HttpStatusCode.Unauthorized => "Translator_ApiKeyInvalid",
+                HttpStatusCode.Forbidden => "Translator_ApiKeyForbidden",
+                HttpStatusCode.NotFound => "Translator_EndpointNotFound",
+                HttpStatusCode.TooManyRequests => "Translator_RateLimited",
+                _ when (int)statusCode >= 500 => "Translator_ProviderUnavailable",
+                _ => null
+            };
+
+            if (key is not null) {
+                return new LlmError(key, exception.Message);
+            }
+        }
+
+        return new LlmError(string.Empty, exception.Message);
     }
 
     private static HttpRequestMessage CreateRequest(HttpMethod method, Uri uri, string apiKey,
@@ -115,7 +135,8 @@ internal static class LlmClient {
                 throw new LlmRequestException(
                     $"{operation} request failed ({(int)response.StatusCode}): {response.ReasonPhrase}; {body}",
                     IsTransient(response.StatusCode),
-                    GetRetryAfter(response));
+                    GetRetryAfter(response),
+                    response.StatusCode);
             }
 
             return body;

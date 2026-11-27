@@ -25,17 +25,18 @@ public sealed class TranslatorSettings : ModSettings {
     public int RetryCount = DefaultRetryCount;
     public OutputLocationMode DefaultOutputLocationMode = OutputLocationMode.GeneratedMod;
 
-    public string GetApiKey(string providerId) => _apiKeys.GetValueOrDefault(providerId, string.Empty);
-    public void SetApiKey(string providerId, string key) => _apiKeys[providerId] = key;
-    public string GetModel(string providerId) => _models.GetValueOrDefault(providerId, string.Empty);
-    public void SetModel(string providerId, string model) => _models[providerId] = model;
+    public string GetApiKey(string providerId) =>
+        _apiKeys.GetValueOrDefault(providerId, string.Empty).Trim();
+    public void SetApiKey(string providerId, string key) {
+        _apiKeys[providerId] = key;
+    }
+    public string GetModel(string providerId) =>
+        _models.GetValueOrDefault(providerId, string.Empty).Trim();
+    public void SetModel(string providerId, string model) {
+        _models[providerId] = model;
+    }
 
-    public void ResetToDefaults() {
-        ProviderId = LlmProviderPresets.DeepSeek.Id;
-        CustomProtocol = LlmApiProtocol.ChatCompletions;
-        ApiUrl = string.Empty;
-        _apiKeys.Clear();
-        _models.Clear();
+    public void ResetAdvancedSettings() {
         BatchSize = DefaultBatchSize;
         Concurrency = DefaultConcurrency;
         RetryCount = DefaultRetryCount;
