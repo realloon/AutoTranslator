@@ -38,7 +38,7 @@ public class Window_ExportLanguagePicker : Window {
         var y = 0f;
 
         Text.Font = GameFont.Medium;
-        Widgets.Label(new Rect(0f, y, inRect.width, 34f), "Translator_ExportLanguageDialogTitle".Translate());
+        Widgets.Label(new Rect(0f, y, inRect.width, 34f), "Translator_SelectTranslationLanguages".Translate());
         y += 44f;
         Text.Font = GameFont.Small;
 
@@ -56,7 +56,7 @@ public class Window_ExportLanguagePicker : Window {
     private void DrawHeaderActions(Rect rect) {
         const float buttonWidth = 116f;
         var selectAllRect = new Rect(rect.x, rect.y, buttonWidth, rect.height);
-        if (Widgets.ButtonText(selectAllRect, "Translator_SelectAllLanguages".Translate())) {
+        if (Widgets.ButtonText(selectAllRect, "Translator_SelectAll".Translate())) {
             _selectedLanguageFolders.Clear();
             foreach (var language in _languages) {
                 _selectedLanguageFolders.Add(language.folderName);
@@ -64,14 +64,14 @@ public class Window_ExportLanguagePicker : Window {
         }
 
         var clearRect = new Rect(selectAllRect.xMax + 8f, rect.y, buttonWidth, rect.height);
-        if (Widgets.ButtonText(clearRect, "Translator_ClearLanguageSelection".Translate())) {
+        if (Widgets.ButtonText(clearRect, "Translator_ClearAll".Translate())) {
             _selectedLanguageFolders.Clear();
         }
 
         var countRect = new Rect(clearRect.xMax + 10f, rect.y + 4f,
             rect.width - clearRect.xMax - 10f, rect.height);
         Widgets.Label(countRect,
-            "Translator_ExportLanguageSelectedCount".Translate(
+            "Translator_SelectedCount".Translate(
                 _selectedLanguageFolders.Count, _languages.Count));
     }
 
@@ -129,9 +129,9 @@ public class Window_ExportLanguagePicker : Window {
         }
 
         TooltipHandler.TipRegion(modeButtonRect,
-            "Translator_OutputModeButtonTip".Translate(OutputModeText.Of(_outputLocationMode)));
+            "Translator_OutputLocation".Translate(OutputModeText.Of(_outputLocationMode)));
 
-        var confirmLabel = "Translator_ExportLanguageConfirm".Translate();
+        var confirmLabel = "Translator_TranslateAndExport".Translate();
         var cancelLabel = "Cancel".Translate();
         var confirmWidth = Mathf.Max(120f, Text.CalcSize(confirmLabel).x + 24f);
         var cancelWidth = Mathf.Max(120f, Text.CalcSize(cancelLabel).x + 24f);
@@ -149,7 +149,7 @@ public class Window_ExportLanguagePicker : Window {
 
     private void ConfirmAndClose() {
         if (_selectedLanguageFolders.Count == 0) {
-            Messages.Message("Translator_ExportNoLanguageSelected".Translate(),
+            Messages.Message("Translator_SelectAtLeastOneLanguage".Translate(),
                 MessageTypeDefOf.RejectInput);
             return;
         }

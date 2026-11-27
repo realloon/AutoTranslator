@@ -31,7 +31,7 @@ public class Window_Termbase : Window {
         var y = 0f;
 
         Text.Font = GameFont.Medium;
-        Widgets.Label(new Rect(0f, y, inRect.width, 34f), "Translator_TermbaseDialogTitle".Translate());
+        Widgets.Label(new Rect(0f, y, inRect.width, 34f), "Translator_Termbase".Translate());
         y += 40f;
         Text.Font = GameFont.Small;
 
@@ -54,9 +54,9 @@ public class Window_Termbase : Window {
         const float minButtonWidth = 90f;
         const float rowGap = 8f;
 
-        var addLabel = "Translator_TermbaseAddRow".Translate();
-        var clearLabel = "Translator_TermbaseClearAll".Translate();
-        var saveLabel = "Translator_TermbaseSave".Translate();
+        var addLabel = "Translator_Add".Translate();
+        var clearLabel = "Translator_ClearAll".Translate();
+        var saveLabel = "Translator_Save".Translate();
 
         var addWidth = Mathf.Clamp(Text.CalcSize(addLabel).x + 24f, minButtonWidth, 160f);
         var clearWidth = Mathf.Clamp(Text.CalcSize(clearLabel).x + 24f, minButtonWidth, 200f);
@@ -125,7 +125,7 @@ public class Window_Termbase : Window {
         }
 
         if (selectedEntries.Count == 0) {
-            Widgets.Label(new Rect(0f, 38f, viewRect.width, 60f), "Translator_TermbaseEmpty".Translate());
+            Widgets.Label(new Rect(0f, 38f, viewRect.width, 60f), "Translator_NoTermsYet".Translate());
             Widgets.EndScrollView();
             return;
         }
@@ -202,14 +202,14 @@ public class Window_Termbase : Window {
             return;
         }
 
-        var errorText = "Translator_TermbaseSaveFailed".Translate(
+        var errorText = "Translator_SaveTermbaseFailed".Translate(
             result.Message.NullOrEmpty() ? "unknown error" : result.Message);
         Messages.Message(errorText, MessageTypeDefOf.RejectInput);
     }
 
     private string GetSelectedLanguageDisplayName() {
         if (_selectedLanguageFolder.NullOrEmpty()) {
-            return "Translator_TermbaseNoLanguage".Translate();
+            return "Translator_NoAvailableLanguage".Translate();
         }
 
         var language = _languages.FirstOrDefault(item => item.folderName.Equals(
@@ -225,7 +225,7 @@ public class Window_Termbase : Window {
 
     private void OpenLanguageMenu() {
         if (_languages.Count == 0) {
-            Messages.Message("Translator_TermbaseNoLanguage".Translate(),
+            Messages.Message("Translator_NoAvailableLanguage".Translate(),
                 MessageTypeDefOf.RejectInput);
             return;
         }
@@ -246,7 +246,7 @@ public class Window_Termbase : Window {
     private static string GetSourceLanguageDisplayName() {
         var sourceLanguage = LanguageDatabase.defaultLanguage ?? LanguageDatabase.activeLanguage;
         return sourceLanguage is null
-            ? "Translator_TermbaseNoLanguage".Translate()
+            ? "Translator_NoAvailableLanguage".Translate()
             : DisplayNameOf(sourceLanguage);
     }
 

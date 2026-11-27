@@ -123,7 +123,7 @@ public class Window_TranslatorMain : Window {
 
         if (stats is null) {
             using (GuiColorScope.Using(ColoredText.SubtleGrayColor)) {
-                Widgets.Label(new Rect(rect.x, y, rect.width, 24f), "Translator_StatsComputing".Translate());
+                Widgets.Label(new Rect(rect.x, y, rect.width, 24f), "Translator_CalculatingStatistics".Translate());
             }
 
             y += 24f;
@@ -139,12 +139,12 @@ public class Window_TranslatorMain : Window {
                 DrawLabel("Translator_MissingEntries".Translate(section.MissingCount), trailingSpacing);
             }
 
-            DrawSection("Translator_DefStatsTitle", stats.DefStats, 32f);
+            DrawSection("Translator_FromDef", stats.DefStats, 32f);
 
             Widgets.DrawLineHorizontal(rect.x, y, rect.width, UiTheme.SectionDividerColor);
             y += 12f;
 
-            DrawSection("Translator_StaticScanTitle", stats.KeyStats, 36f);
+            DrawSection("Translator_FromKey", stats.KeyStats, 36f);
         }
 
         DrawActionButtons(rect, selectedMod);
@@ -152,9 +152,9 @@ public class Window_TranslatorMain : Window {
     }
 
     private void DrawActionButtons(Rect rect, ModMetaData selectedMod) {
-        var termbaseButtonLabel = "Translator_TermbaseButton".Translate();
-        var exportButtonLabel = "Translator_ExtractButton".Translate();
-        var translateButtonLabel = "Translator_TranslateExportButton".Translate();
+        var termbaseButtonLabel = "Translator_Termbase".Translate();
+        var exportButtonLabel = "Translator_ExtractAndExport".Translate();
+        var translateButtonLabel = "Translator_TranslateExport".Translate();
         const float buttonGap = 8f;
         const float buttonHeight = 30f;
 
@@ -375,7 +375,7 @@ public class Window_TranslatorMain : Window {
                     ShowExportFailure(BuildFailureSummary(failures));
                 }
             });
-        }, "Translator_AiTranslateInProgress", doAsynchronously: true, null);
+        }, "Translator_Translating", doAsynchronously: true, null);
     }
 
     private void ShowExportFailure(string status) {

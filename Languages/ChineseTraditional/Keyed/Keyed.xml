@@ -1,71 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LanguageData>
   <Translator_ModCount>顯示模組 {0}/{1}</Translator_ModCount>
-  <Translator_DefStatsTitle>來源於 Def</Translator_DefStatsTitle>
+  <Translator_FromDef>來源於 Def</Translator_FromDef>
   <Translator_TranslatableEntries>可翻譯條目：{0}</Translator_TranslatableEntries>
   <Translator_MissingEntries>目前語言缺失：{0}</Translator_MissingEntries>
-  <Translator_StaticScanTitle>來源於 key</Translator_StaticScanTitle>
-  <Translator_StatsComputing>正在統計…</Translator_StatsComputing>
+  <Translator_FromKey>來源於 key</Translator_FromKey>
+  <Translator_CalculatingStatistics>正在統計…</Translator_CalculatingStatistics>
   <Translator_NoModsFound>未找到可翻譯的模組。</Translator_NoModsFound>
-  <Translator_ExportLanguageDialogTitle>選擇翻譯語言</Translator_ExportLanguageDialogTitle>
-  <Translator_SelectAllLanguages>全選</Translator_SelectAllLanguages>
-  <Translator_ClearLanguageSelection>清空</Translator_ClearLanguageSelection>
-  <Translator_ExportLanguageSelectedCount>已選擇 {0}/{1}</Translator_ExportLanguageSelectedCount>
-  <Translator_ExportLanguageConfirm>翻譯並匯出</Translator_ExportLanguageConfirm>
-  <Translator_ExportNoLanguageSelected>請至少選擇一種匯出語言。</Translator_ExportNoLanguageSelected>
-  <Translator_TermbaseButton>術語庫</Translator_TermbaseButton>
-  <Translator_TermbaseComingSoon>術語庫介面正在開發中。</Translator_TermbaseComingSoon>
-  <Translator_TermbaseDialogTitle>術語庫</Translator_TermbaseDialogTitle>
+  <Translator_SelectTranslationLanguages>選擇翻譯語言</Translator_SelectTranslationLanguages>
+  <Translator_SelectAll>全選</Translator_SelectAll>
+  <Translator_ClearAll>清空</Translator_ClearAll>
+  <Translator_SelectedCount>已選擇 {0}/{1}</Translator_SelectedCount>
+  <Translator_TranslateAndExport>翻譯並匯出</Translator_TranslateAndExport>
+  <Translator_SelectAtLeastOneLanguage>請至少選擇一種匯出語言。</Translator_SelectAtLeastOneLanguage>
+  <Translator_Termbase>術語庫</Translator_Termbase>
   <Translator_TermbaseDescription>在翻譯前管理固定術語。</Translator_TermbaseDescription>
-  <Translator_TermbaseColumns>來源術語 -> 目標術語</Translator_TermbaseColumns>
-  <Translator_TermbaseEmpty>目前沒有術語。</Translator_TermbaseEmpty>
-  <Translator_TermbaseAddRow>新增行</Translator_TermbaseAddRow>
-  <Translator_TermbaseClearAll>清空</Translator_TermbaseClearAll>
-  <Translator_TermbaseTargetLanguage>目標語言</Translator_TermbaseTargetLanguage>
-  <Translator_TermbaseNoLanguage>沒有可用語言</Translator_TermbaseNoLanguage>
-  <Translator_TermbaseEntryCount>條目數：{0}</Translator_TermbaseEntryCount>
-  <Translator_TermbaseSave>儲存</Translator_TermbaseSave>
-  <Translator_TermbaseSaveFailed>術語庫儲存失敗：{0}</Translator_TermbaseSaveFailed>
-  <Translator_ExportIrButton>翻譯並匯出</Translator_ExportIrButton>
-  <Translator_AiTranslateInProgress>翻譯中，這可能需要較長時間</Translator_AiTranslateInProgress>
-  <Translator_AiTranslateSuccess>翻譯模組已匯出</Translator_AiTranslateSuccess>
-  <Translator_AiTranslatePartialFailed>翻譯模組已匯出，但存在部分錯誤。</Translator_AiTranslatePartialFailed>
-  <Translator_AiTranslatePartialFailedWithDetails>翻譯模組已匯出，但存在部分錯誤。失敗摘要：{0}</Translator_AiTranslatePartialFailedWithDetails>
+  <Translator_NoTermsYet>目前沒有術語。</Translator_NoTermsYet>
+  <Translator_Add>新增行</Translator_Add>
+  <Translator_NoAvailableLanguage>沒有可用語言</Translator_NoAvailableLanguage>
+  <Translator_Save>儲存</Translator_Save>
+  <Translator_SaveTermbaseFailed>術語庫儲存失敗：{0}</Translator_SaveTermbaseFailed>
+  <Translator_Translating>翻譯中，這可能需要較長時間</Translator_Translating>
   <Translator_OutputDirectory>輸出目錄：{0}</Translator_OutputDirectory>
   <Translator_OpenOutputFolder>開啟輸出目錄</Translator_OpenOutputFolder>
   <Translator_OutputFolderNotFound>輸出目錄不存在。</Translator_OutputFolderNotFound>
   <Translator_OpenOutputFolderFailed>開啟輸出目錄失敗：{0}</Translator_OpenOutputFolderFailed>
-  <Translator_AiTranslateConfigInvalid>AI 設定無效：{0}</Translator_AiTranslateConfigInvalid>
-  <Translator_AiTranslateFailed>AI 翻譯失敗：{0}</Translator_AiTranslateFailed>
-  <Translator_AutoTranslator>Auto Translator</Translator_AutoTranslator>
-  <Translator_ModSettingsTabConnection>連線</Translator_ModSettingsTabConnection>
-  <Translator_ModSettingsTabAdvanced>進階</Translator_ModSettingsTabAdvanced>
-  <Translator_ModSettingProtocol>介面協定</Translator_ModSettingProtocol>
-  <Translator_ModSettingProtocolChat>Chat Completions API</Translator_ModSettingProtocolChat>
-  <Translator_ModSettingProtocolResponses>Responses API</Translator_ModSettingProtocolResponses>
-  <Translator_ModSettingApiUrl>API 位址</Translator_ModSettingApiUrl>
-  <Translator_ModSettingApiKey>API Key</Translator_ModSettingApiKey>
-  <Translator_ModSettingProvider>供應商</Translator_ModSettingProvider>
-  <Translator_ModSettingProviderCustom>自訂</Translator_ModSettingProviderCustom>
-  <Translator_ModSettingModel>模型</Translator_ModSettingModel>
-  <Translator_ModSettingModelSelect>選擇模型</Translator_ModSettingModelSelect>
-  <Translator_ModSettingModelCustom>自訂…</Translator_ModSettingModelCustom>
-  <Translator_ModSettingModelsLoading>正在載入模型…</Translator_ModSettingModelsLoading>
-  <Translator_ModSettingModelsFailed>載入模型失敗：{0}</Translator_ModSettingModelsFailed>
-  <Translator_ModSettingBatchSize>請求分片</Translator_ModSettingBatchSize>
-  <Translator_ModSettingBatchSizeDescription>單次模型呼叫包含的條目數。條目越多一致性越好，但應控制在合理的上下文長度內。</Translator_ModSettingBatchSizeDescription>
-  <Translator_ModSettingConcurrency>併發數</Translator_ModSettingConcurrency>
-  <Translator_ModSettingConcurrencyDescription>同時進行的模型呼叫數量。併發越高完成越早，但過高可能觸發平台限流。</Translator_ModSettingConcurrencyDescription>
-  <Translator_ModSettingRetryCount>重試次數</Translator_ModSettingRetryCount>
-  <Translator_ModSettingRetryCountDescription>單次模型呼叫失敗後重試的次數。</Translator_ModSettingRetryCountDescription>
-  <Translator_ModSettingDefaultOutputLocation>預設輸出位置</Translator_ModSettingDefaultOutputLocation>
-  <Translator_ModSettingDefaultOutputLocationDescription>選擇翻譯檔案預設寫入的位置。</Translator_ModSettingDefaultOutputLocationDescription>
-  <Translator_OutputModeGeneratedMod>產生的新模組</Translator_OutputModeGeneratedMod>
-  <Translator_OutputModeOriginalMod>原模組</Translator_OutputModeOriginalMod>
-  <Translator_OutputModeButtonTip>輸出位置：{0}</Translator_OutputModeButtonTip>
-  <Translator_ModSettingsValidateConfig>驗證</Translator_ModSettingsValidateConfig>
-  <Translator_ModSettingsValidating>正在驗證設定，請稍候...</Translator_ModSettingsValidating>
-  <Translator_ModSettingsValidationSuccess>驗證成功，設定已儲存</Translator_ModSettingsValidationSuccess>
-  <Translator_ModSettingsValidationFailed>設定驗證失敗：{0}</Translator_ModSettingsValidationFailed>
-  <Translator_ModSettingsResetDefaults>恢復預設值</Translator_ModSettingsResetDefaults>
+  <Translator_AutoTranslator>翻譯器</Translator_AutoTranslator>
+  <Translator_Connection>連線</Translator_Connection>
+  <Translator_Advanced>進階</Translator_Advanced>
+  <Translator_ApiProtocol>介面協定</Translator_ApiProtocol>
+  <Translator_ChatCompletionsApi>Chat Completions API</Translator_ChatCompletionsApi>
+  <Translator_ResponsesApi>Responses API</Translator_ResponsesApi>
+  <Translator_ApiUrl>API 位址</Translator_ApiUrl>
+  <Translator_ApiKey>API Key</Translator_ApiKey>
+  <Translator_Provider>供應商</Translator_Provider>
+  <Translator_Custom>自訂</Translator_Custom>
+  <Translator_Model>模型</Translator_Model>
+  <Translator_SelectModel>選擇模型</Translator_SelectModel>
+  <Translator_CustomModel>自訂…</Translator_CustomModel>
+  <Translator_LoadingModels>正在載入模型…</Translator_LoadingModels>
+  <Translator_LoadModelsFailed>載入模型失敗：{0}</Translator_LoadModelsFailed>
+  <Translator_RequestChunking>請求分片</Translator_RequestChunking>
+  <Translator_RequestChunkingDescription>單次模型呼叫包含的條目數。條目越多一致性越好，但應控制在合理的上下文長度內。</Translator_RequestChunkingDescription>
+  <Translator_Concurrency>併發數</Translator_Concurrency>
+  <Translator_ConcurrencyDescription>同時進行的模型呼叫數量。併發越高完成越早，但過高可能觸發平台限流。</Translator_ConcurrencyDescription>
+  <Translator_RetryAttempts>重試次數</Translator_RetryAttempts>
+  <Translator_RetryAttemptsDescription>單次模型呼叫失敗後重試的次數。</Translator_RetryAttemptsDescription>
+  <Translator_DefaultOutputLocation>預設輸出位置</Translator_DefaultOutputLocation>
+  <Translator_DefaultOutputLocationDescription>選擇翻譯檔案預設寫入的位置。</Translator_DefaultOutputLocationDescription>
+  <Translator_GeneratedMod>產生的新模組</Translator_GeneratedMod>
+  <Translator_OriginalMod>原模組</Translator_OriginalMod>
+  <Translator_OutputLocation>輸出位置：{0}</Translator_OutputLocation>
+  <Translator_Validate>驗證</Translator_Validate>
+  <Translator_ValidatingConfiguration>正在驗證設定，請稍候...</Translator_ValidatingConfiguration>
+  <Translator_ValidationSucceeded>驗證成功，設定已儲存</Translator_ValidationSucceeded>
+  <Translator_ValidationFailed>設定驗證失敗：{0}</Translator_ValidationFailed>
+  <Translator_ResetToDefaults>恢復預設值</Translator_ResetToDefaults>
+  <Translator_ExtractAndExport>擷取並匯出</Translator_ExtractAndExport>
+  <Translator_TranslateExport>翻譯匯出</Translator_TranslateExport>
 </LanguageData>

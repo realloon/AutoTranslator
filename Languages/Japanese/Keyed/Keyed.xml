@@ -1,71 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LanguageData>
   <Translator_ModCount>表示中のMod {0}/{1}</Translator_ModCount>
-  <Translator_DefStatsTitle>From Def</Translator_DefStatsTitle>
+  <Translator_FromDef>From Def</Translator_FromDef>
   <Translator_TranslatableEntries>翻訳可能な項目: {0}</Translator_TranslatableEntries>
   <Translator_MissingEntries>現在の言語で不足: {0}</Translator_MissingEntries>
-  <Translator_StaticScanTitle>From Key</Translator_StaticScanTitle>
-  <Translator_StatsComputing>統計を計算中…</Translator_StatsComputing>
+  <Translator_FromKey>From Key</Translator_FromKey>
+  <Translator_CalculatingStatistics>統計を計算中…</Translator_CalculatingStatistics>
   <Translator_NoModsFound>翻訳可能なMODが見つかりません。</Translator_NoModsFound>
-  <Translator_ExportLanguageDialogTitle>翻訳言語を選択</Translator_ExportLanguageDialogTitle>
-  <Translator_SelectAllLanguages>すべて選択</Translator_SelectAllLanguages>
-  <Translator_ClearLanguageSelection>クリア</Translator_ClearLanguageSelection>
-  <Translator_ExportLanguageSelectedCount>選択済み: {0}/{1}</Translator_ExportLanguageSelectedCount>
-  <Translator_ExportLanguageConfirm>翻訳してエクスポート</Translator_ExportLanguageConfirm>
-  <Translator_ExportNoLanguageSelected>エクスポートする言語を少なくとも1つ選択してください。</Translator_ExportNoLanguageSelected>
-  <Translator_TermbaseButton>用語集</Translator_TermbaseButton>
-  <Translator_TermbaseComingSoon>用語集UIは現在開発中です。</Translator_TermbaseComingSoon>
-  <Translator_TermbaseDialogTitle>用語集</Translator_TermbaseDialogTitle>
+  <Translator_SelectTranslationLanguages>翻訳言語を選択</Translator_SelectTranslationLanguages>
+  <Translator_SelectAll>すべて選択</Translator_SelectAll>
+  <Translator_ClearAll>クリア</Translator_ClearAll>
+  <Translator_SelectedCount>選択済み: {0}/{1}</Translator_SelectedCount>
+  <Translator_TranslateAndExport>翻訳してエクスポート</Translator_TranslateAndExport>
+  <Translator_SelectAtLeastOneLanguage>エクスポートする言語を少なくとも1つ選択してください。</Translator_SelectAtLeastOneLanguage>
+  <Translator_Termbase>用語集</Translator_Termbase>
   <Translator_TermbaseDescription>翻訳前に固定用語を管理します。</Translator_TermbaseDescription>
-  <Translator_TermbaseColumns>原文用語 -> 訳文用語</Translator_TermbaseColumns>
-  <Translator_TermbaseEmpty>用語はまだありません。</Translator_TermbaseEmpty>
-  <Translator_TermbaseAddRow>行を追加</Translator_TermbaseAddRow>
-  <Translator_TermbaseClearAll>クリア</Translator_TermbaseClearAll>
-  <Translator_TermbaseTargetLanguage>対象言語</Translator_TermbaseTargetLanguage>
-  <Translator_TermbaseNoLanguage>利用可能な言語がありません。</Translator_TermbaseNoLanguage>
-  <Translator_TermbaseEntryCount>項目数: {0}</Translator_TermbaseEntryCount>
-  <Translator_TermbaseSave>保存</Translator_TermbaseSave>
-  <Translator_TermbaseSaveFailed>用語集の保存に失敗しました: {0}</Translator_TermbaseSaveFailed>
-  <Translator_ExportIrButton>翻訳してエクスポート</Translator_ExportIrButton>
-  <Translator_AiTranslateInProgress>翻訳中です。しばらく時間がかかる場合があります。</Translator_AiTranslateInProgress>
-  <Translator_AiTranslateSuccess>翻訳済みModをエクスポートしました。</Translator_AiTranslateSuccess>
-  <Translator_AiTranslatePartialFailed>一部エラーがありましたが、翻訳済みModをエクスポートしました。</Translator_AiTranslatePartialFailed>
-  <Translator_AiTranslatePartialFailedWithDetails>一部エラーがありましたが、翻訳済みModをエクスポートしました。失敗の概要: {0}</Translator_AiTranslatePartialFailedWithDetails>
+  <Translator_NoTermsYet>用語はまだありません。</Translator_NoTermsYet>
+  <Translator_Add>行を追加</Translator_Add>
+  <Translator_NoAvailableLanguage>利用可能な言語がありません。</Translator_NoAvailableLanguage>
+  <Translator_Save>保存</Translator_Save>
+  <Translator_SaveTermbaseFailed>用語集の保存に失敗しました: {0}</Translator_SaveTermbaseFailed>
+  <Translator_Translating>翻訳中です。しばらく時間がかかる場合があります。</Translator_Translating>
   <Translator_OutputDirectory>出力ディレクトリ: {0}</Translator_OutputDirectory>
   <Translator_OpenOutputFolder>出力フォルダを開く</Translator_OpenOutputFolder>
   <Translator_OutputFolderNotFound>出力フォルダが見つかりません。</Translator_OutputFolderNotFound>
   <Translator_OpenOutputFolderFailed>出力フォルダを開けませんでした: {0}</Translator_OpenOutputFolderFailed>
-  <Translator_AiTranslateConfigInvalid>AI設定が無効です: {0}</Translator_AiTranslateConfigInvalid>
-  <Translator_AiTranslateFailed>AI翻訳に失敗しました: {0}</Translator_AiTranslateFailed>
-  <Translator_AutoTranslator>Auto Translator</Translator_AutoTranslator>
-  <Translator_ModSettingsTabConnection>接続</Translator_ModSettingsTabConnection>
-  <Translator_ModSettingsTabAdvanced>詳細</Translator_ModSettingsTabAdvanced>
-  <Translator_ModSettingProtocol>APIプロトコル</Translator_ModSettingProtocol>
-  <Translator_ModSettingProtocolChat>Chat Completions API</Translator_ModSettingProtocolChat>
-  <Translator_ModSettingProtocolResponses>Responses API</Translator_ModSettingProtocolResponses>
-  <Translator_ModSettingApiUrl>API URL</Translator_ModSettingApiUrl>
-  <Translator_ModSettingApiKey>API Key</Translator_ModSettingApiKey>
-  <Translator_ModSettingProvider>プロバイダー</Translator_ModSettingProvider>
-  <Translator_ModSettingProviderCustom>カスタム</Translator_ModSettingProviderCustom>
-  <Translator_ModSettingModel>モデル</Translator_ModSettingModel>
-  <Translator_ModSettingModelSelect>モデルを選択</Translator_ModSettingModelSelect>
-  <Translator_ModSettingModelCustom>カスタム…</Translator_ModSettingModelCustom>
-  <Translator_ModSettingModelsLoading>モデルを読み込み中…</Translator_ModSettingModelsLoading>
-  <Translator_ModSettingModelsFailed>モデルの読み込みに失敗: {0}</Translator_ModSettingModelsFailed>
-  <Translator_ModSettingBatchSize>リクエスト分割</Translator_ModSettingBatchSize>
-  <Translator_ModSettingBatchSizeDescription>1回のモデル呼び出しに含める項目数です。項目が多いほど一貫性は向上しやすいですが、コンテキスト長は適切な範囲に保ってください。</Translator_ModSettingBatchSizeDescription>
-  <Translator_ModSettingConcurrency>並列数</Translator_ModSettingConcurrency>
-  <Translator_ModSettingConcurrencyDescription>並列で送信するモデル呼び出し数です。並列数を上げると完了は早くなりますが、高すぎるとプロバイダーのrate limitに達する可能性があります。</Translator_ModSettingConcurrencyDescription>
-  <Translator_ModSettingRetryCount>再試行回数</Translator_ModSettingRetryCount>
-  <Translator_ModSettingRetryCountDescription>1回のモデル呼び出しが失敗した後の再試行回数です。</Translator_ModSettingRetryCountDescription>
-  <Translator_ModSettingDefaultOutputLocation>デフォルト出力先</Translator_ModSettingDefaultOutputLocation>
-  <Translator_ModSettingDefaultOutputLocationDescription>翻訳ファイルの既定の出力先を選択します。</Translator_ModSettingDefaultOutputLocationDescription>
-  <Translator_OutputModeGeneratedMod>生成Mod</Translator_OutputModeGeneratedMod>
-  <Translator_OutputModeOriginalMod>元のMod</Translator_OutputModeOriginalMod>
-  <Translator_OutputModeButtonTip>出力先: {0}</Translator_OutputModeButtonTip>
-  <Translator_ModSettingsValidateConfig>検証</Translator_ModSettingsValidateConfig>
-  <Translator_ModSettingsValidating>設定を検証中...</Translator_ModSettingsValidating>
-  <Translator_ModSettingsValidationSuccess>検証に成功し、設定を保存しました。</Translator_ModSettingsValidationSuccess>
-  <Translator_ModSettingsValidationFailed>設定の検証に失敗しました: {0}</Translator_ModSettingsValidationFailed>
-  <Translator_ModSettingsResetDefaults>デフォルトに戻す</Translator_ModSettingsResetDefaults>
+  <Translator_AutoTranslator>トランスレーター</Translator_AutoTranslator>
+  <Translator_Connection>接続</Translator_Connection>
+  <Translator_Advanced>詳細</Translator_Advanced>
+  <Translator_ApiProtocol>APIプロトコル</Translator_ApiProtocol>
+  <Translator_ChatCompletionsApi>Chat Completions API</Translator_ChatCompletionsApi>
+  <Translator_ResponsesApi>Responses API</Translator_ResponsesApi>
+  <Translator_ApiUrl>API URL</Translator_ApiUrl>
+  <Translator_ApiKey>API Key</Translator_ApiKey>
+  <Translator_Provider>プロバイダー</Translator_Provider>
+  <Translator_Custom>カスタム</Translator_Custom>
+  <Translator_Model>モデル</Translator_Model>
+  <Translator_SelectModel>モデルを選択</Translator_SelectModel>
+  <Translator_CustomModel>カスタム…</Translator_CustomModel>
+  <Translator_LoadingModels>モデルを読み込み中…</Translator_LoadingModels>
+  <Translator_LoadModelsFailed>モデルの読み込みに失敗: {0}</Translator_LoadModelsFailed>
+  <Translator_RequestChunking>リクエスト分割</Translator_RequestChunking>
+  <Translator_RequestChunkingDescription>1回のモデル呼び出しに含める項目数です。項目が多いほど一貫性は向上しやすいですが、コンテキスト長は適切な範囲に保ってください。</Translator_RequestChunkingDescription>
+  <Translator_Concurrency>並列数</Translator_Concurrency>
+  <Translator_ConcurrencyDescription>並列で送信するモデル呼び出し数です。並列数を上げると完了は早くなりますが、高すぎるとプロバイダーのrate limitに達する可能性があります。</Translator_ConcurrencyDescription>
+  <Translator_RetryAttempts>再試行回数</Translator_RetryAttempts>
+  <Translator_RetryAttemptsDescription>1回のモデル呼び出しが失敗した後の再試行回数です。</Translator_RetryAttemptsDescription>
+  <Translator_DefaultOutputLocation>デフォルト出力先</Translator_DefaultOutputLocation>
+  <Translator_DefaultOutputLocationDescription>翻訳ファイルの既定の出力先を選択します。</Translator_DefaultOutputLocationDescription>
+  <Translator_GeneratedMod>生成Mod</Translator_GeneratedMod>
+  <Translator_OriginalMod>元のMod</Translator_OriginalMod>
+  <Translator_OutputLocation>出力先: {0}</Translator_OutputLocation>
+  <Translator_Validate>検証</Translator_Validate>
+  <Translator_ValidatingConfiguration>設定を検証中...</Translator_ValidatingConfiguration>
+  <Translator_ValidationSucceeded>検証に成功し、設定を保存しました。</Translator_ValidationSucceeded>
+  <Translator_ValidationFailed>設定の検証に失敗しました: {0}</Translator_ValidationFailed>
+  <Translator_ResetToDefaults>デフォルトに戻す</Translator_ResetToDefaults>
+  <Translator_ExtractAndExport>抽出してエクスポート</Translator_ExtractAndExport>
+  <Translator_TranslateExport>エクスポートを翻訳</Translator_TranslateExport>
 </LanguageData>

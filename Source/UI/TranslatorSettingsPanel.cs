@@ -11,8 +11,8 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
     private const float TabsAreaHeight = Grid * 5f;
 
     private static readonly string[] TabKeys = [
-        "Translator_ModSettingsTabConnection",
-        "Translator_ModSettingsTabAdvanced"
+        "Translator_Connection",
+        "Translator_Advanced"
     ];
 
     private readonly AsyncOperation<LlmConfigValidationResult> _validation = new();
@@ -77,7 +77,7 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
     private void DrawConnectionSettings(Listing_Standard listing) {
         var settings = TranslatorMod.Settings;
 
-        listing.Label("Translator_ModSettingProvider".Translate());
+        listing.Label("Translator_Provider".Translate());
         if (listing.ButtonText(GetProviderLabel(settings.ProviderId))) {
             OpenProviderMenu();
         }
@@ -86,7 +86,7 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
 
         var preset = LlmProviderPresets.Find(settings.ProviderId);
         if (preset is null) {
-            listing.Label("Translator_ModSettingProtocol".Translate());
+            listing.Label("Translator_ApiProtocol".Translate());
             if (listing.ButtonText(GetProtocolLabel(settings.CustomProtocol))) {
                 settings.CustomProtocol = settings.CustomProtocol == LlmApiProtocol.ChatCompletions
                     ? LlmApiProtocol.Responses
@@ -95,12 +95,12 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
 
             listing.Gap(6f);
 
-            listing.Label("Translator_ModSettingApiUrl".Translate());
+            listing.Label("Translator_ApiUrl".Translate());
             settings.ApiUrl = listing.TextEntry(settings.ApiUrl);
             listing.Gap(6f);
         }
 
-        listing.Label("Translator_ModSettingApiKey".Translate());
+        listing.Label("Translator_ApiKey".Translate());
         var apiKey = settings.GetApiKey(settings.ProviderId);
         var newApiKey = listing.TextEntry(apiKey);
         if (newApiKey != apiKey) {
@@ -115,7 +115,7 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
             StartModelFetch();
         }
 
-        listing.Label("Translator_ModSettingModel".Translate());
+        listing.Label("Translator_Model".Translate());
         var model = settings.GetModel(settings.ProviderId);
         if (preset is null) {
             var newModel = listing.TextEntry(model);
@@ -124,7 +124,7 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
             }
         } else {
             if (listing.ButtonText(model.NullOrEmpty()
-                    ? "Translator_ModSettingModelSelect".Translate()
+                    ? "Translator_SelectModel".Translate()
                     : model)) {
                 OpenModelMenu();
             }
@@ -139,13 +139,13 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
 
         listing.Gap(6f);
 
-        if (listing.ButtonText("Translator_ModSettingsValidateConfig".Translate())) {
+        if (listing.ButtonText("Translator_Validate".Translate())) {
             BeginValidation();
         }
 
         if (_validation.IsRunning) {
             using var color = GuiColorScope.Using(Color.yellow);
-            listing.Label("Translator_ModSettingsValidating".Translate());
+            listing.Label("Translator_ValidatingConfiguration".Translate());
         } else if (!_validationStatus.NullOrEmpty()) {
             using var color = GuiColorScope.Using(_validationFailed
                 ? UiTheme.ErrorColor
@@ -157,9 +157,9 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
     private static void DrawAdvancedSettings(Listing_Standard listing) {
         var settings = TranslatorMod.Settings;
 
-        listing.Label($"{"Translator_ModSettingBatchSize".Translate()}: {settings.BatchSize}");
+        listing.Label($"{"Translator_RequestChunking".Translate()}: {settings.BatchSize}");
         using (GuiColorScope.Using(ColoredText.SubtleGrayColor)) {
-            listing.Label("Translator_ModSettingBatchSizeDescription".Translate());
+            listing.Label("Translator_RequestChunkingDescription".Translate());
         }
 
         listing.Gap(2f);
@@ -167,9 +167,9 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
             settings.BatchSize, TranslatorSettings.MinBatchSize, TranslatorSettings.MaxBatchSize));
         listing.Gap(6f);
 
-        listing.Label($"{"Translator_ModSettingConcurrency".Translate()}: {settings.Concurrency}");
+        listing.Label($"{"Translator_Concurrency".Translate()}: {settings.Concurrency}");
         using (GuiColorScope.Using(ColoredText.SubtleGrayColor)) {
-            listing.Label("Translator_ModSettingConcurrencyDescription".Translate());
+            listing.Label("Translator_ConcurrencyDescription".Translate());
         }
 
         listing.Gap(2f);
@@ -177,9 +177,9 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
             settings.Concurrency, TranslatorSettings.MinConcurrency, TranslatorSettings.MaxConcurrency));
         listing.Gap(6f);
 
-        listing.Label($"{"Translator_ModSettingRetryCount".Translate()}: {settings.RetryCount}");
+        listing.Label($"{"Translator_RetryAttempts".Translate()}: {settings.RetryCount}");
         using (GuiColorScope.Using(ColoredText.SubtleGrayColor)) {
-            listing.Label("Translator_ModSettingRetryCountDescription".Translate());
+            listing.Label("Translator_RetryAttemptsDescription".Translate());
         }
 
         listing.Gap(2f);
@@ -190,7 +190,7 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
         listing.GapLine();
         listing.Gap(6f);
 
-        listing.Label("Translator_ModSettingDefaultOutputLocation".Translate());
+        listing.Label("Translator_DefaultOutputLocation".Translate());
         if (listing.ButtonText(GetOutputLocationLabel(settings.DefaultOutputLocationMode))) {
             settings.DefaultOutputLocationMode =
                 settings.DefaultOutputLocationMode == OutputLocationMode.GeneratedMod
@@ -199,14 +199,14 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
         }
 
         using (GuiColorScope.Using(ColoredText.SubtleGrayColor)) {
-            listing.Label("Translator_ModSettingDefaultOutputLocationDescription".Translate());
+            listing.Label("Translator_DefaultOutputLocationDescription".Translate());
         }
 
         listing.Gap(6f);
         listing.GapLine();
         listing.Gap(6f);
 
-        if (listing.ButtonText("Translator_ModSettingsResetDefaults".Translate())) {
+        if (listing.ButtonText("Translator_ResetToDefaults".Translate())) {
             settings.ResetToDefaults();
         }
     }
@@ -225,7 +225,7 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
 
         if (error is not null) {
             _validationFailed = true;
-            _validationStatus = "Translator_ModSettingsValidationFailed".Translate(error.Message);
+            _validationStatus = "Translator_ValidationFailed".Translate(error.Message);
             return;
         }
 
@@ -233,8 +233,8 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
 
         _validationFailed = !result.Success;
         _validationStatus = result.Success
-            ? "Translator_ModSettingsValidationSuccess".Translate()
-            : "Translator_ModSettingsValidationFailed".Translate(result.Message);
+            ? "Translator_ValidationSucceeded".Translate()
+            : "Translator_ValidationFailed".Translate(result.Message);
     }
 
     private void OpenProviderMenu() {
@@ -266,14 +266,14 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
 
         var options = new List<FloatMenuOption>();
         if (_modelFetch.IsRunning) {
-            options.Add(new FloatMenuOption("Translator_ModSettingModelsLoading".Translate(), null));
+            options.Add(new FloatMenuOption("Translator_LoadingModels".Translate(), null));
         } else {
             options.AddRange(_availableModels.Select(model =>
                 new FloatMenuOption(model, () => SelectModel(model))));
         }
 
         options.Add(new FloatMenuOption(
-            "Translator_ModSettingModelCustom".Translate(),
+            "Translator_CustomModel".Translate(),
             () => _customModelProviders.Add(TranslatorMod.Settings.ProviderId)));
         Find.WindowStack.Add(new FloatMenu(options));
     }
@@ -302,7 +302,7 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
         if (!_modelFetch.TryTakeResult(out var result, out var error)) return;
 
         if (error is not null) {
-            Messages.Message("Translator_ModSettingModelsFailed".Translate(error.Message),
+            Messages.Message("Translator_LoadModelsFailed".Translate(error.Message),
                 MessageTypeDefOf.SilentInput);
             return;
         }
@@ -310,7 +310,7 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
         if (result is null) return;
 
         if (!result.Success) {
-            Messages.Message("Translator_ModSettingModelsFailed".Translate(result.Message),
+            Messages.Message("Translator_LoadModelsFailed".Translate(result.Message),
                 MessageTypeDefOf.SilentInput);
             return;
         }
@@ -320,12 +320,12 @@ internal sealed class TranslatorSettingsPanel(Action writeSettings) {
     }
 
     private static string GetProtocolLabel(LlmApiProtocol protocol) => protocol == LlmApiProtocol.Responses
-        ? "Translator_ModSettingProtocolResponses".Translate()
-        : "Translator_ModSettingProtocolChat".Translate();
+        ? "Translator_ResponsesApi".Translate()
+        : "Translator_ChatCompletionsApi".Translate();
 
     private static string GetProviderLabel(string providerId) =>
         LlmProviderPresets.Find(providerId)?.Label ?? LlmProviderPresets.CustomLabelKey.Translate();
 
     private static string GetOutputLocationLabel(OutputLocationMode mode) =>
-        $"{"Translator_ModSettingDefaultOutputLocation".Translate()}: {OutputModeText.Of(mode)}";
+        $"{"Translator_DefaultOutputLocation".Translate()}: {OutputModeText.Of(mode)}";
 }

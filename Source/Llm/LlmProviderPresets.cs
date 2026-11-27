@@ -16,7 +16,7 @@ public sealed record LlmProviderPreset(
 
 public static class LlmProviderPresets {
     public const string CustomId = "custom";
-    public const string CustomLabelKey = "Translator_ModSettingProviderCustom";
+    public const string CustomLabelKey = "Translator_Custom";
 
     public static LlmProviderPreset DeepSeek { get; } = new(
         "deepseek", "DeepSeek", "https://api.deepseek.com", LlmApiProtocol.Responses, DisableThinking: true);
