@@ -33,9 +33,11 @@
   <Translator_ResponsesApi>Responses API</Translator_ResponsesApi>
   <Translator_ApiUrl>API URL</Translator_ApiUrl>
   <Translator_ApiKey>API Key</Translator_ApiKey>
+  <Translator_ApiKeyNotConfigured>APIキーが設定されていません</Translator_ApiKeyNotConfigured>
   <Translator_Provider>プロバイダー</Translator_Provider>
   <Translator_Custom>カスタム</Translator_Custom>
   <Translator_Model>モデル</Translator_Model>
+  <Translator_ModelNotConfigured>モデルが設定されていません</Translator_ModelNotConfigured>
   <Translator_SelectModel>モデルを選択</Translator_SelectModel>
   <Translator_CustomModel>カスタム…</Translator_CustomModel>
   <Translator_LoadingModels>モデルを読み込み中…</Translator_LoadingModels>
@@ -54,8 +56,14 @@
   <Translator_Validate>検証</Translator_Validate>
   <Translator_ValidatingConfiguration>設定を検証中...</Translator_ValidatingConfiguration>
   <Translator_ValidationSucceeded>検証に成功し、設定を保存しました。</Translator_ValidationSucceeded>
-  <Translator_ValidationFailed>設定の検証に失敗しました: {0}</Translator_ValidationFailed>
+  <Translator_ValidationFailed>検証に失敗しました</Translator_ValidationFailed>
+  <Translator_ValidationFailedWithReason>検証に失敗しました、{0}</Translator_ValidationFailedWithReason>
   <Translator_ResetToDefaults>デフォルトに戻す</Translator_ResetToDefaults>
   <Translator_ExtractAndExport>抽出してエクスポート</Translator_ExtractAndExport>
   <Translator_TranslateExport>エクスポートを翻訳</Translator_TranslateExport>
+  <Translator_ApiKeyInvalid>APIキーが無効または未認証です</Translator_ApiKeyInvalid>
+  <Translator_ApiKeyForbidden>APIキーにアクセス権がありません</Translator_ApiKeyForbidden>
+  <Translator_EndpointNotFound>エンドポイントまたはモデルが見つかりません</Translator_EndpointNotFound>
+  <Translator_RateLimited>リクエストが多すぎます。後でもう一度お試しください</Translator_RateLimited>
+  <Translator_ProviderUnavailable>プロバイダーサービスが一時的に利用できません</Translator_ProviderUnavailable>
 </LanguageData>

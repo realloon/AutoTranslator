@@ -35,9 +35,11 @@
   <Translator_ResponsesApi>Responses API</Translator_ResponsesApi>
   <Translator_ApiUrl>API URL</Translator_ApiUrl>
   <Translator_ApiKey>API Key</Translator_ApiKey>
+  <Translator_ApiKeyNotConfigured>API key is not configured</Translator_ApiKeyNotConfigured>
   <Translator_Provider>Provider</Translator_Provider>
   <Translator_Custom>Custom</Translator_Custom>
   <Translator_Model>Model</Translator_Model>
+  <Translator_ModelNotConfigured>Model is not configured</Translator_ModelNotConfigured>
   <Translator_SelectModel>Select a model</Translator_SelectModel>
   <Translator_CustomModel>Custom...</Translator_CustomModel>
   <Translator_LoadingModels>Loading models...</Translator_LoadingModels>
@@ -56,6 +58,12 @@
   <Translator_Validate>Validate</Translator_Validate>
   <Translator_ValidatingConfiguration>Validating configuration...</Translator_ValidatingConfiguration>
   <Translator_ValidationSucceeded>Validation succeeded, configuration saved.</Translator_ValidationSucceeded>
-  <Translator_ValidationFailed>Configuration validation failed: {0}</Translator_ValidationFailed>
+  <Translator_ValidationFailed>Validation failed</Translator_ValidationFailed>
+  <Translator_ValidationFailedWithReason>Validation failed, {0}</Translator_ValidationFailedWithReason>
   <Translator_ResetToDefaults>Reset to defaults</Translator_ResetToDefaults>
+  <Translator_ApiKeyInvalid>API key is invalid or unauthorized</Translator_ApiKeyInvalid>
+  <Translator_ApiKeyForbidden>API key does not have access</Translator_ApiKeyForbidden>
+  <Translator_EndpointNotFound>Endpoint or model not found</Translator_EndpointNotFound>
+  <Translator_RateLimited>Too many requests; try again later</Translator_RateLimited>
+  <Translator_ProviderUnavailable>Provider service is temporarily unavailable</Translator_ProviderUnavailable>
 </LanguageData>

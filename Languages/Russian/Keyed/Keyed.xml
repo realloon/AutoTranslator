@@ -33,9 +33,11 @@
   <Translator_ResponsesApi>Responses API</Translator_ResponsesApi>
   <Translator_ApiUrl>API URL</Translator_ApiUrl>
   <Translator_ApiKey>API Key</Translator_ApiKey>
+  <Translator_ApiKeyNotConfigured>API-ключ не настроен</Translator_ApiKeyNotConfigured>
   <Translator_Provider>Провайдер</Translator_Provider>
   <Translator_Custom>Свой</Translator_Custom>
   <Translator_Model>Модель</Translator_Model>
+  <Translator_ModelNotConfigured>Модель не настроена</Translator_ModelNotConfigured>
   <Translator_SelectModel>Выбрать модель</Translator_SelectModel>
   <Translator_CustomModel>Свой…</Translator_CustomModel>
   <Translator_LoadingModels>Загрузка моделей…</Translator_LoadingModels>
@@ -54,8 +56,14 @@
   <Translator_Validate>Проверить</Translator_Validate>
   <Translator_ValidatingConfiguration>Проверка конфигурации...</Translator_ValidatingConfiguration>
   <Translator_ValidationSucceeded>Проверка успешна, настройки сохранены.</Translator_ValidationSucceeded>
-  <Translator_ValidationFailed>Ошибка проверки конфигурации: {0}</Translator_ValidationFailed>
+  <Translator_ValidationFailed>Ошибка проверки</Translator_ValidationFailed>
+  <Translator_ValidationFailedWithReason>Ошибка проверки, {0}</Translator_ValidationFailedWithReason>
   <Translator_ResetToDefaults>Сбросить по умолчанию</Translator_ResetToDefaults>
   <Translator_ExtractAndExport>Извлечь и экспортировать</Translator_ExtractAndExport>
   <Translator_TranslateExport>Перевести экспорт</Translator_TranslateExport>
+  <Translator_ApiKeyInvalid>API-ключ недействителен или не авторизован</Translator_ApiKeyInvalid>
+  <Translator_ApiKeyForbidden>У API-ключа нет доступа</Translator_ApiKeyForbidden>
+  <Translator_EndpointNotFound>Конечная точка или модель не найдены</Translator_EndpointNotFound>
+  <Translator_RateLimited>Слишком много запросов; попробуйте позже</Translator_RateLimited>
+  <Translator_ProviderUnavailable>Сервис провайдера временно недоступен</Translator_ProviderUnavailable>
 </LanguageData>

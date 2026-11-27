@@ -33,9 +33,11 @@
   <Translator_ResponsesApi>Responses API</Translator_ResponsesApi>
   <Translator_ApiUrl>API URL</Translator_ApiUrl>
   <Translator_ApiKey>API Key</Translator_ApiKey>
+  <Translator_ApiKeyNotConfigured>API 키가 설정되지 않았습니다</Translator_ApiKeyNotConfigured>
   <Translator_Provider>공급자</Translator_Provider>
   <Translator_Custom>사용자 지정</Translator_Custom>
   <Translator_Model>모델</Translator_Model>
+  <Translator_ModelNotConfigured>모델이 설정되지 않았습니다</Translator_ModelNotConfigured>
   <Translator_SelectModel>모델 선택</Translator_SelectModel>
   <Translator_CustomModel>사용자 지정…</Translator_CustomModel>
   <Translator_LoadingModels>모델 불러오는 중…</Translator_LoadingModels>
@@ -54,8 +56,14 @@
   <Translator_Validate>검증</Translator_Validate>
   <Translator_ValidatingConfiguration>구성을 검증하는 중...</Translator_ValidatingConfiguration>
   <Translator_ValidationSucceeded>검증 성공, 설정이 저장되었습니다.</Translator_ValidationSucceeded>
-  <Translator_ValidationFailed>구성 검증 실패: {0}</Translator_ValidationFailed>
+  <Translator_ValidationFailed>검증 실패</Translator_ValidationFailed>
+  <Translator_ValidationFailedWithReason>검증 실패, {0}</Translator_ValidationFailedWithReason>
   <Translator_ResetToDefaults>기본값으로 재설정</Translator_ResetToDefaults>
   <Translator_ExtractAndExport>추출 및 내보내기</Translator_ExtractAndExport>
   <Translator_TranslateExport>내보내기 번역</Translator_TranslateExport>
+  <Translator_ApiKeyInvalid>API 키가 유효하지 않거나 인증되지 않았습니다</Translator_ApiKeyInvalid>
+  <Translator_ApiKeyForbidden>API 키에 접근 권한이 없습니다</Translator_ApiKeyForbidden>
+  <Translator_EndpointNotFound>엔드포인트 또는 모델을 찾을 수 없습니다</Translator_EndpointNotFound>
+  <Translator_RateLimited>요청이 너무 많습니다. 나중에 다시 시도하세요</Translator_RateLimited>
+  <Translator_ProviderUnavailable>공급자 서비스를 일시적으로 사용할 수 없습니다</Translator_ProviderUnavailable>
 </LanguageData>

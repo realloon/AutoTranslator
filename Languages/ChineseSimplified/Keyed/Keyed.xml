@@ -33,9 +33,11 @@
   <Translator_ResponsesApi>Responses API</Translator_ResponsesApi>
   <Translator_ApiUrl>API 地址</Translator_ApiUrl>
   <Translator_ApiKey>API Key</Translator_ApiKey>
+  <Translator_ApiKeyNotConfigured>尚未配置 API Key</Translator_ApiKeyNotConfigured>
   <Translator_Provider>提供商</Translator_Provider>
   <Translator_Custom>自定义</Translator_Custom>
   <Translator_Model>模型</Translator_Model>
+  <Translator_ModelNotConfigured>尚未配置模型</Translator_ModelNotConfigured>
   <Translator_SelectModel>选择模型</Translator_SelectModel>
   <Translator_CustomModel>自定义…</Translator_CustomModel>
   <Translator_LoadingModels>正在加载模型…</Translator_LoadingModels>
@@ -54,8 +56,14 @@
   <Translator_Validate>验证</Translator_Validate>
   <Translator_ValidatingConfiguration>正在验证配置，请稍候...</Translator_ValidatingConfiguration>
   <Translator_ValidationSucceeded>验证成功，配置已保存</Translator_ValidationSucceeded>
-  <Translator_ValidationFailed>配置验证失败：{0}</Translator_ValidationFailed>
+  <Translator_ValidationFailed>验证失败</Translator_ValidationFailed>
+  <Translator_ValidationFailedWithReason>验证失败，{0}</Translator_ValidationFailedWithReason>
   <Translator_ResetToDefaults>恢复默认值</Translator_ResetToDefaults>
   <Translator_ExtractAndExport>提取并导出</Translator_ExtractAndExport>
   <Translator_TranslateExport>翻译导出</Translator_TranslateExport>
+  <Translator_ApiKeyInvalid>API Key 无效或未授权</Translator_ApiKeyInvalid>
+  <Translator_ApiKeyForbidden>API Key 无权访问</Translator_ApiKeyForbidden>
+  <Translator_EndpointNotFound>接口或模型不存在</Translator_EndpointNotFound>
+  <Translator_RateLimited>请求过于频繁，请稍后再试</Translator_RateLimited>
+  <Translator_ProviderUnavailable>服务暂时不可用</Translator_ProviderUnavailable>
 </LanguageData>

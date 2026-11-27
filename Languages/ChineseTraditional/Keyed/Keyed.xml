@@ -33,9 +33,11 @@
   <Translator_ResponsesApi>Responses API</Translator_ResponsesApi>
   <Translator_ApiUrl>API 位址</Translator_ApiUrl>
   <Translator_ApiKey>API Key</Translator_ApiKey>
+  <Translator_ApiKeyNotConfigured>尚未設定 API Key</Translator_ApiKeyNotConfigured>
   <Translator_Provider>供應商</Translator_Provider>
   <Translator_Custom>自訂</Translator_Custom>
   <Translator_Model>模型</Translator_Model>
+  <Translator_ModelNotConfigured>尚未設定模型</Translator_ModelNotConfigured>
   <Translator_SelectModel>選擇模型</Translator_SelectModel>
   <Translator_CustomModel>自訂…</Translator_CustomModel>
   <Translator_LoadingModels>正在載入模型…</Translator_LoadingModels>
@@ -54,8 +56,14 @@
   <Translator_Validate>驗證</Translator_Validate>
   <Translator_ValidatingConfiguration>正在驗證設定，請稍候...</Translator_ValidatingConfiguration>
   <Translator_ValidationSucceeded>驗證成功，設定已儲存</Translator_ValidationSucceeded>
-  <Translator_ValidationFailed>設定驗證失敗：{0}</Translator_ValidationFailed>
+  <Translator_ValidationFailed>驗證失敗</Translator_ValidationFailed>
+  <Translator_ValidationFailedWithReason>驗證失敗，{0}</Translator_ValidationFailedWithReason>
   <Translator_ResetToDefaults>恢復預設值</Translator_ResetToDefaults>
   <Translator_ExtractAndExport>擷取並匯出</Translator_ExtractAndExport>
   <Translator_TranslateExport>翻譯匯出</Translator_TranslateExport>
+  <Translator_ApiKeyInvalid>API Key 無效或未授權</Translator_ApiKeyInvalid>
+  <Translator_ApiKeyForbidden>API Key 無權存取</Translator_ApiKeyForbidden>
+  <Translator_EndpointNotFound>端點或模型不存在</Translator_EndpointNotFound>
+  <Translator_RateLimited>請求過於頻繁，請稍後再試</Translator_RateLimited>
+  <Translator_ProviderUnavailable>服務暫時無法使用</Translator_ProviderUnavailable>
 </LanguageData>
